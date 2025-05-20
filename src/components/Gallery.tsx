@@ -61,86 +61,88 @@ const Gallery = () => {
   return (
     <section id="galeria" className="bg-booking-gray py-16">
       <div className="section-container">
-        <div className="flex items-center gap-2 mb-2">
-          <Image className="h-6 w-6 text-booking-primary" />
-          <h2 className="section-title mb-0">Galéria</h2>
-        </div>
-        <p className="section-subtitle">Prezrite si náš útulný apartmán</p>
-        
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-8 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="all">Všetko</TabsTrigger>
-            <TabsTrigger value="interior">Interiér</TabsTrigger>
-            <TabsTrigger value="exterior">Exteriér</TabsTrigger>
-            <TabsTrigger value="surroundings">Okolie</TabsTrigger>
-          </TabsList>
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6 md:p-8 mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <Image className="h-6 w-6 text-booking-primary" />
+            <h2 className="section-title mb-0">Galéria</h2>
+          </div>
+          <p className="section-subtitle">Prezrite si náš útulný apartmán</p>
           
-          <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {galleryImages.map((image) => (
-                <Dialog key={image.id}>
-                  <DialogTrigger asChild>
-                    <div 
-                      className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-md hover:shadow-xl transition-all transform hover:scale-[1.02]"
-                      onClick={() => setSelectedImage(image.src)}
-                    >
-                      <img 
-                        src={image.src} 
-                        alt={image.alt}
-                        className="w-full h-56 object-cover"
-                      />
-                      <div className="p-2 text-center text-sm text-gray-500">
-                        {image.alt}
-                      </div>
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[900px] p-1">
-                    <img 
-                      src={selectedImage || ''} 
-                      alt="Zväčšený obrázok"
-                      className="w-full h-auto object-contain max-h-[80vh]"
-                    />
-                  </DialogContent>
-                </Dialog>
-              ))}
-            </div>
-          </TabsContent>
-          
-          {["interior", "exterior", "surroundings"].map((category) => (
-            <TabsContent key={category} value={category} className="mt-0">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-8 bg-white/50 backdrop-blur-sm">
+              <TabsTrigger value="all">Všetko</TabsTrigger>
+              <TabsTrigger value="interior">Interiér</TabsTrigger>
+              <TabsTrigger value="exterior">Exteriér</TabsTrigger>
+              <TabsTrigger value="surroundings">Okolie</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all" className="mt-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {galleryImages
-                  .filter((image) => image.category === category)
-                  .map((image) => (
-                    <Dialog key={image.id}>
-                      <DialogTrigger asChild>
-                        <div 
-                          className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-md hover:shadow-xl transition-all transform hover:scale-[1.02]"
-                          onClick={() => setSelectedImage(image.src)}
-                        >
-                          <img 
-                            src={image.src} 
-                            alt={image.alt}
-                            className="w-full h-56 object-cover"
-                          />
-                          <div className="p-2 text-center text-sm text-gray-500">
-                            {image.alt}
-                          </div>
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[900px] p-1">
+                {galleryImages.map((image) => (
+                  <Dialog key={image.id}>
+                    <DialogTrigger asChild>
+                      <div 
+                        className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-md hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                        onClick={() => setSelectedImage(image.src)}
+                      >
                         <img 
-                          src={selectedImage || ''} 
-                          alt="Zväčšený obrázok"
-                          className="w-full h-auto object-contain max-h-[80vh]"
+                          src={image.src} 
+                          alt={image.alt}
+                          className="w-full h-56 object-cover"
                         />
-                      </DialogContent>
-                    </Dialog>
-                  ))}
+                        <div className="p-2 text-center text-sm text-gray-500">
+                          {image.alt}
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[900px] p-1">
+                      <img 
+                        src={selectedImage || ''} 
+                        alt="Zväčšený obrázok"
+                        className="w-full h-auto object-contain max-h-[80vh]"
+                      />
+                    </DialogContent>
+                  </Dialog>
+                ))}
               </div>
             </TabsContent>
-          ))}
-        </Tabs>
+            
+            {["interior", "exterior", "surroundings"].map((category) => (
+              <TabsContent key={category} value={category} className="mt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {galleryImages
+                    .filter((image) => image.category === category)
+                    .map((image) => (
+                      <Dialog key={image.id}>
+                        <DialogTrigger asChild>
+                          <div 
+                            className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-md hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                            onClick={() => setSelectedImage(image.src)}
+                          >
+                            <img 
+                              src={image.src} 
+                              alt={image.alt}
+                              className="w-full h-56 object-cover"
+                            />
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              {image.alt}
+                            </div>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[900px] p-1">
+                          <img 
+                            src={selectedImage || ''} 
+                            alt="Zväčšený obrázok"
+                            className="w-full h-auto object-contain max-h-[80vh]"
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
       </div>
     </section>
   );
