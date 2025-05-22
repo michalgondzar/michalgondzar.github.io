@@ -1,12 +1,19 @@
 
 import { Logo } from "./Logo";
 import { Link } from "react-scroll";
+import { Button } from "./ui/button"; 
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  
+  const handleAdminEntry = () => {
+    navigate("/admin");
+  };
   
   return (
-    <footer className="bg-booking-darkGray text-white pt-12 pb-6">
+    <footer className="bg-booking-darkGray text-white pt-12 pb-6 relative">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
@@ -58,8 +65,18 @@ const Footer = () => {
         
         <hr className="my-8 border-white/10" />
         
-        <div className="text-center text-gray-400 text-sm">
-          <p>&copy; {currentYear} Apartmán Tri víly. Všetky práva vyhradené.</p>
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <p className="text-center text-gray-400 text-sm">
+            &copy; {currentYear} Apartmán Tri víly. Všetky práva vyhradené.
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="mt-4 md:mt-0 bg-transparent border-white/30 text-white hover:bg-white/10"
+            onClick={handleAdminEntry}
+          >
+            Vstup pre admina
+          </Button>
         </div>
       </div>
     </footer>
