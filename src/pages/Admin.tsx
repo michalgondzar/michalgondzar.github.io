@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -11,9 +10,11 @@ import { ContentEditor } from "@/components/admin/ContentEditor";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { BookingsManager } from "@/components/admin/BookingsManager";
 import { ContactEditor } from "@/components/admin/ContactEditor";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = (username: string, password: string) => {
     setIsAuthenticated(true);
@@ -22,6 +23,7 @@ const Admin = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     toast.info("Odhlásenie úspešné");
+    navigate("/");
   };
 
   if (!isAuthenticated) {
