@@ -20,7 +20,7 @@ const Hero = () => {
           Apartmán Tília
         </h1>
         <p className="text-xl md:text-2xl text-white/90 max-w-3xl animate-slide-in-bottom opacity-0" style={{animationDelay: "0.2s"}}>
-          Luxusné ubytovanie v blízkosti aquaparku Bešeňová
+          Príjemné ubytovanie v blízkosti aquaparku Bešeňová
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-slide-in-bottom opacity-0" style={{animationDelay: "0.4s"}}>
           <Button size="lg" className="bg-booking-primary hover:bg-booking-secondary">
