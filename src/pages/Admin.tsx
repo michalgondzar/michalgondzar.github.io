@@ -3,13 +3,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { FileText, CalendarIcon, Image } from "lucide-react";
+import { FileText, CalendarIcon, Image, MapPin } from "lucide-react";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthForm } from "@/components/admin/AuthForm";
 import { ContentEditor } from "@/components/admin/ContentEditor";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { BookingsManager } from "@/components/admin/BookingsManager";
+import { ContactEditor } from "@/components/admin/ContactEditor";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,8 +43,8 @@ const Admin = () => {
       <div className="flex-1 container mx-auto p-6">
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Panel - Tri víly</h1>
-            <p className="text-gray-600">Správa obsahu, galérie a rezervácií apartmánu</p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Panel - Apartmán Tília</h1>
+            <p className="text-gray-600">Správa obsahu, galérie, kontaktov a rezervácií apartmánu</p>
           </div>
         </div>
 
@@ -56,6 +57,10 @@ const Admin = () => {
             <TabsTrigger value="gallery" className="flex items-center gap-2">
               <Image size={16} />
               Galéria
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="flex items-center gap-2">
+              <MapPin size={16} />
+              Kontakt
             </TabsTrigger>
             <TabsTrigger value="bookings" className="flex items-center gap-2">
               <CalendarIcon size={16} />
@@ -71,6 +76,11 @@ const Admin = () => {
           {/* Galéria */}
           <TabsContent value="gallery" className="space-y-6">
             <GalleryManager />
+          </TabsContent>
+          
+          {/* Kontakt */}
+          <TabsContent value="contact" className="space-y-6">
+            <ContactEditor />
           </TabsContent>
           
           {/* Rezervácie */}

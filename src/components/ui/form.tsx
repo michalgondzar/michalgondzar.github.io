@@ -9,7 +9,6 @@ import {
   FieldValues,
   FormProvider,
   useFormContext,
-  FormState
 } from "react-hook-form"
 
 import { cn } from "@/lib/utils"
@@ -44,14 +43,15 @@ const FormField = <
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
-  const formContext = useFormContext()
+  const { getFieldState, formState } = useFormContext()
+
+  const fieldState = getFieldState(fieldContext.name, formState)
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
   }
 
-  const fieldState = formContext ? formContext.getFieldState(fieldContext.name, formContext.formState) : {}
-  const { id } = itemContext || {}
+  const { id } = itemContext
 
   return {
     id,
@@ -59,8 +59,7 @@ const useFormField = () => {
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
-    error: fieldState?.error,
-    ...(fieldState || {}),
+    ...fieldState,
   }
 }
 
@@ -90,13 +89,13 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error } = useFormField()
+  const { error, formItemId } = useFormField()
 
   return (
     <Label
       ref={ref}
       className={cn(error && "text-destructive", className)}
-      htmlFor={props.htmlFor}
+      htmlFor={formItemId}
       {...props}
     />
   )
