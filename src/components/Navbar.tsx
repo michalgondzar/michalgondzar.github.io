@@ -38,7 +38,7 @@ const Navbar = () => {
     >
       <div className="container flex items-center justify-between">
         <a href="/" className="text-2xl font-bold text-booking-primary">
-          Tri víly
+          Apartmán Tília
         </a>
         
         {/* Desktop Navigation */}

@@ -17,7 +17,7 @@ const Hero = () => {
       
       <div className="relative z-20 h-full flex flex-col justify-center items-center text-center px-4">
         <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
-          Apartmán Tri víly
+          Apartmán Tília
         </h1>
         <p className="text-xl md:text-2xl text-white/90 max-w-3xl animate-slide-in-bottom opacity-0" style={{animationDelay: "0.2s"}}>
           Luxusné ubytovanie v blízkosti aquaparku Bešeňová

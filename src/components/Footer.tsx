@@ -67,7 +67,7 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-center text-gray-400 text-sm">
-            &copy; {currentYear} Apartmán Tri víly. Všetky práva vyhradené.
+            &copy; {currentYear} Apartmán Tília. Všetky práva vyhradené.
           </p>
           <Button 
             variant="outline" 
