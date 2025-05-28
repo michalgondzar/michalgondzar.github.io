@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormLabel } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
 
@@ -29,32 +29,36 @@ export const ContactEditor = () => {
       
       <div className="space-y-4">
         <div>
-          <FormLabel>Adresa</FormLabel>
+          <Label htmlFor="address">Adresa</Label>
           <Input 
+            id="address"
             value={contact.address} 
             onChange={(e) => setContact({...contact, address: e.target.value})}
           />
         </div>
         
         <div>
-          <FormLabel>PSČ a mesto</FormLabel>
+          <Label htmlFor="postalCode">PSČ a mesto</Label>
           <Input 
+            id="postalCode"
             value={contact.postalCode}
             onChange={(e) => setContact({...contact, postalCode: e.target.value})}
           />
         </div>
         
         <div>
-          <FormLabel>Telefón</FormLabel>
+          <Label htmlFor="phone">Telefón</Label>
           <Input 
+            id="phone"
             value={contact.phone}
             onChange={(e) => setContact({...contact, phone: e.target.value})}
           />
         </div>
         
         <div>
-          <FormLabel>Email</FormLabel>
+          <Label htmlFor="email">Email</Label>
           <Input 
+            id="email"
             type="email"
             value={contact.email}
             onChange={(e) => setContact({...contact, email: e.target.value})}
@@ -62,16 +66,18 @@ export const ContactEditor = () => {
         </div>
         
         <div>
-          <FormLabel>Čas príchodu</FormLabel>
+          <Label htmlFor="checkinTime">Čas príchodu</Label>
           <Input 
+            id="checkinTime"
             value={contact.checkinTime}
             onChange={(e) => setContact({...contact, checkinTime: e.target.value})}
           />
         </div>
         
         <div>
-          <FormLabel>Čas odchodu</FormLabel>
+          <Label htmlFor="checkoutTime">Čas odchodu</Label>
           <Input 
+            id="checkoutTime"
             value={contact.checkoutTime}
             onChange={(e) => setContact({...contact, checkoutTime: e.target.value})}
           />
