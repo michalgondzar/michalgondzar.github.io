@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { FileText, CalendarIcon, Image, MapPin } from "lucide-react";
+import { FileText, CalendarIcon, Image, MapPin, Heart } from "lucide-react";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthForm } from "@/components/admin/AuthForm";
@@ -10,6 +11,7 @@ import { ContentEditor } from "@/components/admin/ContentEditor";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { BookingsManager } from "@/components/admin/BookingsManager";
 import { ContactEditor } from "@/components/admin/ContactEditor";
+import { MaritalStaysEditor } from "@/components/admin/MaritalStaysEditor";
 import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
@@ -60,6 +62,10 @@ const Admin = () => {
               <Image size={16} />
               Galéria
             </TabsTrigger>
+            <TabsTrigger value="marital-stays" className="flex items-center gap-2">
+              <Heart size={16} />
+              Manželské pobyty
+            </TabsTrigger>
             <TabsTrigger value="contact" className="flex items-center gap-2">
               <MapPin size={16} />
               Kontakt
@@ -78,6 +84,11 @@ const Admin = () => {
           {/* Galéria */}
           <TabsContent value="gallery" className="space-y-6">
             <GalleryManager />
+          </TabsContent>
+          
+          {/* Manželské pobyty */}
+          <TabsContent value="marital-stays" className="space-y-6">
+            <MaritalStaysEditor />
           </TabsContent>
           
           {/* Kontakt */}
