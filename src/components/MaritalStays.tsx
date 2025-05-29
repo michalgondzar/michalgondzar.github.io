@@ -11,17 +11,20 @@ export const maritalStaysData = {
     {
       id: 1,
       src: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=800&q=80",
-      alt: "Romantická obývacia izba"
+      alt: "Romantická obývacia izba",
+      description: "Útulná a štýlovo zariadená obývacia izba s pohodlným sedením je ideálnym miestom pre romantické večery. Jemné osvetlenie a teplé farby vytvárajú atmosféru intimity a pokoja. Tu si môžete vychutnať spoločné chvíle pri víne, sledovaní filmu alebo len tak pri rozhovoroch o vašich snoch a plánoch. Priestor je navrhnutý tak, aby podporoval blízkosť a vytváranie krásnych spomienok na váš manželský pobyt."
     },
     {
       id: 2,
       src: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80",
-      alt: "Krásne okolie pre romantické prechádzky"
+      alt: "Krásne okolie pre romantické prechádzky",
+      description: "Nádherná príroda okolo apartmánu ponúka nekonečné možnosti pre romantické prechádzky a výlety. Zelené lesy, čisté horské vzduch a pokojná atmosféra vytvárajú perfektné prostredie pre páry, ktoré chcú uniknúť z každodenného zhonu. Môžete objaviť skryté chodníčky, piknikovať v prírode alebo si len tak užívať ticho a krásu slovenskej krajiny. Každý krok v tomto prostredí prináša nové zážitky a posilňuje vašu vzájomnú lásku."
     },
     {
       id: 3,
       src: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=800&q=80",
-      alt: "Útulné prostredie apartmánu"
+      alt: "Útulné prostredie apartmánu",
+      description: "Interiér apartmánu je navrhnutý s dôrazom na pohodlie a romantiku. Každý detail je starostlivo vybratý tak, aby vytvoril harmonické prostredie pre manželské páry. Od mäkkých textílií až po jemné osvetlenie - všetko prispieva k atmosfére lásky a oddychu. Apartmán poskytuje súkromie a kľud potrebný na obnovenie vašej vzájomnej blízkosti. Je to miesto, kde môžete zabudnúť na starosti a sústrediť sa len na seba navzájom."
     }
   ],
   externalLink: "https://www.manzelkepobyty.sk"
@@ -49,8 +52,11 @@ const MaritalStays = () => {
                   alt={image.alt}
                   className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
                 />
-                <div className="p-3 bg-white text-center text-sm text-gray-600">
-                  {image.alt}
+                <div className="p-4 bg-white">
+                  <h3 className="font-semibold text-gray-800 mb-2 text-center">{image.alt}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed text-justify">
+                    {image.description}
+                  </p>
                 </div>
               </div>
             ))}

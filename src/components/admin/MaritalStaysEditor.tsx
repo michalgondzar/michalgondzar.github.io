@@ -12,6 +12,7 @@ export const MaritalStaysEditor = () => {
   const [content, setContent] = useState({...maritalStaysData});
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newImageAlt, setNewImageAlt] = useState("");
+  const [newImageDescription, setNewImageDescription] = useState("");
 
   const saveMaritalStaysChanges = () => {
     // V reálnej aplikácii by tu bol API volanie na uloženie do databázy
@@ -19,11 +20,12 @@ export const MaritalStaysEditor = () => {
   };
   
   const addImage = () => {
-    if (newImageUrl.trim() !== "" && newImageAlt.trim() !== "") {
+    if (newImageUrl.trim() !== "" && newImageAlt.trim() !== "" && newImageDescription.trim() !== "") {
       const newImage = {
         id: Math.max(...content.images.map(img => img.id)) + 1,
         src: newImageUrl.trim(),
-        alt: newImageAlt.trim()
+        alt: newImageAlt.trim(),
+        description: newImageDescription.trim()
       };
       setContent({
         ...content,
@@ -31,6 +33,7 @@ export const MaritalStaysEditor = () => {
       });
       setNewImageUrl("");
       setNewImageAlt("");
+      setNewImageDescription("");
       toast.success("Obrázok bol pridaný");
     }
   };
@@ -41,7 +44,7 @@ export const MaritalStaysEditor = () => {
     toast.success("Obrázok bol odstránený");
   };
 
-  const updateImage = (imageId: number, field: 'src' | 'alt', value: string) => {
+  const updateImage = (imageId: number, field: 'src' | 'alt' | 'description', value: string) => {
     const updatedImages = content.images.map(img => 
       img.id === imageId ? {...img, [field]: value} : img
     );
@@ -96,11 +99,23 @@ export const MaritalStaysEditor = () => {
                     />
                   </div>
                   <div>
-                    <Label>Popis obrázku</Label>
+                    <Label>Názov obrázku</Label>
                     <Input 
                       value={image.alt}
                       onChange={(e) => updateImage(image.id, 'alt', e.target.value)}
                     />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <Label>Popis obrázku (cca 500 znakov)</Label>
+                  <Textarea 
+                    value={image.description}
+                    onChange={(e) => updateImage(image.id, 'description', e.target.value)}
+                    rows={6}
+                    placeholder="Detailný popis obrázku - približne 500 znakov..."
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Znakov: {image.description?.length || 0}
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -122,28 +137,42 @@ export const MaritalStaysEditor = () => {
             
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
               <h4 className="font-medium mb-4">Pridať nový obrázok</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>URL obrázku</Label>
-                  <Input 
-                    placeholder="https://example.com/image.jpg"
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                  />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>URL obrázku</Label>
+                    <Input 
+                      placeholder="https://example.com/image.jpg"
+                      value={newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Názov obrázku</Label>
+                    <Input 
+                      placeholder="Názov obrázku..."
+                      value={newImageAlt}
+                      onChange={(e) => setNewImageAlt(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <Label>Popis obrázku</Label>
-                  <Input 
-                    placeholder="Popis obrázku..."
-                    value={newImageAlt}
-                    onChange={(e) => setNewImageAlt(e.target.value)}
+                  <Label>Popis obrázku (cca 500 znakov)</Label>
+                  <Textarea 
+                    placeholder="Detailný popis obrázku - približne 500 znakov..."
+                    value={newImageDescription}
+                    onChange={(e) => setNewImageDescription(e.target.value)}
+                    rows={6}
                   />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Znakov: {newImageDescription.length}
+                  </div>
                 </div>
               </div>
               <Button 
                 onClick={addImage}
                 className="mt-4"
-                disabled={!newImageUrl.trim() || !newImageAlt.trim()}
+                disabled={!newImageUrl.trim() || !newImageAlt.trim() || !newImageDescription.trim()}
               >
                 <Plus size={16} className="mr-2" />
                 Pridať obrázok
