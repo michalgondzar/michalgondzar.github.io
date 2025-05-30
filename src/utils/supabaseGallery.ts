@@ -1,5 +1,4 @@
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 
 export interface GalleryImage {
   id: number;
@@ -11,6 +10,10 @@ export interface GalleryImage {
 
 // Upload image to Supabase storage
 export const uploadImageToStorage = async (file: File): Promise<string> => {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase is not configured. Please set up your Supabase environment variables.');
+  }
+
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
   const filePath = `gallery/${fileName}`;
@@ -34,6 +37,12 @@ export const uploadImageToStorage = async (file: File): Promise<string> => {
 
 // Save gallery data to Supabase database
 export const saveGalleryToDatabase = async (gallery: GalleryImage[]) => {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase not configured, saving to localStorage instead');
+    localStorage.setItem('apartmentGallery', JSON.stringify(gallery));
+    return;
+  }
+
   const { error } = await supabase
     .from('gallery')
     .upsert({ 
@@ -49,6 +58,19 @@ export const saveGalleryToDatabase = async (gallery: GalleryImage[]) => {
 
 // Load gallery data from Supabase database
 export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase not configured, loading from localStorage instead');
+    const savedGallery = localStorage.getItem('apartmentGallery');
+    if (savedGallery) {
+      try {
+        return JSON.parse(savedGallery);
+      } catch (error) {
+        console.error('Error parsing localStorage gallery:', error);
+      }
+    }
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('gallery')
     .select('images')
@@ -69,6 +91,11 @@ export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
 
 // Delete image from storage
 export const deleteImageFromStorage = async (storagePath: string) => {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase not configured, cannot delete from storage');
+    return;
+  }
+
   if (!storagePath) return;
   
   const { error } = await supabase.storage
