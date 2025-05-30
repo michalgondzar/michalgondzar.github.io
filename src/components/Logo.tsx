@@ -8,15 +8,20 @@ export const Logo = ({ white = false }: { white?: boolean }) => {
   useEffect(() => {
     const handleImagesUpdate = () => {
       const newLogo = getImageByUsage('logo');
-      console.log('Updating logo image to:', newLogo);
+      console.log('Logo: Updating logo image to:', newLogo);
       setLogoImage(newLogo);
     };
 
-    // Initial load
-    handleImagesUpdate();
-
+    // Listen for image updates
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
-    return () => window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
+    
+    // Also listen for storage changes in case of direct localStorage updates
+    window.addEventListener('storage', handleImagesUpdate);
+    
+    return () => {
+      window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
+      window.removeEventListener('storage', handleImagesUpdate);
+    };
   }, []);
 
   return (

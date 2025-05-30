@@ -10,15 +10,20 @@ const Hero = () => {
   useEffect(() => {
     const handleImagesUpdate = () => {
       const newImage = getImageByUsage('hero-background');
-      console.log('Updating hero image to:', newImage);
+      console.log('Hero: Updating hero image to:', newImage);
       setHeroImage(newImage);
     };
 
-    // Initial load
-    handleImagesUpdate();
-
+    // Listen for image updates
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
-    return () => window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
+    
+    // Also listen for storage changes in case of direct localStorage updates
+    window.addEventListener('storage', handleImagesUpdate);
+    
+    return () => {
+      window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
+      window.removeEventListener('storage', handleImagesUpdate);
+    };
   }, []);
 
   return (
