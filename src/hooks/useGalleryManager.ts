@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -60,8 +59,13 @@ export const useGalleryManager = () => {
       let storagePath: string | undefined;
 
       if (isSupabaseConfigured) {
+        console.log('Uploading to Supabase storage...');
         imageSrc = await uploadImageToStorage(file);
-        storagePath = imageSrc.split('/').pop();
+        // Extract storage path from URL for Supabase
+        const urlParts = imageSrc.split('/');
+        const objectPath = urlParts.slice(-2).join('/'); // gets "gallery/filename.ext"
+        storagePath = objectPath;
+        console.log('Storage path extracted:', storagePath);
       } else {
         imageSrc = await compressImage(file, 0.7);
         console.log('Obrázok komprimovaný pre lokálne ukladanie');
@@ -87,7 +91,7 @@ export const useGalleryManager = () => {
         toast.success("Obrázok bol aktualizovaný");
       } else {
         updatedGallery = [...gallery, newImage];
-        toast.success("Obrázok bol pridaný a komprimovaný");
+        toast.success("Obrázok bol pridaný");
       }
       
       setGallery(updatedGallery);
@@ -97,7 +101,7 @@ export const useGalleryManager = () => {
       return true;
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error("Chyba pri nahrávaní obrázka");
+      toast.error("Chyba pri nahrávaní obrázka: " + (error as Error).message);
       return false;
     } finally {
       setIsLoading(false);

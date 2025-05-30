@@ -19,6 +19,8 @@ export const uploadImageToStorage = async (file: File): Promise<string> => {
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
   const filePath = `gallery/${fileName}`;
 
+  console.log('Uploading file to path:', filePath);
+
   const { data, error } = await supabase.storage
     .from('gallery-images')
     .upload(filePath, file);
@@ -28,11 +30,14 @@ export const uploadImageToStorage = async (file: File): Promise<string> => {
     throw error;
   }
 
+  console.log('Upload successful:', data);
+
   // Get public URL
   const { data: { publicUrl } } = supabase.storage
     .from('gallery-images')
     .getPublicUrl(filePath);
 
+  console.log('Public URL:', publicUrl);
   return publicUrl;
 };
 
@@ -43,6 +48,8 @@ export const saveGalleryToDatabase = async (gallery: GalleryImage[]) => {
     localStorage.setItem('apartmentGallery', JSON.stringify(gallery));
     return;
   }
+
+  console.log('Saving gallery to database:', gallery);
 
   const { error } = await supabase
     .from('gallery')
@@ -55,6 +62,8 @@ export const saveGalleryToDatabase = async (gallery: GalleryImage[]) => {
     console.error('Error saving gallery:', error);
     throw error;
   }
+
+  console.log('Gallery saved successfully');
 };
 
 // Load gallery data from Supabase database
@@ -72,6 +81,8 @@ export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
     return [];
   }
 
+  console.log('Loading gallery from database');
+
   const { data, error } = await supabase
     .from('gallery')
     .select('images')
@@ -83,7 +94,9 @@ export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
     throw error;
   }
 
-  return (data?.images as unknown as GalleryImage[]) || [];
+  const galleryData = (data?.images as unknown as GalleryImage[]) || [];
+  console.log('Loaded gallery:', galleryData);
+  return galleryData;
 };
 
 // Delete image from storage
@@ -95,6 +108,8 @@ export const deleteImageFromStorage = async (storagePath: string) => {
 
   if (!storagePath) return;
   
+  console.log('Deleting file from storage:', storagePath);
+  
   const { error } = await supabase.storage
     .from('gallery-images')
     .remove([storagePath]);
@@ -103,4 +118,6 @@ export const deleteImageFromStorage = async (storagePath: string) => {
     console.error('Error deleting file:', error);
     throw error;
   }
+
+  console.log('File deleted successfully');
 };
