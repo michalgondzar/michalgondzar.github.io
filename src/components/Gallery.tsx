@@ -1,10 +1,18 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Image } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const galleryImages = [
+// Typ pre obrázok
+interface ImageItem {
+  id: number;
+  src: string;
+  alt: string;
+  category?: string;
+}
+
+const defaultGalleryImages = [
   {
     id: 1,
     category: "interior",
@@ -57,6 +65,21 @@ const galleryImages = [
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<ImageItem[]>(defaultGalleryImages);
+
+  // Načítanie galérie z localStorage
+  useEffect(() => {
+    const savedGallery = localStorage.getItem('apartmentGallery');
+    if (savedGallery) {
+      try {
+        const parsedGallery = JSON.parse(savedGallery);
+        setGalleryImages(parsedGallery);
+        console.log('Loaded gallery data for display:', parsedGallery);
+      } catch (error) {
+        console.error('Error parsing saved gallery for display:', error);
+      }
+    }
+  }, []);
 
   return (
     <section id="galeria" className="bg-booking-gray py-16">

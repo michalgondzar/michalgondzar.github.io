@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -11,21 +11,42 @@ interface ImageItem {
   id: number;
   src: string;
   alt: string;
+  category?: string;
 }
 
 export const GalleryManager = () => {
   const [gallery, setGallery] = useState<ImageItem[]>([
-    { id: 1, src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267", alt: "Apartmán obývačka" },
-    { id: 2, src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a", alt: "Apartmán kuchyňa" },
-    { id: 3, src: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd", alt: "Apartmán spálňa" },
-    { id: 4, src: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688", alt: "Apartmán kúpeľňa" },
-    { id: 5, src: "https://images.unsplash.com/photo-1610123598195-a6e2652d22fc", alt: "Apartmán terasa" }
+    { id: 1, src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267", alt: "Apartmán obývačka", category: "interior" },
+    { id: 2, src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a", alt: "Apartmán kuchyňa", category: "interior" },
+    { id: 3, src: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd", alt: "Apartmán spálňa", category: "interior" },
+    { id: 4, src: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688", alt: "Apartmán kúpeľňa", category: "interior" },
+    { id: 5, src: "https://images.unsplash.com/photo-1610123598195-a6e2652d22fc", alt: "Apartmán terasa", category: "exterior" }
   ]);
   const [currentImage, setCurrentImage] = useState<ImageItem | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
 
   // Referencia pre upload súborov
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Načítanie galérie z localStorage pri spustení
+  useEffect(() => {
+    const savedGallery = localStorage.getItem('apartmentGallery');
+    if (savedGallery) {
+      try {
+        const parsedGallery = JSON.parse(savedGallery);
+        setGallery(parsedGallery);
+        console.log('Loaded gallery data for admin:', parsedGallery);
+      } catch (error) {
+        console.error('Error parsing saved gallery for admin:', error);
+      }
+    }
+  }, []);
+
+  // Uloženie galérie do localStorage
+  const saveGalleryToStorage = (updatedGallery: ImageItem[]) => {
+    localStorage.setItem('apartmentGallery', JSON.stringify(updatedGallery));
+    console.log('Saved gallery data to localStorage:', updatedGallery);
+  };
 
   const openImageDialog = (image: ImageItem | null = null) => {
     setCurrentImage(image);
@@ -41,21 +62,25 @@ export const GalleryManager = () => {
         const newImage = {
           id: gallery.length + 1,
           src: event.target?.result as string,
-          alt: file.name.replace(/\.[^/.]+$/, "") // Použitie názvu súboru ako alt
+          alt: file.name.replace(/\.[^/.]+$/, ""), // Použitie názvu súboru ako alt
+          category: "interior" // Predvolená kategória
         };
         
+        let updatedGallery;
         if (currentImage) {
           // Úprava existujúceho obrázka
-          const updatedGallery = gallery.map(img => 
+          updatedGallery = gallery.map(img => 
             img.id === currentImage.id ? {...img, src: newImage.src} : img
           );
-          setGallery(updatedGallery);
           toast.success("Obrázok bol aktualizovaný");
         } else {
           // Pridanie nového obrázka
-          setGallery([...gallery, newImage]);
+          updatedGallery = [...gallery, newImage];
           toast.success("Obrázok bol pridaný");
         }
+        
+        setGallery(updatedGallery);
+        saveGalleryToStorage(updatedGallery);
         setIsImageDialogOpen(false);
       };
       reader.readAsDataURL(file);
@@ -66,8 +91,17 @@ export const GalleryManager = () => {
     if (confirm("Naozaj chcete odstrániť tento obrázok?")) {
       const updatedGallery = gallery.filter(img => img.id !== id);
       setGallery(updatedGallery);
+      saveGalleryToStorage(updatedGallery);
       toast.success("Obrázok bol odstránený");
     }
+  };
+
+  const updateImageAlt = (id: number, newAlt: string) => {
+    const updatedGallery = gallery.map(img => 
+      img.id === id ? {...img, alt: newAlt} : img
+    );
+    setGallery(updatedGallery);
+    saveGalleryToStorage(updatedGallery);
   };
 
   return (
@@ -114,12 +148,7 @@ export const GalleryManager = () => {
             <div className="p-3 bg-white">
               <Input 
                 value={image.alt}
-                onChange={(e) => {
-                  const updatedGallery = gallery.map(img => 
-                    img.id === image.id ? {...img, alt: e.target.value} : img
-                  );
-                  setGallery(updatedGallery);
-                }}
+                onChange={(e) => updateImageAlt(image.id, e.target.value)}
                 placeholder="Popis obrázka"
                 className="mt-2"
               />
