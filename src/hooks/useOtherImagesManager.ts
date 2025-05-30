@@ -156,27 +156,17 @@ const DEFAULT_IMAGES: OtherImage[] = [
 const getCurrentImages = (): OtherImage[] => {
   try {
     const savedImages = localStorage.getItem(STORAGE_KEY);
-    let currentImages = [...DEFAULT_IMAGES];
     
     if (savedImages) {
       const parsedImages: OtherImage[] = JSON.parse(savedImages);
-      console.log('Loading saved images:', parsedImages);
+      console.log('Loading all saved images from localStorage:', parsedImages);
       
-      // Aktualizuj predvolené obrázky s uloženými verziami
-      currentImages = DEFAULT_IMAGES.map(defaultImg => {
-        const savedImg = parsedImages.find(img => img.usage === defaultImg.usage);
-        return savedImg || defaultImg;
-      });
-      
-      // Pridaj nové obrázky, ktoré nie sú v predvolených
-      const newImages = parsedImages.filter(savedImg => 
-        !DEFAULT_IMAGES.find(defaultImg => defaultImg.usage === savedImg.usage)
-      );
-      currentImages = [...currentImages, ...newImages];
+      // Vráť všetky uložené obrázky - už obsahujú aj aktualizované predvolené
+      return parsedImages;
+    } else {
+      console.log('No saved images found, using defaults');
+      return [...DEFAULT_IMAGES];
     }
-    
-    console.log('Current images after merge:', currentImages);
-    return currentImages;
   } catch (error) {
     console.error('Error getting current images:', error);
     return [...DEFAULT_IMAGES];
@@ -201,13 +191,15 @@ export const useOtherImagesManager = () => {
 
   const loadOtherImages = () => {
     const currentImages = getCurrentImages();
+    console.log('Loading images for admin panel:', currentImages);
     setOtherImages(currentImages);
   };
 
   const saveOtherImages = (images: OtherImage[]) => {
     try {
+      // Uložíme kompletný zoznam obrázkov
       localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-      console.log('Saved other images to localStorage:', images);
+      console.log('Saved complete image list to localStorage:', images);
       
       // Trigger všetky možné eventy pre maximálnu kompatibilitu
       console.log('Triggering otherImagesUpdated event');
@@ -278,8 +270,11 @@ export const useOtherImagesManager = () => {
         toast.success("Obrázok bol aktualizovaný");
       } else {
         // Pridanie nového obrázka
+        const currentImages = getCurrentImages();
+        const newId = Math.max(...currentImages.map(img => img.id), 0) + 1;
+        
         const newImage: OtherImage = {
-          id: Date.now(),
+          id: newId,
           name: fileName,
           src: imageSrc,
           alt: imageDescription,
@@ -288,8 +283,8 @@ export const useOtherImagesManager = () => {
           storage_path: storagePath
         };
         
-        const currentImages = getCurrentImages();
         updatedImages = [...currentImages, newImage];
+        console.log('Added new image:', newImage);
         toast.success("Obrázok bol pridaný");
       }
       
@@ -318,6 +313,7 @@ export const useOtherImagesManager = () => {
       }
       
       const updatedImages = currentImages.filter(img => img.id !== id);
+      console.log('Deleted image with id:', id);
       setOtherImages(updatedImages);
       saveOtherImages(updatedImages);
       toast.success("Obrázok bol odstránený");
