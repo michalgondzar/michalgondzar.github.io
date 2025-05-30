@@ -63,7 +63,7 @@ export const GalleryGrid = ({
             <div>
               <label className="text-xs text-gray-600 block mb-1">Popis obrázka</label>
               <Input 
-                value={image.alt}
+                value={image.alt || ""}
                 onChange={(e) => onUpdateImageAlt(image.id, e.target.value)}
                 placeholder="Popis obrázka"
                 className="text-sm"
