@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface ContactData {
@@ -27,14 +28,11 @@ interface ContactContextType {
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
 
 export const ContactProvider = ({ children }: { children: ReactNode }) => {
-  // Load data from localStorage or use initial data
+  // Force clear old data and use fresh initial data
   const [contactData, setContactData] = useState<ContactData>(() => {
-    try {
-      const saved = localStorage.getItem('apartman-contact-data');
-      return saved ? JSON.parse(saved) : initialContactData;
-    } catch {
-      return initialContactData;
-    }
+    // Clear any old cached data
+    localStorage.removeItem('apartman-contact-data');
+    return initialContactData;
   });
 
   // Save to localStorage whenever data changes
