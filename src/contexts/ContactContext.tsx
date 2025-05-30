@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface ContactData {
   address: string;
@@ -27,7 +27,20 @@ interface ContactContextType {
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
 
 export const ContactProvider = ({ children }: { children: ReactNode }) => {
-  const [contactData, setContactData] = useState<ContactData>(initialContactData);
+  // Load data from localStorage or use initial data
+  const [contactData, setContactData] = useState<ContactData>(() => {
+    try {
+      const saved = localStorage.getItem('apartman-contact-data');
+      return saved ? JSON.parse(saved) : initialContactData;
+    } catch {
+      return initialContactData;
+    }
+  });
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('apartman-contact-data', JSON.stringify(contactData));
+  }, [contactData]);
 
   const updateContactData = (data: ContactData) => {
     setContactData(data);
