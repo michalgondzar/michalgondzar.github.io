@@ -121,6 +121,11 @@ export const OtherImagesManager = () => {
                     <SelectItem value="apartment-interior">Interiér apartmánu</SelectItem>
                     <SelectItem value="aquapark-bešeňová">Aquapark Bešeňová</SelectItem>
                     <SelectItem value="location-map">Mapa lokality</SelectItem>
+                    <SelectItem value="navbar-background">Navbar pozadie</SelectItem>
+                    <SelectItem value="description-background">Popis pozadie</SelectItem>
+                    <SelectItem value="marital-stays-background">Manželské pobyty pozadie</SelectItem>
+                    <SelectItem value="gallery-hero">Galéria hero</SelectItem>
+                    <SelectItem value="contact-hero">Kontakt hero</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

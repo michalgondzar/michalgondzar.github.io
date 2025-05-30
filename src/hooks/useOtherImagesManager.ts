@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -47,7 +46,12 @@ export const getImageByUsage = (usage: string): string => {
     'apartment-exterior': 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6',
     'apartment-interior': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
     'aquapark-bešeňová': 'https://images.unsplash.com/photo-1577880216142-8549e9488dad',
-    'location-map': 'https://images.unsplash.com/photo-1524661135-423995f22d0b'
+    'location-map': 'https://images.unsplash.com/photo-1524661135-423995f22d0b',
+    'navbar-background': '',
+    'description-background': '',
+    'marital-stays-background': '',
+    'gallery-hero': '',
+    'contact-hero': ''
   };
   
   return fallbackImages[usage] || '';
@@ -141,6 +145,46 @@ export const useOtherImagesManager = () => {
       src: "https://images.unsplash.com/photo-1524661135-423995f22d0b",
       alt: "Mapa s umiestnením apartmánu",
       usage: "location-map",
+      category: "general"
+    },
+    {
+      id: 12,
+      name: "Navbar pozadie",
+      src: "",
+      alt: "Pozadie navigácie",
+      usage: "navbar-background",
+      category: "general"
+    },
+    {
+      id: 13,
+      name: "Popis pozadie",
+      src: "",
+      alt: "Pozadie sekcie popisu",
+      usage: "description-background",
+      category: "general"
+    },
+    {
+      id: 14,
+      name: "Manželské pobyty pozadie",
+      src: "",
+      alt: "Pozadie sekcie manželských pobytov",
+      usage: "marital-stays-background",
+      category: "general"
+    },
+    {
+      id: 15,
+      name: "Galéria hero",
+      src: "",
+      alt: "Hero obrázok galérie",
+      usage: "gallery-hero",
+      category: "general"
+    },
+    {
+      id: 16,
+      name: "Kontakt hero",
+      src: "",
+      alt: "Hero obrázok kontaktu",
+      usage: "contact-hero",
       category: "general"
     }
   ]);
