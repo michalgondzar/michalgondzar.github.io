@@ -8,6 +8,7 @@ import { StorageUsageDisplay } from "./StorageUsageDisplay";
 import { GalleryGrid } from "./GalleryGrid";
 import { ImageUploadDialog } from "./ImageUploadDialog";
 import { ImportGalleryDialog } from "./ImportGalleryDialog";
+import { OtherImagesManager } from "./OtherImagesManager";
 
 export const GalleryManager = () => {
   const [currentImage, setCurrentImage] = useState<GalleryImage | null>(null);
@@ -42,69 +43,75 @@ export const GalleryManager = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold">Spravovať fotogalériu</h2>
-          {!isSupabaseConfigured && (
-            <StorageUsageDisplay storageUsage={storageUsage} />
-          )}
+    <div className="space-y-6">
+      {/* Main Gallery Section */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold">Fotogaléria apartmánu</h2>
+            {!isSupabaseConfigured && (
+              <StorageUsageDisplay storageUsage={storageUsage} />
+            )}
+          </div>
+          <div className="flex gap-2">
+            {!isSupabaseConfigured && (
+              <>
+                <Button 
+                  variant="outline"
+                  onClick={exportGallery}
+                  className="flex items-center gap-2"
+                  disabled={gallery.length === 0}
+                >
+                  <Download size={16} />
+                  Export
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsImportDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <FileUp size={16} />
+                  Import
+                </Button>
+              </>
+            )}
+            <Button 
+              onClick={() => openImageDialog()} 
+              className="flex items-center gap-2"
+              disabled={isLoading}
+            >
+              <Plus size={16} />
+              Pridať obrázok
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          {!isSupabaseConfigured && (
-            <>
-              <Button 
-                variant="outline"
-                onClick={exportGallery}
-                className="flex items-center gap-2"
-                disabled={gallery.length === 0}
-              >
-                <Download size={16} />
-                Export
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setIsImportDialogOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <FileUp size={16} />
-                Import
-              </Button>
-            </>
-          )}
-          <Button 
-            onClick={() => openImageDialog()} 
-            className="flex items-center gap-2"
-            disabled={isLoading}
-          >
-            <Plus size={16} />
-            Pridať obrázok
-          </Button>
-        </div>
+        
+        <GalleryGrid 
+          gallery={gallery}
+          onEditImage={openImageDialog}
+          onDeleteImage={deleteImage}
+          onUpdateImageAlt={updateImageAlt}
+          onUpdateImageCategory={updateImageCategory}
+          onUpdateImageName={updateImageName}
+        />
+
+        <ImportGalleryDialog 
+          isOpen={isImportDialogOpen}
+          onClose={() => setIsImportDialogOpen(false)}
+          onImportGallery={importGallery}
+        />
+
+        <ImageUploadDialog 
+          isOpen={isImageDialogOpen}
+          onClose={closeImageDialog}
+          currentImage={currentImage}
+          onImageUpload={handleImageUpload}
+          isLoading={isLoading}
+        />
       </div>
-      
-      <GalleryGrid 
-        gallery={gallery}
-        onEditImage={openImageDialog}
-        onDeleteImage={deleteImage}
-        onUpdateImageAlt={updateImageAlt}
-        onUpdateImageCategory={updateImageCategory}
-        onUpdateImageName={updateImageName}
-      />
 
-      <ImportGalleryDialog 
-        isOpen={isImportDialogOpen}
-        onClose={() => setIsImportDialogOpen(false)}
-        onImportGallery={importGallery}
-      />
-
-      <ImageUploadDialog 
-        isOpen={isImageDialogOpen}
-        onClose={closeImageDialog}
-        currentImage={currentImage}
-        onImageUpload={handleImageUpload}
-        isLoading={isLoading}
-      />
+      {/* Other Images Section */}
+      <OtherImagesManager />
     </div>
   );
 };
