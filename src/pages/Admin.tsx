@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { FileText, CalendarIcon, Image, MapPin, Heart } from "lucide-react";
+import { FileText, CalendarIcon, Image, MapPin, Heart, Euro } from "lucide-react";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthForm } from "@/components/admin/AuthForm";
@@ -12,6 +12,7 @@ import { GalleryManager } from "@/components/admin/GalleryManager";
 import { BookingsManager } from "@/components/admin/BookingsManager";
 import { ContactEditor } from "@/components/admin/ContactEditor";
 import { MaritalStaysEditor } from "@/components/admin/MaritalStaysEditor";
+import { PricingEditor } from "@/components/admin/PricingEditor";
 import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
@@ -66,6 +67,10 @@ const Admin = () => {
               <Heart size={16} />
               Manželské pobyty
             </TabsTrigger>
+            <TabsTrigger value="pricing" className="flex items-center gap-2">
+              <Euro size={16} />
+              Cenník
+            </TabsTrigger>
             <TabsTrigger value="contact" className="flex items-center gap-2">
               <MapPin size={16} />
               Kontakt
@@ -89,6 +94,11 @@ const Admin = () => {
           {/* Manželské pobyty */}
           <TabsContent value="marital-stays" className="space-y-6">
             <MaritalStaysEditor />
+          </TabsContent>
+          
+          {/* Cenník */}
+          <TabsContent value="pricing" className="space-y-6">
+            <PricingEditor />
           </TabsContent>
           
           {/* Kontakt */}
