@@ -185,15 +185,47 @@ export const useOtherImagesManager = () => {
   const [otherImages, setOtherImages] = useState<OtherImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const loadOtherImages = () => {
+    try {
+      const currentImages = getCurrentImages();
+      console.log('Loading images for admin panel:', currentImages);
+      setOtherImages(currentImages);
+    } catch (error) {
+      console.error('Error loading images:', error);
+      setOtherImages([...DEFAULT_IMAGES]);
+    }
+  };
+
   useEffect(() => {
+    console.log('useOtherImagesManager mounted, loading images...');
     loadOtherImages();
+    
+    // Force reload after a short delay to ensure localStorage is accessible
+    const timer = setTimeout(() => {
+      console.log('Force reloading images after delay...');
+      loadOtherImages();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const loadOtherImages = () => {
-    const currentImages = getCurrentImages();
-    console.log('Loading images for admin panel:', currentImages);
-    setOtherImages(currentImages);
-  };
+  // Listen for storage events
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log('Storage changed, reloading images...');
+      loadOtherImages();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('otherImagesUpdated', handleStorageChange);
+    window.addEventListener('forceImageRefresh', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('otherImagesUpdated', handleStorageChange);
+      window.removeEventListener('forceImageRefresh', handleStorageChange);
+    };
+  }, []);
 
   const saveOtherImages = (images: OtherImage[]) => {
     try {
@@ -334,11 +366,33 @@ export const useOtherImagesManager = () => {
     saveOtherImages(updatedImages);
   };
 
+  // Debug function to check localStorage
+  const debugLocalStorage = () => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    console.log('Current localStorage data for', STORAGE_KEY, ':', data);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        console.log('Parsed data:', parsed);
+        console.log('Number of images:', parsed.length);
+      } catch (e) {
+        console.error('Error parsing localStorage data:', e);
+      }
+    }
+  };
+
+  // Call debug on mount
+  useEffect(() => {
+    debugLocalStorage();
+  }, []);
+
   return {
     otherImages,
     isLoading,
     uploadImage,
     deleteImage,
-    updateImageField
+    updateImageField,
+    loadOtherImages,
+    debugLocalStorage
   };
 };

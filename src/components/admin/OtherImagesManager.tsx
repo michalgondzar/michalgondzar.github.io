@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash, FileImage, Replace, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash, FileImage, Replace, ExternalLink, RefreshCw } from "lucide-react";
 import { ImageUploadDialog } from "./ImageUploadDialog";
 import { useOtherImagesManager, OtherImage } from "@/hooks/useOtherImagesManager";
 
@@ -16,7 +16,9 @@ export const OtherImagesManager = () => {
     isLoading,
     uploadImage,
     deleteImage,
-    updateImageField
+    updateImageField,
+    loadOtherImages,
+    debugLocalStorage
   } = useOtherImagesManager();
 
   const openImageDialog = (image: OtherImage | null = null) => {
@@ -40,6 +42,12 @@ export const OtherImagesManager = () => {
     }
   };
 
+  const handleRefresh = () => {
+    console.log('Manual refresh triggered');
+    debugLocalStorage();
+    loadOtherImages();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-6">
       <div className="flex items-center justify-between mb-6">
@@ -48,13 +56,37 @@ export const OtherImagesManager = () => {
           <h3 className="text-lg font-semibold">Ostatné obrázky na stránke</h3>
           <span className="text-sm text-gray-500">({otherImages.length} obrázkov)</span>
         </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw size={16} />
+            Obnoviť
+          </Button>
+          <Button 
+            onClick={() => openImageDialog()} 
+            className="flex items-center gap-2"
+            disabled={isLoading}
+          >
+            <Plus size={16} />
+            Pridať obrázok
+          </Button>
+        </div>
+      </div>
+
+      {/* Debug info */}
+      <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
+        <strong>Debug info:</strong> Načítané {otherImages.length} obrázkov z localStorage
         <Button 
-          onClick={() => openImageDialog()} 
-          className="flex items-center gap-2"
-          disabled={isLoading}
+          onClick={debugLocalStorage} 
+          variant="outline" 
+          size="sm" 
+          className="ml-2"
         >
-          <Plus size={16} />
-          Pridať obrázok
+          Zobraziť localStorage
         </Button>
       </div>
 
@@ -190,6 +222,7 @@ export const OtherImagesManager = () => {
           <li>• Ak je obrázok označený ako "Chýba", sekcia bude bez pozadia alebo bude používať predvolený obrázok</li>
           <li>• Kliknutím na obrázok si ho môžete prezrieť v plnej veľkosti</li>
           <li>• Použite tlačidlo "Nahradiť" na zmenu existujúceho obrázka</li>
+          <li>• Ak nevidíte obrázky, skúste kliknúť na tlačidlo "Obnoviť"</li>
         </ul>
       </div>
 
