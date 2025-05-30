@@ -1,25 +1,28 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-scroll";
 import { getImageByUsage } from "@/hooks/useOtherImagesManager";
 
 const Hero = () => {
-  const [heroImage, setHeroImage] = useState(getImageByUsage('hero-background'));
+  const [heroImage, setHeroImage] = useState('');
 
   useEffect(() => {
-    const handleImagesUpdate = () => {
+    const updateHeroImage = () => {
       const newImage = getImageByUsage('hero-background');
       console.log('Hero: Updating hero image to:', newImage);
       setHeroImage(newImage);
     };
 
-    // Initial load to make sure we have the latest image
-    handleImagesUpdate();
+    // Initial load
+    updateHeroImage();
 
     // Listen for image updates
+    const handleImagesUpdate = () => {
+      updateHeroImage();
+    };
+
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
-    
-    // Also listen for storage changes in case of direct localStorage updates
     window.addEventListener('storage', handleImagesUpdate);
     
     return () => {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -183,7 +182,7 @@ const getCurrentImages = (): OtherImage[] => {
   }
 };
 
-// Funkcia na získenie obrázka podľa použitia
+// Funkcia na získanie obrázka podľa použitia
 export const getImageByUsage = (usage: string): string => {
   const images = getCurrentImages();
   const image = images.find(img => img.usage === usage);
@@ -211,7 +210,13 @@ export const useOtherImagesManager = () => {
       
       // Trigger custom event pre aktualizáciu komponentov
       console.log('Triggering otherImagesUpdated event');
-      window.dispatchEvent(new CustomEvent('otherImagesUpdated', { detail: images }));
+      const event = new CustomEvent('otherImagesUpdated', { detail: images });
+      window.dispatchEvent(event);
+      
+      // Force refresh pre všetky komponenty ktoré používajú getImageByUsage
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 100);
     } catch (error) {
       console.error('Error saving other images:', error);
       toast.error("Chyba pri ukladaní obrázkov");

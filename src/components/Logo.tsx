@@ -3,22 +3,24 @@ import { useState, useEffect } from "react";
 import { getImageByUsage } from "@/hooks/useOtherImagesManager";
 
 export const Logo = ({ white = false }: { white?: boolean }) => {
-  const [logoImage, setLogoImage] = useState(getImageByUsage('logo'));
+  const [logoImage, setLogoImage] = useState('');
 
   useEffect(() => {
-    const handleImagesUpdate = () => {
+    const updateLogoImage = () => {
       const newLogo = getImageByUsage('logo');
       console.log('Logo: Updating logo image to:', newLogo);
       setLogoImage(newLogo);
     };
 
-    // Initial load to make sure we have the latest image
-    handleImagesUpdate();
+    // Initial load
+    updateLogoImage();
 
     // Listen for image updates
+    const handleImagesUpdate = () => {
+      updateLogoImage();
+    };
+
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
-    
-    // Also listen for storage changes in case of direct localStorage updates
     window.addEventListener('storage', handleImagesUpdate);
     
     return () => {
