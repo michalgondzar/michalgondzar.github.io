@@ -129,27 +129,47 @@ export const useGalleryManager = () => {
   };
 
   const updateImageAlt = async (id: number, newAlt: string) => {
-    const updatedGallery = gallery.map(img => 
-      img.id === id ? {...img, alt: newAlt} : img
-    );
-    setGallery(updatedGallery);
-    await saveGallery(updatedGallery);
+    console.log('updateImageAlt called with:', { id, newAlt });
+    try {
+      const updatedGallery = gallery.map(img => 
+        img.id === id ? {...img, alt: newAlt} : img
+      );
+      console.log('Updated gallery with new alt:', updatedGallery);
+      setGallery(updatedGallery);
+      await saveGallery(updatedGallery);
+      console.log('Alt text saved successfully');
+    } catch (error) {
+      console.error('Error updating alt text:', error);
+      toast.error("Chyba pri aktualizácii popisu");
+    }
   };
 
   const updateImageCategory = async (id: number, newCategory: string) => {
-    const updatedGallery = gallery.map(img => 
-      img.id === id ? {...img, category: newCategory} : img
-    );
-    setGallery(updatedGallery);
-    await saveGallery(updatedGallery);
+    console.log('updateImageCategory called with:', { id, newCategory });
+    try {
+      const updatedGallery = gallery.map(img => 
+        img.id === id ? {...img, category: newCategory} : img
+      );
+      setGallery(updatedGallery);
+      await saveGallery(updatedGallery);
+    } catch (error) {
+      console.error('Error updating category:', error);
+      toast.error("Chyba pri aktualizácii kategórie");
+    }
   };
 
   const updateImageName = async (id: number, newName: string) => {
-    const updatedGallery = gallery.map(img => 
-      img.id === id ? {...img, name: newName} : img
-    );
-    setGallery(updatedGallery);
-    await saveGallery(updatedGallery);
+    console.log('updateImageName called with:', { id, newName });
+    try {
+      const updatedGallery = gallery.map(img => 
+        img.id === id ? {...img, name: newName} : img
+      );
+      setGallery(updatedGallery);
+      await saveGallery(updatedGallery);
+    } catch (error) {
+      console.error('Error updating name:', error);
+      toast.error("Chyba pri aktualizácii názvu");
+    }
   };
 
   const exportGallery = () => {
