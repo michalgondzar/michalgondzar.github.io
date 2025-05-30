@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { toast } from "sonner";
 import { CalendarIcon, Edit, Trash, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { BookingForm } from "./BookingForm";
+import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
 
 interface Booking {
   id: number;
@@ -32,6 +32,7 @@ export const BookingsManager = () => {
   // Správa dialógov
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isGoogleCalendarDialogOpen, setIsGoogleCalendarDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
   
   // Kalendár - dátum a vybrané dátumy
@@ -122,7 +123,7 @@ export const BookingsManager = () => {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={connectGoogleCalendar}
+              onClick={() => setIsGoogleCalendarDialogOpen(true)}
               className="flex items-center gap-2"
             >
               Prepojiť s Google Kalendárom
@@ -237,6 +238,13 @@ export const BookingsManager = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Google Calendar Dialog */}
+      <GoogleCalendarDialog 
+        isOpen={isGoogleCalendarDialogOpen}
+        onClose={() => setIsGoogleCalendarDialogOpen(false)}
+        bookings={bookings}
+      />
     </>
   );
 };
