@@ -1,14 +1,27 @@
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-scroll";
+import { getImageByUsage } from "@/hooks/useOtherImagesManager";
 
 const Hero = () => {
+  const [heroImage, setHeroImage] = useState(getImageByUsage('hero-background'));
+
+  useEffect(() => {
+    const handleImagesUpdate = () => {
+      setHeroImage(getImageByUsage('hero-background'));
+    };
+
+    window.addEventListener('otherImagesUpdated', handleImagesUpdate);
+    return () => window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
+  }, []);
+
   return (
     <div className="relative h-screen bg-gradient-to-r from-purple-900/20 to-indigo-900/20">
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png')",
+          backgroundImage: `url('${heroImage}')`,
           filter: "brightness(0.9)"
         }}
       />

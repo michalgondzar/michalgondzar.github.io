@@ -20,22 +20,91 @@ export interface OtherImage {
 
 const STORAGE_KEY = 'apartmentOtherImages';
 
+// Funkcia na získanie obrázka podľa použitia
+export const getImageByUsage = (usage: string): string => {
+  try {
+    const savedImages = localStorage.getItem(STORAGE_KEY);
+    if (savedImages) {
+      const images: OtherImage[] = JSON.parse(savedImages);
+      const image = images.find(img => img.usage === usage);
+      if (image) {
+        return image.src;
+      }
+    }
+  } catch (error) {
+    console.error('Error getting image by usage:', error);
+  }
+  
+  // Fallback na pôvodné obrázky
+  const fallbackImages: Record<string, string> = {
+    'hero-background': '/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png',
+    'logo': '',
+    'about-section': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
+    'contact-section': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
+    'footer-background': '',
+    'gallery-background': '',
+    'booking-section': ''
+  };
+  
+  return fallbackImages[usage] || '';
+};
+
 export const useOtherImagesManager = () => {
   const [otherImages, setOtherImages] = useState<OtherImage[]>([
     {
       id: 1,
       name: "Hero pozadie",
-      src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+      src: "/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png",
       alt: "Pozadie hlavnej sekcie",
       usage: "hero-background",
       category: "general"
     },
     {
       id: 2,
+      name: "Logo apartmánu", 
+      src: "",
+      alt: "Logo Apartmán Tília",
+      usage: "logo",
+      category: "general"
+    },
+    {
+      id: 3,
       name: "O nás obrázok", 
       src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
       alt: "Obrázok v sekcii o nás",
       usage: "about-section",
+      category: "general"
+    },
+    {
+      id: 4,
+      name: "Kontakt pozadie", 
+      src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+      alt: "Pozadie kontaktnej sekcie",
+      usage: "contact-section",
+      category: "general"
+    },
+    {
+      id: 5,
+      name: "Footer pozadie", 
+      src: "",
+      alt: "Pozadie pätičky",
+      usage: "footer-background",
+      category: "general"
+    },
+    {
+      id: 6,
+      name: "Galéria pozadie", 
+      src: "",
+      alt: "Pozadie galérie",
+      usage: "gallery-background",
+      category: "general"
+    },
+    {
+      id: 7,
+      name: "Rezervácia pozadie", 
+      src: "",
+      alt: "Pozadie rezervačnej sekcie",
+      usage: "booking-section",
       category: "general"
     }
   ]);
@@ -63,6 +132,9 @@ export const useOtherImagesManager = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
       console.log('Saved other images to localStorage:', images);
+      
+      // Trigger custom event pre aktualizáciu komponentov
+      window.dispatchEvent(new CustomEvent('otherImagesUpdated', { detail: images }));
     } catch (error) {
       console.error('Error saving other images:', error);
       toast.error("Chyba pri ukladaní obrázkov");
