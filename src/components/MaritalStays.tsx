@@ -73,7 +73,7 @@ const MaritalStays = () => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
               >
-                Navštíviť manzelkepobyty.sk
+                Navštíviť www.manzelskepobyty.sk
                 <ExternalLink size={18} />
               </a>
             </Button>
