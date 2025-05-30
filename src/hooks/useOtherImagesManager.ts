@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -159,16 +158,14 @@ const getCurrentImages = (): OtherImage[] => {
     
     if (savedImages) {
       const parsedImages: OtherImage[] = JSON.parse(savedImages);
-      console.log('Loading all saved images from localStorage:', parsedImages);
-      
-      // Vráť všetky uložené obrázky - už obsahujú aj aktualizované predvolené
+      console.log('getCurrentImages: Loading saved images from localStorage:', parsedImages.length);
       return parsedImages;
     } else {
-      console.log('No saved images found, using defaults');
+      console.log('getCurrentImages: No saved images found, using defaults');
       return [...DEFAULT_IMAGES];
     }
   } catch (error) {
-    console.error('Error getting current images:', error);
+    console.error('getCurrentImages: Error getting current images:', error);
     return [...DEFAULT_IMAGES];
   }
 };
@@ -177,7 +174,7 @@ const getCurrentImages = (): OtherImage[] => {
 export const getImageByUsage = (usage: string): string => {
   const images = getCurrentImages();
   const image = images.find(img => img.usage === usage);
-  console.log(`Getting image for usage "${usage}":`, image?.src || 'not found');
+  console.log(`getImageByUsage: Getting image for usage "${usage}":`, image?.src || 'not found');
   return image?.src || '';
 };
 
@@ -186,23 +183,56 @@ export const useOtherImagesManager = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const loadOtherImages = () => {
+    console.log('loadOtherImages: Starting to load images...');
     try {
       const currentImages = getCurrentImages();
-      console.log('Loading images for admin panel:', currentImages);
+      console.log('loadOtherImages: Loaded images:', currentImages.length, currentImages);
       setOtherImages(currentImages);
     } catch (error) {
-      console.error('Error loading images:', error);
-      setOtherImages([...DEFAULT_IMAGES]);
+      console.error('loadOtherImages: Error loading images:', error);
+      const defaultImages = [...DEFAULT_IMAGES];
+      console.log('loadOtherImages: Using default images:', defaultImages.length);
+      setOtherImages(defaultImages);
     }
   };
 
+  // Debug function to check localStorage
+  const debugLocalStorage = () => {
+    console.log('=== DEBUG LOCALSTORAGE START ===');
+    const data = localStorage.getItem(STORAGE_KEY);
+    console.log('Raw localStorage data for', STORAGE_KEY, ':', data);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        console.log('Parsed data:', parsed);
+        console.log('Number of images in localStorage:', parsed.length);
+        console.log('Images with src:', parsed.filter((img: OtherImage) => img.src).length);
+        parsed.forEach((img: OtherImage, index: number) => {
+          console.log(`Image ${index + 1}:`, {
+            id: img.id,
+            name: img.name,
+            usage: img.usage,
+            hasSrc: !!img.src,
+            src: img.src ? img.src.substring(0, 50) + '...' : 'empty'
+          });
+        });
+      } catch (e) {
+        console.error('Error parsing localStorage data:', e);
+      }
+    } else {
+      console.log('No data found in localStorage for key:', STORAGE_KEY);
+    }
+    console.log('Current otherImages state:', otherImages.length);
+    console.log('=== DEBUG LOCALSTORAGE END ===');
+  };
+
   useEffect(() => {
-    console.log('useOtherImagesManager mounted, loading images...');
+    console.log('useOtherImagesManager: Component mounted, loading images...');
     loadOtherImages();
     
     // Force reload after a short delay to ensure localStorage is accessible
     const timer = setTimeout(() => {
-      console.log('Force reloading images after delay...');
+      console.log('useOtherImagesManager: Force reloading images after delay...');
       loadOtherImages();
     }, 100);
 
@@ -212,7 +242,7 @@ export const useOtherImagesManager = () => {
   // Listen for storage events
   useEffect(() => {
     const handleStorageChange = () => {
-      console.log('Storage changed, reloading images...');
+      console.log('useOtherImagesManager: Storage changed, reloading images...');
       loadOtherImages();
     };
 
@@ -229,35 +259,24 @@ export const useOtherImagesManager = () => {
 
   const saveOtherImages = (images: OtherImage[]) => {
     try {
-      // Uložíme kompletný zoznam obrázkov
+      console.log('saveOtherImages: Saving images to localStorage:', images.length);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-      console.log('Saved complete image list to localStorage:', images);
+      console.log('saveOtherImages: Images saved successfully');
       
-      // Trigger všetky možné eventy pre maximálnu kompatibilitu
-      console.log('Triggering otherImagesUpdated event');
+      // Trigger events for component refresh
       const customEvent = new CustomEvent('otherImagesUpdated', { detail: images });
       window.dispatchEvent(customEvent);
       
-      // Storage event pre komponenty ktoré ho používajú
       setTimeout(() => {
-        console.log('Triggering storage event for component refresh');
         window.dispatchEvent(new Event('storage'));
       }, 50);
       
-      // Force refresh event pre komponenty
       setTimeout(() => {
-        console.log('Triggering force refresh event');
         window.dispatchEvent(new CustomEvent('forceImageRefresh'));
       }, 100);
       
-      // Pridáme aj document event pre cross-page komunikáciu
-      setTimeout(() => {
-        console.log('Triggering document-level image update event');
-        document.dispatchEvent(new CustomEvent('globalImageUpdate', { detail: images }));
-      }, 150);
-      
     } catch (error) {
-      console.error('Error saving other images:', error);
+      console.error('saveOtherImages: Error saving other images:', error);
       toast.error("Chyba pri ukladaní obrázkov");
     }
   };
@@ -291,14 +310,12 @@ export const useOtherImagesManager = () => {
           await deleteImageFromStorage(currentImage.storage_path);
         }
         
-        // Získaj aktuálne obrázky a aktualizuj konkrétny
         const currentImages = getCurrentImages();
         updatedImages = currentImages.map(img => 
           img.id === currentImage.id 
             ? {...img, src: imageSrc, alt: imageDescription, name: fileName, storage_path: storagePath}
             : img
         );
-        console.log('Updated existing image, new images array:', updatedImages);
         toast.success("Obrázok bol aktualizovaný");
       } else {
         // Pridanie nového obrázka
@@ -316,7 +333,6 @@ export const useOtherImagesManager = () => {
         };
         
         updatedImages = [...currentImages, newImage];
-        console.log('Added new image:', newImage);
         toast.success("Obrázok bol pridaný");
       }
       
@@ -345,7 +361,6 @@ export const useOtherImagesManager = () => {
       }
       
       const updatedImages = currentImages.filter(img => img.id !== id);
-      console.log('Deleted image with id:', id);
       setOtherImages(updatedImages);
       saveOtherImages(updatedImages);
       toast.success("Obrázok bol odstránený");
@@ -360,31 +375,9 @@ export const useOtherImagesManager = () => {
     const updatedImages = currentImages.map(img => 
       img.id === id ? {...img, [field]: value} : img
     );
-    console.log('Updating image field:', field, 'for image:', id, 'new value:', value);
-    console.log('Updated images array:', updatedImages);
     setOtherImages(updatedImages);
     saveOtherImages(updatedImages);
   };
-
-  // Debug function to check localStorage
-  const debugLocalStorage = () => {
-    const data = localStorage.getItem(STORAGE_KEY);
-    console.log('Current localStorage data for', STORAGE_KEY, ':', data);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        console.log('Parsed data:', parsed);
-        console.log('Number of images:', parsed.length);
-      } catch (e) {
-        console.error('Error parsing localStorage data:', e);
-      }
-    }
-  };
-
-  // Call debug on mount
-  useEffect(() => {
-    debugLocalStorage();
-  }, []);
 
   return {
     otherImages,
