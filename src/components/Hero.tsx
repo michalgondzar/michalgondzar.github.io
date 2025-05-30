@@ -23,16 +23,34 @@ const Hero = () => {
       updateHeroImage();
     };
 
+    // Window events
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     window.addEventListener('storage', handleImagesUpdate);
     window.addEventListener('forceImageRefresh', handleImagesUpdate);
+    
+    // Document events pre cross-page komunikáciu
+    document.addEventListener('globalImageUpdate', handleImagesUpdate);
     
     return () => {
       window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
       window.removeEventListener('storage', handleImagesUpdate);
       window.removeEventListener('forceImageRefresh', handleImagesUpdate);
+      document.removeEventListener('globalImageUpdate', handleImagesUpdate);
     };
   }, []);
+
+  // Pridáme aj useEffect pre sledovanie zmien v localStorage
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentImage = getImageByUsage('hero-background');
+      if (currentImage !== heroImage) {
+        console.log('Hero: Detected image change via polling');
+        setHeroImage(currentImage);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [heroImage]);
 
   return (
     <div className="relative h-screen bg-gradient-to-r from-purple-900/20 to-indigo-900/20">

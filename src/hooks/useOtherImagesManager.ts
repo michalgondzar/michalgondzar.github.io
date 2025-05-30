@@ -183,7 +183,7 @@ const getCurrentImages = (): OtherImage[] => {
   }
 };
 
-// Funkcia na získenie obrázka podľa použitia
+// Funkcia na získanie obrázka podľa použitia
 export const getImageByUsage = (usage: string): string => {
   const images = getCurrentImages();
   const image = images.find(img => img.usage === usage);
@@ -209,22 +209,28 @@ export const useOtherImagesManager = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
       console.log('Saved other images to localStorage:', images);
       
-      // Trigger custom event pre aktualizáciu komponentov
+      // Trigger všetky možné eventy pre maximálnu kompatibilitu
       console.log('Triggering otherImagesUpdated event');
-      const event = new CustomEvent('otherImagesUpdated', { detail: images });
-      window.dispatchEvent(event);
+      const customEvent = new CustomEvent('otherImagesUpdated', { detail: images });
+      window.dispatchEvent(customEvent);
       
-      // Pridáme krátky timeout a potom spustíme storage event
+      // Storage event pre komponenty ktoré ho používajú
       setTimeout(() => {
         console.log('Triggering storage event for component refresh');
         window.dispatchEvent(new Event('storage'));
       }, 50);
       
-      // Pridáme ešte jeden event špecificky pre force refresh
+      // Force refresh event pre komponenty
       setTimeout(() => {
         console.log('Triggering force refresh event');
         window.dispatchEvent(new CustomEvent('forceImageRefresh'));
       }, 100);
+      
+      // Pridáme aj document event pre cross-page komunikáciu
+      setTimeout(() => {
+        console.log('Triggering document-level image update event');
+        document.dispatchEvent(new CustomEvent('globalImageUpdate', { detail: images }));
+      }, 150);
       
     } catch (error) {
       console.error('Error saving other images:', error);
