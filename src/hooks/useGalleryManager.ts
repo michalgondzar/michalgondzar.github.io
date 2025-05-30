@@ -75,6 +75,7 @@ export const useGalleryManager = () => {
         id: Date.now(),
         src: imageSrc,
         alt: file.name.replace(/\.[^/.]+$/, ""),
+        name: file.name.replace(/\.[^/.]+$/, ""),
         category: "interior",
         storage_path: storagePath
       };
@@ -143,6 +144,14 @@ export const useGalleryManager = () => {
     await saveGallery(updatedGallery);
   };
 
+  const updateImageName = async (id: number, newName: string) => {
+    const updatedGallery = gallery.map(img => 
+      img.id === id ? {...img, name: newName} : img
+    );
+    setGallery(updatedGallery);
+    await saveGallery(updatedGallery);
+  };
+
   const exportGallery = () => {
     try {
       exportGalleryToFile(gallery);
@@ -176,6 +185,7 @@ export const useGalleryManager = () => {
     deleteImage,
     updateImageAlt,
     updateImageCategory,
+    updateImageName,
     exportGallery,
     importGallery
   };

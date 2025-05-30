@@ -7,6 +7,7 @@ export interface GalleryImage {
   alt: string;
   category: string;
   storage_path?: string;
+  name?: string;
 }
 
 // Upload image to Supabase storage

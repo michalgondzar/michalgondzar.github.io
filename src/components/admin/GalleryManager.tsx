@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, FileUp } from "lucide-react";
@@ -23,6 +22,7 @@ export const GalleryManager = () => {
     deleteImage,
     updateImageAlt,
     updateImageCategory,
+    updateImageName,
     exportGallery,
     importGallery
   } = useGalleryManager();
@@ -89,6 +89,7 @@ export const GalleryManager = () => {
         onDeleteImage={deleteImage}
         onUpdateImageAlt={updateImageAlt}
         onUpdateImageCategory={updateImageCategory}
+        onUpdateImageName={updateImageName}
       />
 
       <ImportGalleryDialog 

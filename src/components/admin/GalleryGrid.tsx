@@ -10,6 +10,7 @@ interface GalleryGridProps {
   onDeleteImage: (id: number) => void;
   onUpdateImageAlt: (id: number, alt: string) => void;
   onUpdateImageCategory: (id: number, category: string) => void;
+  onUpdateImageName: (id: number, name: string) => void;
 }
 
 export const GalleryGrid = ({ 
@@ -17,7 +18,8 @@ export const GalleryGrid = ({
   onEditImage, 
   onDeleteImage, 
   onUpdateImageAlt, 
-  onUpdateImageCategory 
+  onUpdateImageCategory,
+  onUpdateImageName
 }: GalleryGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -49,20 +51,36 @@ export const GalleryGrid = ({
           </div>
           
           <div className="p-3 bg-white space-y-2">
-            <Input 
-              value={image.alt}
-              onChange={(e) => onUpdateImageAlt(image.id, e.target.value)}
-              placeholder="Popis obrázka"
-            />
-            <select 
-              value={image.category}
-              onChange={(e) => onUpdateImageCategory(image.id, e.target.value)}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="interior">Interiér</option>
-              <option value="exterior">Exteriér</option>
-              <option value="surroundings">Okolie</option>
-            </select>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Názov súboru</label>
+              <Input 
+                value={image.name || image.alt}
+                onChange={(e) => onUpdateImageName(image.id, e.target.value)}
+                placeholder="Názov súboru"
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Popis obrázka</label>
+              <Input 
+                value={image.alt}
+                onChange={(e) => onUpdateImageAlt(image.id, e.target.value)}
+                placeholder="Popis obrázka"
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Kategória</label>
+              <select 
+                value={image.category}
+                onChange={(e) => onUpdateImageCategory(image.id, e.target.value)}
+                className="w-full p-2 border rounded-md text-sm"
+              >
+                <option value="interior">Interiér</option>
+                <option value="exterior">Exteriér</option>
+                <option value="surroundings">Okolie</option>
+              </select>
+            </div>
           </div>
         </div>
       ))}
