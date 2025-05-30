@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUploadDialog } from "./ImageUploadDialog";
@@ -12,6 +13,7 @@ interface OtherImage {
   src: string;
   alt: string;
   usage: string; // Where this image is used (e.g., "hero-background", "about-section", etc.)
+  category: string; // Add category to match GalleryImage interface
 }
 
 export const OtherImagesManager = () => {
@@ -21,14 +23,16 @@ export const OtherImagesManager = () => {
       name: "Hero pozadie",
       src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
       alt: "Pozadie hlavnej sekcie",
-      usage: "hero-background"
+      usage: "hero-background",
+      category: "general"
     },
     {
       id: 2,
       name: "O nás obrázok", 
       src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
       alt: "Obrázok v sekcii o nás",
-      usage: "about-section"
+      usage: "about-section",
+      category: "general"
     }
   ]);
   
@@ -61,7 +65,8 @@ export const OtherImagesManager = () => {
           name: fileName,
           src: imageSrc,
           alt: imageDescription,
-          usage: "general"
+          usage: "general",
+          category: "general"
         };
         
         if (currentImage) {
@@ -173,18 +178,24 @@ export const OtherImagesManager = () => {
               </div>
               <div>
                 <label className="text-xs text-gray-600 block mb-1">Použitie</label>
-                <select 
+                <Select 
                   value={image.usage}
-                  onChange={(e) => updateImageField(image.id, 'usage', e.target.value)}
-                  className="w-full p-2 border rounded-md text-sm"
+                  onValueChange={(value) => updateImageField(image.id, 'usage', value)}
                 >
-                  <option value="general">Všeobecné</option>
-                  <option value="hero-background">Hero pozadie</option>
-                  <option value="about-section">Sekcia o nás</option>
-                  <option value="contact-section">Kontaktná sekcia</option>
-                  <option value="footer">Pätička</option>
-                  <option value="logo">Logo</option>
-                </select>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Vyberte použitie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Všeobecné</SelectItem>
+                    <SelectItem value="hero-background">Hero pozadie</SelectItem>
+                    <SelectItem value="about-section">Sekcia o nás</SelectItem>
+                    <SelectItem value="contact-section">Kontaktná sekcia</SelectItem>
+                    <SelectItem value="footer">Pätička</SelectItem>
+                    <SelectItem value="logo">Logo</SelectItem>
+                    <SelectItem value="gallery-background">Pozadie galérie</SelectItem>
+                    <SelectItem value="booking-section">Rezervačná sekcia</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
