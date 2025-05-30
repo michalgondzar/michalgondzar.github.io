@@ -35,7 +35,6 @@ const Contact = () => {
                   <div>
                     <h4 className="font-medium">Adresa</h4>
                     <address className="not-italic text-gray-600">
-                      Apartmán Tri víly<br />
                       {contactData.address}<br />
                       {contactData.postalCode}<br />
                       Slovensko
