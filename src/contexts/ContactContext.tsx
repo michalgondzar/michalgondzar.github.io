@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface ContactData {
@@ -10,14 +9,14 @@ interface ContactData {
   checkoutTime: string;
 }
 
-// Upravte tieto predvolené hodnoty podľa vašich skutočných kontaktných údajov
+// Predvolené kontaktné údaje
 const initialContactData: ContactData = {
-  address: "Vaša skutočná adresa",  // Zmeňte na vašu skutočnú adresu
-  postalCode: "Vaše PSČ a mesto",   // Zmeňte na vaše skutočné PSČ
-  phone: "Vaše telefónne číslo",    // Zmeňte na vaše skutočné telefónne číslo
-  email: "apartmantilia@gmail.com", // Zmeňte na váš skutočný email
-  checkinTime: "14:00 - 20:00",     // Upravte podľa potreby
-  checkoutTime: "do 10:00"          // Upravte podľa potreby
+  address: "Apartmán Tília",
+  postalCode: "97221 Bešeňová",
+  phone: "+421 XXX XXX XXX",
+  email: "apartmantilia@gmail.com",
+  checkinTime: "14:00 - 20:00",
+  checkoutTime: "do 10:00"
 };
 
 interface ContactContextType {
