@@ -5,21 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
-
-const initialContactData = {
-  address: "Bešeňová 123",
-  postalCode: "034 83 Bešeňová",
-  phone: "+421 900 123 456",
-  email: "info@trivily.sk",
-  checkinTime: "14:00 - 20:00",
-  checkoutTime: "do 10:00"
-};
+import { useContact } from "@/contexts/ContactContext";
 
 export const ContactEditor = () => {
-  const [contact, setContact] = useState(initialContactData);
+  const { contactData, updateContactData } = useContact();
+  const [contact, setContact] = useState(contactData);
 
   const saveContactChanges = () => {
-    // V reálnej aplikácii by tu bol API volanie na uloženie do databázy
+    updateContactData(contact);
     toast.success("Kontaktné údaje boli úspešne uložené");
   };
 
