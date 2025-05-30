@@ -1,10 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Edit, Trash, Plus, Upload } from "lucide-react";
+import { Edit, Trash, Plus, Upload, Download, FileUp, HardDrive } from "lucide-react";
 import { 
   uploadImageToStorage, 
   saveGalleryToDatabase, 
@@ -13,19 +12,35 @@ import {
   GalleryImage 
 } from "@/utils/supabaseGallery";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
+import { 
+  compressImage, 
+  exportGalleryToFile, 
+  importGalleryFromFile, 
+  getStorageUsage 
+} from "@/utils/localImageUtils";
 
 export const GalleryManager = () => {
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GalleryImage | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [storageUsage, setStorageUsage] = useState({ used: 0, percentage: 0 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
 
   // Load gallery from Supabase on component mount
   useEffect(() => {
     loadGallery();
+    updateStorageUsage();
   }, []);
+
+  const updateStorageUsage = () => {
+    if (!isSupabaseConfigured) {
+      setStorageUsage(getStorageUsage());
+    }
+  };
 
   const loadGallery = async () => {
     try {
@@ -67,9 +82,9 @@ export const GalleryManager = () => {
         imageSrc = await uploadImageToStorage(file);
         storagePath = imageSrc.split('/').pop();
       } else {
-        // Create local URL for the image
-        imageSrc = URL.createObjectURL(file);
-        console.log('Supabase not configured, using local URL:', imageSrc);
+        // Komprimovať obrázok pre lokálne ukladanie
+        imageSrc = await compressImage(file, 0.7);
+        console.log('Obrázok komprimovaný pre lokálne ukladanie');
       }
       
       const newImage: GalleryImage = {
@@ -93,13 +108,14 @@ export const GalleryManager = () => {
         toast.success("Obrázok bol aktualizovaný");
       } else {
         updatedGallery = [...gallery, newImage];
-        toast.success("Obrázok bol pridaný");
+        toast.success("Obrázok bol pridaný a komprimovaný");
       }
       
       setGallery(updatedGallery);
       await saveGallery(updatedGallery);
       setIsImageDialogOpen(false);
       setCurrentImage(null);
+      updateStorageUsage();
       
       // Reset file input
       if (fileInputRef.current) {
@@ -110,6 +126,37 @@ export const GalleryManager = () => {
       toast.error("Chyba pri nahrávaní obrázka");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExportGallery = () => {
+    try {
+      exportGalleryToFile(gallery);
+      toast.success("Galéria bola exportovaná");
+    } catch (error) {
+      console.error('Error exporting gallery:', error);
+      toast.error("Chyba pri exportovaní galérie");
+    }
+  };
+
+  const handleImportGallery = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const importedGallery = await importGalleryFromFile(file);
+      setGallery(importedGallery);
+      await saveGallery(importedGallery);
+      updateStorageUsage();
+      toast.success(`Galéria bola importovaná (${importedGallery.length} obrázkov)`);
+      setIsImportDialogOpen(false);
+      
+      if (importFileInputRef.current) {
+        importFileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error importing gallery:', error);
+      toast.error("Chyba pri importovaní galérie");
     }
   };
   
@@ -154,19 +201,46 @@ export const GalleryManager = () => {
         <div>
           <h2 className="text-xl font-semibold">Spravovať fotogalériu</h2>
           {!isSupabaseConfigured && (
-            <p className="text-sm text-orange-600 mt-1">
-              Supabase nie je nakonfigurovaný - obrázky sa ukladajú lokálne
-            </p>
+            <div className="text-sm text-orange-600 mt-1 space-y-1">
+              <p>Supabase nie je nakonfigurovaný - obrázky sa ukladajú lokálne</p>
+              <div className="flex items-center gap-2">
+                <HardDrive size={14} />
+                <span>Využitie úložiska: {storageUsage.used.toFixed(2)} MB ({storageUsage.percentage.toFixed(1)}%)</span>
+              </div>
+            </div>
           )}
         </div>
-        <Button 
-          onClick={() => openImageDialog()} 
-          className="flex items-center gap-2"
-          disabled={isLoading}
-        >
-          <Plus size={16} />
-          Pridať obrázok
-        </Button>
+        <div className="flex gap-2">
+          {!isSupabaseConfigured && (
+            <>
+              <Button 
+                variant="outline"
+                onClick={handleExportGallery}
+                className="flex items-center gap-2"
+                disabled={gallery.length === 0}
+              >
+                <Download size={16} />
+                Export
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setIsImportDialogOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <FileUp size={16} />
+                Import
+              </Button>
+            </>
+          )}
+          <Button 
+            onClick={() => openImageDialog()} 
+            className="flex items-center gap-2"
+            disabled={isLoading}
+          >
+            <Plus size={16} />
+            Pridať obrázok
+          </Button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -216,6 +290,34 @@ export const GalleryManager = () => {
           </div>
         ))}
       </div>
+
+      {/* Import Dialog */}
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Importovať galériu</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Vyberte JSON súbor s galériou. Existujúce obrázky budú nahradené.
+            </p>
+            <Input 
+              type="file" 
+              accept=".json"
+              ref={importFileInputRef}
+              onChange={handleImportGallery}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsImportDialogOpen(false)}
+            >
+              Zrušiť
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
         <DialogContent className="sm:max-w-md">
