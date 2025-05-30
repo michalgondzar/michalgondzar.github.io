@@ -10,13 +10,14 @@ interface ContactData {
   checkoutTime: string;
 }
 
+// Upravte tieto predvolené hodnoty podľa vašich skutočných kontaktných údajov
 const initialContactData: ContactData = {
-  address: "Bešeňová 123",
-  postalCode: "034 83 Bešeňová",
-  phone: "+421 900 123 456",
-  email: "info@trivily.sk",
-  checkinTime: "14:00 - 20:00",
-  checkoutTime: "do 10:00"
+  address: "Vaša skutočná adresa",  // Zmeňte na vašu skutočnú adresu
+  postalCode: "Vaše PSČ a mesto",   // Zmeňte na vaše skutočné PSČ
+  phone: "Vaše telefónne číslo",    // Zmeňte na vaše skutočné telefónne číslo
+  email: "vas@email.sk",            // Zmeňte na váš skutočný email
+  checkinTime: "14:00 - 20:00",     // Upravte podľa potreby
+  checkoutTime: "do 10:00"          // Upravte podľa potreby
 };
 
 interface ContactContextType {
