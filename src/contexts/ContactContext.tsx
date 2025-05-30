@@ -15,7 +15,7 @@ const initialContactData: ContactData = {
   address: "Vaša skutočná adresa",  // Zmeňte na vašu skutočnú adresu
   postalCode: "Vaše PSČ a mesto",   // Zmeňte na vaše skutočné PSČ
   phone: "Vaše telefónne číslo",    // Zmeňte na vaše skutočné telefónne číslo
-  email: "vas@email.sk",            // Zmeňte na váš skutočný email
+  email: "apartmantilia@gmail.com", // Zmeňte na váš skutočný email
   checkinTime: "14:00 - 20:00",     // Upravte podľa potreby
   checkoutTime: "do 10:00"          // Upravte podľa potreby
 };
