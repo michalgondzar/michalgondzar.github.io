@@ -12,6 +12,9 @@ export const Logo = ({ white = false }: { white?: boolean }) => {
       setLogoImage(newLogo);
     };
 
+    // Initial load to make sure we have the latest image
+    handleImagesUpdate();
+
     // Listen for image updates
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     

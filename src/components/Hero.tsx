@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-scroll";
@@ -13,6 +12,9 @@ const Hero = () => {
       console.log('Hero: Updating hero image to:', newImage);
       setHeroImage(newImage);
     };
+
+    // Initial load to make sure we have the latest image
+    handleImagesUpdate();
 
     // Listen for image updates
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
