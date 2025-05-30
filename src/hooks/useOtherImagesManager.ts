@@ -43,7 +43,11 @@ export const getImageByUsage = (usage: string): string => {
     'contact-section': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
     'footer-background': '',
     'gallery-background': '',
-    'booking-section': ''
+    'booking-section': '',
+    'apartment-exterior': 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6',
+    'apartment-interior': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
+    'aquapark-bešeňová': 'https://images.unsplash.com/photo-1577880216142-8549e9488dad',
+    'location-map': 'https://images.unsplash.com/photo-1524661135-423995f22d0b'
   };
   
   return fallbackImages[usage] || '';
@@ -105,6 +109,38 @@ export const useOtherImagesManager = () => {
       src: "",
       alt: "Pozadie rezervačnej sekcie",
       usage: "booking-section",
+      category: "general"
+    },
+    {
+      id: 8,
+      name: "Exteriér apartmánu",
+      src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
+      alt: "Vonkajší pohľad na apartmán",
+      usage: "apartment-exterior",
+      category: "general"
+    },
+    {
+      id: 9,
+      name: "Interiér apartmánu",
+      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+      alt: "Vnútorný pohľad na apartmán",
+      usage: "apartment-interior",
+      category: "general"
+    },
+    {
+      id: 10,
+      name: "Aquapark Bešeňová",
+      src: "https://images.unsplash.com/photo-1577880216142-8549e9488dad",
+      alt: "Aquapark Bešeňová v blízkosti apartmánu",
+      usage: "aquapark-bešeňová",
+      category: "general"
+    },
+    {
+      id: 11,
+      name: "Mapa lokality",
+      src: "https://images.unsplash.com/photo-1524661135-423995f22d0b",
+      alt: "Mapa s umiestnením apartmánu",
+      usage: "location-map",
       category: "general"
     }
   ]);
