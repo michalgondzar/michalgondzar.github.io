@@ -37,8 +37,8 @@ export const GalleryManager = () => {
     setCurrentImage(null);
   };
 
-  const handleImageUpload = async (file: File) => {
-    return await uploadImage(file, currentImage);
+  const handleImageUpload = async (file: File, description?: string) => {
+    return await uploadImage(file, description, currentImage);
   };
 
   return (

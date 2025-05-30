@@ -52,7 +52,7 @@ export const useGalleryManager = () => {
     }
   };
 
-  const uploadImage = async (file: File, currentImage?: GalleryImage | null) => {
+  const uploadImage = async (file: File, description?: string, currentImage?: GalleryImage | null) => {
     setIsLoading(true);
     try {
       let imageSrc: string;
@@ -71,11 +71,14 @@ export const useGalleryManager = () => {
         console.log('Obrázok komprimovaný pre lokálne ukladanie');
       }
       
+      const fileName = file.name.replace(/\.[^/.]+$/, "");
+      const imageDescription = description || fileName;
+      
       const newImage: GalleryImage = {
         id: Date.now(),
         src: imageSrc,
-        alt: file.name.replace(/\.[^/.]+$/, ""),
-        name: file.name.replace(/\.[^/.]+$/, ""),
+        alt: imageDescription,
+        name: fileName,
         category: "interior",
         storage_path: storagePath
       };
@@ -87,7 +90,7 @@ export const useGalleryManager = () => {
         }
         
         updatedGallery = gallery.map(img => 
-          img.id === currentImage.id ? {...img, src: newImage.src, storage_path: newImage.storage_path} : img
+          img.id === currentImage.id ? {...img, src: newImage.src, alt: newImage.alt, storage_path: newImage.storage_path} : img
         );
         toast.success("Obrázok bol aktualizovaný");
       } else {
