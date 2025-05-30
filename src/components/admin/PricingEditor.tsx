@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,9 +21,24 @@ export const PricingEditor = () => {
     touristTax: "1.50"
   });
 
+  // Load pricing data from localStorage on component mount
+  useEffect(() => {
+    const savedPricing = localStorage.getItem('apartmentPricing');
+    if (savedPricing) {
+      try {
+        const parsedPricing = JSON.parse(savedPricing);
+        setPricing(parsedPricing);
+        console.log('Loaded pricing from localStorage:', parsedPricing);
+      } catch (error) {
+        console.error('Error parsing saved pricing:', error);
+      }
+    }
+  }, []);
+
   const handleSave = () => {
-    // Here you would save to localStorage or backend
+    // Save to localStorage
     localStorage.setItem('apartmentPricing', JSON.stringify(pricing));
+    console.log('Saving pricing to localStorage:', pricing);
     toast.success("Cenník bol úspešne uložený");
   };
 
