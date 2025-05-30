@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -151,55 +152,47 @@ const DEFAULT_IMAGES: OtherImage[] = [
   }
 ];
 
-// Funkcia na získanie obrázka podľa použitia
-export const getImageByUsage = (usage: string): string => {
+// Funkcia na získanie aktuálnych obrázkov s predvolenými ako základom
+const getCurrentImages = (): OtherImage[] => {
   try {
     const savedImages = localStorage.getItem(STORAGE_KEY);
-    let images: OtherImage[] = DEFAULT_IMAGES;
+    let currentImages = [...DEFAULT_IMAGES];
     
     if (savedImages) {
       const parsedImages: OtherImage[] = JSON.parse(savedImages);
-      // Zlúčenie uložených obrázkov s predvolenými
-      images = DEFAULT_IMAGES.map(defaultImg => {
+      console.log('Loading saved images:', parsedImages);
+      
+      // Aktualizuj predvolené obrázky s uloženými verziami
+      currentImages = DEFAULT_IMAGES.map(defaultImg => {
         const savedImg = parsedImages.find(img => img.usage === defaultImg.usage);
         return savedImg || defaultImg;
       });
+      
+      // Pridaj nové obrázky, ktoré nie sú v predvolených
+      const newImages = parsedImages.filter(savedImg => 
+        !DEFAULT_IMAGES.find(defaultImg => defaultImg.usage === savedImg.usage)
+      );
+      currentImages = [...currentImages, ...newImages];
     }
     
-    const image = images.find(img => img.usage === usage);
-    console.log(`Getting image for usage "${usage}":`, image?.src || 'not found');
-    if (image) {
-      return image.src;
-    }
+    console.log('Current images after merge:', currentImages);
+    return currentImages;
   } catch (error) {
-    console.error('Error getting image by usage:', error);
+    console.error('Error getting current images:', error);
+    return [...DEFAULT_IMAGES];
   }
-  
-  // Fallback na pôvodné obrázky
-  const fallbackImages: Record<string, string> = {
-    'hero-background': '/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png',
-    'logo': '',
-    'about-section': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
-    'contact-section': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-    'footer-background': '',
-    'gallery-background': '',
-    'booking-section': '',
-    'apartment-exterior': 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6',
-    'apartment-interior': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
-    'aquapark-bešeňová': 'https://images.unsplash.com/photo-1577880216142-8549e9488dad',
-    'location-map': 'https://images.unsplash.com/photo-1524661135-423995f22d0b',
-    'navbar-background': '',
-    'description-background': '',
-    'marital-stays-background': '',
-    'gallery-hero': '',
-    'contact-hero': ''
-  };
-  
-  return fallbackImages[usage] || '';
+};
+
+// Funkcia na získenie obrázka podľa použitia
+export const getImageByUsage = (usage: string): string => {
+  const images = getCurrentImages();
+  const image = images.find(img => img.usage === usage);
+  console.log(`Getting image for usage "${usage}":`, image?.src || 'not found');
+  return image?.src || '';
 };
 
 export const useOtherImagesManager = () => {
-  const [otherImages, setOtherImages] = useState<OtherImage[]>(DEFAULT_IMAGES);
+  const [otherImages, setOtherImages] = useState<OtherImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -207,34 +200,8 @@ export const useOtherImagesManager = () => {
   }, []);
 
   const loadOtherImages = () => {
-    try {
-      const savedImages = localStorage.getItem(STORAGE_KEY);
-      if (savedImages) {
-        const parsedImages: OtherImage[] = JSON.parse(savedImages);
-        console.log('Loaded saved images from localStorage:', parsedImages);
-        
-        // Zlúčenie uložených obrázkov s predvolenými - predvolené majú prioritu pre štruktúru
-        const mergedImages = DEFAULT_IMAGES.map(defaultImg => {
-          const savedImg = parsedImages.find(img => img.usage === defaultImg.usage);
-          return savedImg || defaultImg;
-        });
-        
-        // Pridanie nových obrázkov, ktoré nie sú v predvolených
-        const newImages = parsedImages.filter(savedImg => 
-          !DEFAULT_IMAGES.find(defaultImg => defaultImg.usage === savedImg.usage)
-        );
-        
-        const finalImages = [...mergedImages, ...newImages];
-        setOtherImages(finalImages);
-        console.log('Final merged images:', finalImages);
-      } else {
-        console.log('No saved images, using defaults');
-        setOtherImages(DEFAULT_IMAGES);
-      }
-    } catch (error) {
-      console.error('Error loading other images:', error);
-      setOtherImages(DEFAULT_IMAGES);
-    }
+    const currentImages = getCurrentImages();
+    setOtherImages(currentImages);
   };
 
   const saveOtherImages = (images: OtherImage[]) => {
@@ -272,30 +239,36 @@ export const useOtherImagesManager = () => {
       const fileName = file.name.replace(/\.[^/.]+$/, "");
       const imageDescription = description || fileName;
       
-      const newImage: OtherImage = {
-        id: Date.now(),
-        name: fileName,
-        src: imageSrc,
-        alt: imageDescription,
-        usage: "general",
-        category: "general",
-        storage_path: storagePath
-      };
-      
       let updatedImages: OtherImage[];
+      
       if (currentImage) {
+        // Aktualizácia existujúceho obrázka
         if (currentImage.storage_path && isSupabaseConfigured) {
           await deleteImageFromStorage(currentImage.storage_path);
         }
         
-        updatedImages = otherImages.map(img => 
+        // Získaj aktuálne obrázky a aktualizuj konkrétny
+        const currentImages = getCurrentImages();
+        updatedImages = currentImages.map(img => 
           img.id === currentImage.id 
-            ? {...img, src: newImage.src, alt: newImage.alt, name: newImage.name, storage_path: newImage.storage_path}
+            ? {...img, src: imageSrc, alt: imageDescription, name: fileName, storage_path: storagePath}
             : img
         );
         toast.success("Obrázok bol aktualizovaný");
       } else {
-        updatedImages = [...otherImages, newImage];
+        // Pridanie nového obrázka
+        const newImage: OtherImage = {
+          id: Date.now(),
+          name: fileName,
+          src: imageSrc,
+          alt: imageDescription,
+          usage: "general",
+          category: "general",
+          storage_path: storagePath
+        };
+        
+        const currentImages = getCurrentImages();
+        updatedImages = [...currentImages, newImage];
         toast.success("Obrázok bol pridaný");
       }
       
@@ -316,12 +289,14 @@ export const useOtherImagesManager = () => {
     if (!confirm("Naozaj chcete odstrániť tento obrázok?")) return;
     
     try {
-      const imageToDelete = otherImages.find(img => img.id === id);
+      const currentImages = getCurrentImages();
+      const imageToDelete = currentImages.find(img => img.id === id);
+      
       if (imageToDelete?.storage_path && isSupabaseConfigured) {
         await deleteImageFromStorage(imageToDelete.storage_path);
       }
       
-      const updatedImages = otherImages.filter(img => img.id !== id);
+      const updatedImages = currentImages.filter(img => img.id !== id);
       setOtherImages(updatedImages);
       saveOtherImages(updatedImages);
       toast.success("Obrázok bol odstránený");
@@ -332,7 +307,8 @@ export const useOtherImagesManager = () => {
   };
 
   const updateImageField = (id: number, field: keyof OtherImage, value: string) => {
-    const updatedImages = otherImages.map(img => 
+    const currentImages = getCurrentImages();
+    const updatedImages = currentImages.map(img => 
       img.id === id ? {...img, [field]: value} : img
     );
     setOtherImages(updatedImages);
