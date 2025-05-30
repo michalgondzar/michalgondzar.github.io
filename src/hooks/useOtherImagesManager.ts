@@ -151,7 +151,7 @@ const DEFAULT_IMAGES: OtherImage[] = [
   }
 ];
 
-// Funkcia na získenie obrázka podľa použitia
+// Funkcia na získanie obrázka podľa použitia
 export const getImageByUsage = (usage: string): string => {
   try {
     const savedImages = localStorage.getItem(STORAGE_KEY);
@@ -167,6 +167,7 @@ export const getImageByUsage = (usage: string): string => {
     }
     
     const image = images.find(img => img.usage === usage);
+    console.log(`Getting image for usage "${usage}":`, image?.src || 'not found');
     if (image) {
       return image.src;
     }
@@ -242,6 +243,7 @@ export const useOtherImagesManager = () => {
       console.log('Saved other images to localStorage:', images);
       
       // Trigger custom event pre aktualizáciu komponentov
+      console.log('Triggering otherImagesUpdated event');
       window.dispatchEvent(new CustomEvent('otherImagesUpdated', { detail: images }));
     } catch (error) {
       console.error('Error saving other images:', error);

@@ -7,8 +7,13 @@ export const Logo = ({ white = false }: { white?: boolean }) => {
 
   useEffect(() => {
     const handleImagesUpdate = () => {
-      setLogoImage(getImageByUsage('logo'));
+      const newLogo = getImageByUsage('logo');
+      console.log('Updating logo image to:', newLogo);
+      setLogoImage(newLogo);
     };
+
+    // Initial load
+    handleImagesUpdate();
 
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     return () => window.removeEventListener('otherImagesUpdated', handleImagesUpdate);

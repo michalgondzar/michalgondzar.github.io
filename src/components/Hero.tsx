@@ -9,8 +9,13 @@ const Hero = () => {
 
   useEffect(() => {
     const handleImagesUpdate = () => {
-      setHeroImage(getImageByUsage('hero-background'));
+      const newImage = getImageByUsage('hero-background');
+      console.log('Updating hero image to:', newImage);
+      setHeroImage(newImage);
     };
+
+    // Initial load
+    handleImagesUpdate();
 
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     return () => window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
