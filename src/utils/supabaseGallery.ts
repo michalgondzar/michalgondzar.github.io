@@ -1,3 +1,4 @@
+
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 
 export interface GalleryImage {
@@ -75,18 +76,14 @@ export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
     .from('gallery')
     .select('images')
     .eq('id', 1)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      // No data found, return empty array
-      return [];
-    }
     console.error('Error loading gallery:', error);
     throw error;
   }
 
-  return data?.images || [];
+  return (data?.images as GalleryImage[]) || [];
 };
 
 // Delete image from storage
