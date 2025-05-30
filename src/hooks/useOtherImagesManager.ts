@@ -19,16 +19,156 @@ export interface OtherImage {
 
 const STORAGE_KEY = 'apartmentOtherImages';
 
-// Funkcia na získanie obrázka podľa použitia
+// Predvolené obrázky
+const DEFAULT_IMAGES: OtherImage[] = [
+  {
+    id: 1,
+    name: "Hero pozadie",
+    src: "/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png",
+    alt: "Pozadie hlavnej sekcie",
+    usage: "hero-background",
+    category: "general"
+  },
+  {
+    id: 2,
+    name: "Logo apartmánu", 
+    src: "",
+    alt: "Logo Apartmán Tília",
+    usage: "logo",
+    category: "general"
+  },
+  {
+    id: 3,
+    name: "O nás obrázok", 
+    src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+    alt: "Obrázok v sekcii o nás",
+    usage: "about-section",
+    category: "general"
+  },
+  {
+    id: 4,
+    name: "Kontakt pozadie", 
+    src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+    alt: "Pozadie kontaktnej sekcie",
+    usage: "contact-section",
+    category: "general"
+  },
+  {
+    id: 5,
+    name: "Footer pozadie", 
+    src: "",
+    alt: "Pozadie pätičky",
+    usage: "footer-background",
+    category: "general"
+  },
+  {
+    id: 6,
+    name: "Galéria pozadie", 
+    src: "",
+    alt: "Pozadie galérie",
+    usage: "gallery-background",
+    category: "general"
+  },
+  {
+    id: 7,
+    name: "Rezervácia pozadie", 
+    src: "",
+    alt: "Pozadie rezervačnej sekcie",
+    usage: "booking-section",
+    category: "general"
+  },
+  {
+    id: 8,
+    name: "Exteriér apartmánu",
+    src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
+    alt: "Vonkajší pohľad na apartmán",
+    usage: "apartment-exterior",
+    category: "general"
+  },
+  {
+    id: 9,
+    name: "Interiér apartmánu",
+    src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+    alt: "Vnútorný pohľad na apartmán",
+    usage: "apartment-interior",
+    category: "general"
+  },
+  {
+    id: 10,
+    name: "Aquapark Bešeňová",
+    src: "https://images.unsplash.com/photo-1577880216142-8549e9488dad",
+    alt: "Aquapark Bešeňová v blízkosti apartmánu",
+    usage: "aquapark-bešeňová",
+    category: "general"
+  },
+  {
+    id: 11,
+    name: "Mapa lokality",
+    src: "https://images.unsplash.com/photo-1524661135-423995f22d0b",
+    alt: "Mapa s umiestnením apartmánu",
+    usage: "location-map",
+    category: "general"
+  },
+  {
+    id: 12,
+    name: "Navbar pozadie",
+    src: "",
+    alt: "Pozadie navigácie",
+    usage: "navbar-background",
+    category: "general"
+  },
+  {
+    id: 13,
+    name: "Popis pozadie",
+    src: "",
+    alt: "Pozadie sekcie popisu",
+    usage: "description-background",
+    category: "general"
+  },
+  {
+    id: 14,
+    name: "Manželské pobyty pozadie",
+    src: "",
+    alt: "Pozadie sekcie manželských pobytov",
+    usage: "marital-stays-background",
+    category: "general"
+  },
+  {
+    id: 15,
+    name: "Galéria hero",
+    src: "",
+    alt: "Hero obrázok galérie",
+    usage: "gallery-hero",
+    category: "general"
+  },
+  {
+    id: 16,
+    name: "Kontakt hero",
+    src: "",
+    alt: "Hero obrázok kontaktu",
+    usage: "contact-hero",
+    category: "general"
+  }
+];
+
+// Funkcia na získenie obrázka podľa použitia
 export const getImageByUsage = (usage: string): string => {
   try {
     const savedImages = localStorage.getItem(STORAGE_KEY);
+    let images: OtherImage[] = DEFAULT_IMAGES;
+    
     if (savedImages) {
-      const images: OtherImage[] = JSON.parse(savedImages);
-      const image = images.find(img => img.usage === usage);
-      if (image) {
-        return image.src;
-      }
+      const parsedImages: OtherImage[] = JSON.parse(savedImages);
+      // Zlúčenie uložených obrázkov s predvolenými
+      images = DEFAULT_IMAGES.map(defaultImg => {
+        const savedImg = parsedImages.find(img => img.usage === defaultImg.usage);
+        return savedImg || defaultImg;
+      });
+    }
+    
+    const image = images.find(img => img.usage === usage);
+    if (image) {
+      return image.src;
     }
   } catch (error) {
     console.error('Error getting image by usage:', error);
@@ -58,137 +198,7 @@ export const getImageByUsage = (usage: string): string => {
 };
 
 export const useOtherImagesManager = () => {
-  const [otherImages, setOtherImages] = useState<OtherImage[]>([
-    {
-      id: 1,
-      name: "Hero pozadie",
-      src: "/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png",
-      alt: "Pozadie hlavnej sekcie",
-      usage: "hero-background",
-      category: "general"
-    },
-    {
-      id: 2,
-      name: "Logo apartmánu", 
-      src: "",
-      alt: "Logo Apartmán Tília",
-      usage: "logo",
-      category: "general"
-    },
-    {
-      id: 3,
-      name: "O nás obrázok", 
-      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      alt: "Obrázok v sekcii o nás",
-      usage: "about-section",
-      category: "general"
-    },
-    {
-      id: 4,
-      name: "Kontakt pozadie", 
-      src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-      alt: "Pozadie kontaktnej sekcie",
-      usage: "contact-section",
-      category: "general"
-    },
-    {
-      id: 5,
-      name: "Footer pozadie", 
-      src: "",
-      alt: "Pozadie pätičky",
-      usage: "footer-background",
-      category: "general"
-    },
-    {
-      id: 6,
-      name: "Galéria pozadie", 
-      src: "",
-      alt: "Pozadie galérie",
-      usage: "gallery-background",
-      category: "general"
-    },
-    {
-      id: 7,
-      name: "Rezervácia pozadie", 
-      src: "",
-      alt: "Pozadie rezervačnej sekcie",
-      usage: "booking-section",
-      category: "general"
-    },
-    {
-      id: 8,
-      name: "Exteriér apartmánu",
-      src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
-      alt: "Vonkajší pohľad na apartmán",
-      usage: "apartment-exterior",
-      category: "general"
-    },
-    {
-      id: 9,
-      name: "Interiér apartmánu",
-      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      alt: "Vnútorný pohľad na apartmán",
-      usage: "apartment-interior",
-      category: "general"
-    },
-    {
-      id: 10,
-      name: "Aquapark Bešeňová",
-      src: "https://images.unsplash.com/photo-1577880216142-8549e9488dad",
-      alt: "Aquapark Bešeňová v blízkosti apartmánu",
-      usage: "aquapark-bešeňová",
-      category: "general"
-    },
-    {
-      id: 11,
-      name: "Mapa lokality",
-      src: "https://images.unsplash.com/photo-1524661135-423995f22d0b",
-      alt: "Mapa s umiestnením apartmánu",
-      usage: "location-map",
-      category: "general"
-    },
-    {
-      id: 12,
-      name: "Navbar pozadie",
-      src: "",
-      alt: "Pozadie navigácie",
-      usage: "navbar-background",
-      category: "general"
-    },
-    {
-      id: 13,
-      name: "Popis pozadie",
-      src: "",
-      alt: "Pozadie sekcie popisu",
-      usage: "description-background",
-      category: "general"
-    },
-    {
-      id: 14,
-      name: "Manželské pobyty pozadie",
-      src: "",
-      alt: "Pozadie sekcie manželských pobytov",
-      usage: "marital-stays-background",
-      category: "general"
-    },
-    {
-      id: 15,
-      name: "Galéria hero",
-      src: "",
-      alt: "Hero obrázok galérie",
-      usage: "gallery-hero",
-      category: "general"
-    },
-    {
-      id: 16,
-      name: "Kontakt hero",
-      src: "",
-      alt: "Hero obrázok kontaktu",
-      usage: "contact-hero",
-      category: "general"
-    }
-  ]);
-  
+  const [otherImages, setOtherImages] = useState<OtherImage[]>(DEFAULT_IMAGES);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -199,12 +209,30 @@ export const useOtherImagesManager = () => {
     try {
       const savedImages = localStorage.getItem(STORAGE_KEY);
       if (savedImages) {
-        const parsedImages = JSON.parse(savedImages);
-        setOtherImages(parsedImages);
-        console.log('Loaded other images from localStorage:', parsedImages);
+        const parsedImages: OtherImage[] = JSON.parse(savedImages);
+        console.log('Loaded saved images from localStorage:', parsedImages);
+        
+        // Zlúčenie uložených obrázkov s predvolenými - predvolené majú prioritu pre štruktúru
+        const mergedImages = DEFAULT_IMAGES.map(defaultImg => {
+          const savedImg = parsedImages.find(img => img.usage === defaultImg.usage);
+          return savedImg || defaultImg;
+        });
+        
+        // Pridanie nových obrázkov, ktoré nie sú v predvolených
+        const newImages = parsedImages.filter(savedImg => 
+          !DEFAULT_IMAGES.find(defaultImg => defaultImg.usage === savedImg.usage)
+        );
+        
+        const finalImages = [...mergedImages, ...newImages];
+        setOtherImages(finalImages);
+        console.log('Final merged images:', finalImages);
+      } else {
+        console.log('No saved images, using defaults');
+        setOtherImages(DEFAULT_IMAGES);
       }
     } catch (error) {
       console.error('Error loading other images:', error);
+      setOtherImages(DEFAULT_IMAGES);
     }
   };
 
