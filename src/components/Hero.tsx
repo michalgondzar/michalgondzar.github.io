@@ -7,27 +7,30 @@ import { getImageByUsage } from "@/hooks/useOtherImagesManager";
 const Hero = () => {
   const [heroImage, setHeroImage] = useState('');
 
-  useEffect(() => {
-    const updateHeroImage = () => {
-      const newImage = getImageByUsage('hero-background');
-      console.log('Hero: Updating hero image to:', newImage);
-      setHeroImage(newImage);
-    };
+  const updateHeroImage = () => {
+    const newImage = getImageByUsage('hero-background');
+    console.log('Hero: Updating hero image to:', newImage);
+    setHeroImage(newImage);
+  };
 
+  useEffect(() => {
     // Initial load
     updateHeroImage();
 
-    // Listen for image updates
+    // Listen for all possible image update events
     const handleImagesUpdate = () => {
+      console.log('Hero: Received image update event');
       updateHeroImage();
     };
 
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     window.addEventListener('storage', handleImagesUpdate);
+    window.addEventListener('forceImageRefresh', handleImagesUpdate);
     
     return () => {
       window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
       window.removeEventListener('storage', handleImagesUpdate);
+      window.removeEventListener('forceImageRefresh', handleImagesUpdate);
     };
   }, []);
 

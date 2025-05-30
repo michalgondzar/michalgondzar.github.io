@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -182,7 +183,7 @@ const getCurrentImages = (): OtherImage[] => {
   }
 };
 
-// Funkcia na získanie obrázka podľa použitia
+// Funkcia na získenie obrázka podľa použitia
 export const getImageByUsage = (usage: string): string => {
   const images = getCurrentImages();
   const image = images.find(img => img.usage === usage);
@@ -213,10 +214,18 @@ export const useOtherImagesManager = () => {
       const event = new CustomEvent('otherImagesUpdated', { detail: images });
       window.dispatchEvent(event);
       
-      // Force refresh pre všetky komponenty ktoré používajú getImageByUsage
+      // Pridáme krátky timeout a potom spustíme storage event
       setTimeout(() => {
+        console.log('Triggering storage event for component refresh');
         window.dispatchEvent(new Event('storage'));
+      }, 50);
+      
+      // Pridáme ešte jeden event špecificky pre force refresh
+      setTimeout(() => {
+        console.log('Triggering force refresh event');
+        window.dispatchEvent(new CustomEvent('forceImageRefresh'));
       }, 100);
+      
     } catch (error) {
       console.error('Error saving other images:', error);
       toast.error("Chyba pri ukladaní obrázkov");
@@ -259,6 +268,7 @@ export const useOtherImagesManager = () => {
             ? {...img, src: imageSrc, alt: imageDescription, name: fileName, storage_path: storagePath}
             : img
         );
+        console.log('Updated existing image, new images array:', updatedImages);
         toast.success("Obrázok bol aktualizovaný");
       } else {
         // Pridanie nového obrázka
@@ -316,6 +326,8 @@ export const useOtherImagesManager = () => {
     const updatedImages = currentImages.map(img => 
       img.id === id ? {...img, [field]: value} : img
     );
+    console.log('Updating image field:', field, 'for image:', id, 'new value:', value);
+    console.log('Updated images array:', updatedImages);
     setOtherImages(updatedImages);
     saveOtherImages(updatedImages);
   };

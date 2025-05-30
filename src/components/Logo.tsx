@@ -5,27 +5,30 @@ import { getImageByUsage } from "@/hooks/useOtherImagesManager";
 export const Logo = ({ white = false }: { white?: boolean }) => {
   const [logoImage, setLogoImage] = useState('');
 
-  useEffect(() => {
-    const updateLogoImage = () => {
-      const newLogo = getImageByUsage('logo');
-      console.log('Logo: Updating logo image to:', newLogo);
-      setLogoImage(newLogo);
-    };
+  const updateLogoImage = () => {
+    const newLogo = getImageByUsage('logo');
+    console.log('Logo: Updating logo image to:', newLogo);
+    setLogoImage(newLogo);
+  };
 
+  useEffect(() => {
     // Initial load
     updateLogoImage();
 
-    // Listen for image updates
+    // Listen for all possible image update events
     const handleImagesUpdate = () => {
+      console.log('Logo: Received image update event');
       updateLogoImage();
     };
 
     window.addEventListener('otherImagesUpdated', handleImagesUpdate);
     window.addEventListener('storage', handleImagesUpdate);
+    window.addEventListener('forceImageRefresh', handleImagesUpdate);
     
     return () => {
       window.removeEventListener('otherImagesUpdated', handleImagesUpdate);
       window.removeEventListener('storage', handleImagesUpdate);
+      window.removeEventListener('forceImageRefresh', handleImagesUpdate);
     };
   }, []);
 
