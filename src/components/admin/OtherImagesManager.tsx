@@ -4,41 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash, FileImage } from "lucide-react";
-import { toast } from "sonner";
 import { ImageUploadDialog } from "./ImageUploadDialog";
-
-interface OtherImage {
-  id: number;
-  name: string;
-  src: string;
-  alt: string;
-  usage: string; // Where this image is used (e.g., "hero-background", "about-section", etc.)
-  category: string; // Add category to match GalleryImage interface
-}
+import { useOtherImagesManager, OtherImage } from "@/hooks/useOtherImagesManager";
 
 export const OtherImagesManager = () => {
-  const [otherImages, setOtherImages] = useState<OtherImage[]>([
-    {
-      id: 1,
-      name: "Hero pozadie",
-      src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-      alt: "Pozadie hlavnej sekcie",
-      usage: "hero-background",
-      category: "general"
-    },
-    {
-      id: 2,
-      name: "O nás obrázok", 
-      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      alt: "Obrázok v sekcii o nás",
-      usage: "about-section",
-      category: "general"
-    }
-  ]);
-  
   const [currentImage, setCurrentImage] = useState<OtherImage | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    otherImages,
+    isLoading,
+    uploadImage,
+    deleteImage,
+    updateImageField
+  } = useOtherImagesManager();
 
   const openImageDialog = (image: OtherImage | null = null) => {
     setCurrentImage(image);
@@ -51,65 +30,7 @@ export const OtherImagesManager = () => {
   };
 
   const handleImageUpload = async (file: File, description?: string) => {
-    setIsLoading(true);
-    try {
-      // Create a data URL for the uploaded file
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageSrc = e.target?.result as string;
-        const fileName = file.name.replace(/\.[^/.]+$/, "");
-        const imageDescription = description || fileName;
-        
-        const newImage: OtherImage = {
-          id: Date.now(),
-          name: fileName,
-          src: imageSrc,
-          alt: imageDescription,
-          usage: "general",
-          category: "general"
-        };
-        
-        if (currentImage) {
-          setOtherImages(images => 
-            images.map(img => 
-              img.id === currentImage.id 
-                ? {...img, src: newImage.src, alt: newImage.alt, name: newImage.name}
-                : img
-            )
-          );
-          toast.success("Obrázok bol aktualizovaný");
-        } else {
-          setOtherImages(images => [...images, newImage]);
-          toast.success("Obrázok bol pridaný");
-        }
-        
-        closeImageDialog();
-      };
-      reader.readAsDataURL(file);
-      
-      return true;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error("Chyba pri nahrávaní obrázka");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deleteImage = (id: number) => {
-    if (!confirm("Naozaj chcete odstrániť tento obrázok?")) return;
-    
-    setOtherImages(images => images.filter(img => img.id !== id));
-    toast.success("Obrázok bol odstránený");
-  };
-
-  const updateImageField = (id: number, field: keyof OtherImage, value: string) => {
-    setOtherImages(images => 
-      images.map(img => 
-        img.id === id ? {...img, [field]: value} : img
-      )
-    );
+    return await uploadImage(file, description, currentImage);
   };
 
   return (
