@@ -48,7 +48,7 @@ export const saveGalleryToDatabase = async (gallery: GalleryImage[]) => {
     .from('gallery')
     .upsert({ 
       id: 1, // Single gallery record
-      images: gallery 
+      images: gallery as any // Cast to any to match Json type
     });
 
   if (error) {
@@ -83,7 +83,7 @@ export const loadGalleryFromDatabase = async (): Promise<GalleryImage[]> => {
     throw error;
   }
 
-  return (data?.images as GalleryImage[]) || [];
+  return (data?.images as unknown as GalleryImage[]) || [];
 };
 
 // Delete image from storage
