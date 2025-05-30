@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash, FileImage } from "lucide-react";
+import { Plus, Edit, Trash, FileImage, Replace } from "lucide-react";
 import { ImageUploadDialog } from "./ImageUploadDialog";
 import { useOtherImagesManager, OtherImage } from "@/hooks/useOtherImagesManager";
 
@@ -65,13 +65,15 @@ export const OtherImagesManager = () => {
                   variant="secondary" 
                   size="sm" 
                   onClick={() => openImageDialog(image)}
+                  title="Nahradiť obrázok"
                 >
-                  <Edit size={16} />
+                  <Replace size={16} />
                 </Button>
                 <Button 
                   variant="destructive" 
                   size="sm"
                   onClick={() => deleteImage(image.id)}
+                  title="Odstrániť obrázok"
                 >
                   <Trash size={16} />
                 </Button>
@@ -111,7 +113,7 @@ export const OtherImagesManager = () => {
                     <SelectItem value="hero-background">Hero pozadie</SelectItem>
                     <SelectItem value="about-section">Sekcia o nás</SelectItem>
                     <SelectItem value="contact-section">Kontaktná sekcia</SelectItem>
-                    <SelectItem value="footer">Pätička</SelectItem>
+                    <SelectItem value="footer-background">Pozadie pätičky</SelectItem>
                     <SelectItem value="logo">Logo</SelectItem>
                     <SelectItem value="gallery-background">Pozadie galérie</SelectItem>
                     <SelectItem value="booking-section">Rezervačná sekcia</SelectItem>
