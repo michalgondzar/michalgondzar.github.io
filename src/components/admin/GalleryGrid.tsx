@@ -21,6 +21,21 @@ export const GalleryGrid = ({
   onUpdateImageCategory,
   onUpdateImageName
 }: GalleryGridProps) => {
+  const handleAltChange = (imageId: number, newAlt: string) => {
+    console.log('Updating alt text for image:', imageId, 'new alt:', newAlt);
+    onUpdateImageAlt(imageId, newAlt);
+  };
+
+  const handleNameChange = (imageId: number, newName: string) => {
+    console.log('Updating name for image:', imageId, 'new name:', newName);
+    onUpdateImageName(imageId, newName);
+  };
+
+  const handleCategoryChange = (imageId: number, newCategory: string) => {
+    console.log('Updating category for image:', imageId, 'new category:', newCategory);
+    onUpdateImageCategory(imageId, newCategory);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {gallery.map((image) => (
@@ -54,8 +69,8 @@ export const GalleryGrid = ({
             <div>
               <label className="text-xs text-gray-600 block mb-1">Názov súboru</label>
               <Input 
-                value={image.name || image.alt}
-                onChange={(e) => onUpdateImageName(image.id, e.target.value)}
+                value={image.name || image.alt || ""}
+                onChange={(e) => handleNameChange(image.id, e.target.value)}
                 placeholder="Názov súboru"
                 className="text-sm"
               />
@@ -64,7 +79,7 @@ export const GalleryGrid = ({
               <label className="text-xs text-gray-600 block mb-1">Popis obrázka</label>
               <Input 
                 value={image.alt || ""}
-                onChange={(e) => onUpdateImageAlt(image.id, e.target.value)}
+                onChange={(e) => handleAltChange(image.id, e.target.value)}
                 placeholder="Popis obrázka"
                 className="text-sm"
               />
@@ -73,7 +88,7 @@ export const GalleryGrid = ({
               <label className="text-xs text-gray-600 block mb-1">Kategória</label>
               <select 
                 value={image.category}
-                onChange={(e) => onUpdateImageCategory(image.id, e.target.value)}
+                onChange={(e) => handleCategoryChange(image.id, e.target.value)}
                 className="w-full p-2 border rounded-md text-sm"
               >
                 <option value="interior">Interiér</option>
