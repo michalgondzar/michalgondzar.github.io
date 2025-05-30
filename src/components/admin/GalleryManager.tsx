@@ -5,103 +5,130 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Edit, Trash, Plus } from "lucide-react";
-
-// Typ pre obrázok
-interface ImageItem {
-  id: number;
-  src: string;
-  alt: string;
-  category?: string;
-}
+import { 
+  uploadImageToStorage, 
+  saveGalleryToDatabase, 
+  loadGalleryFromDatabase, 
+  deleteImageFromStorage,
+  GalleryImage 
+} from "@/utils/supabaseGallery";
 
 export const GalleryManager = () => {
-  const [gallery, setGallery] = useState<ImageItem[]>([
-    { id: 1, src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267", alt: "Apartmán obývačka", category: "interior" },
-    { id: 2, src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a", alt: "Apartmán kuchyňa", category: "interior" },
-    { id: 3, src: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd", alt: "Apartmán spálňa", category: "interior" },
-    { id: 4, src: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688", alt: "Apartmán kúpeľňa", category: "interior" },
-    { id: 5, src: "https://images.unsplash.com/photo-1610123598195-a6e2652d22fc", alt: "Apartmán terasa", category: "exterior" }
-  ]);
-  const [currentImage, setCurrentImage] = useState<ImageItem | null>(null);
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [currentImage, setCurrentImage] = useState<GalleryImage | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Referencia pre upload súborov
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Načítanie galérie z localStorage pri spustení
+  // Load gallery from Supabase on component mount
   useEffect(() => {
-    const savedGallery = localStorage.getItem('apartmentGallery');
-    if (savedGallery) {
-      try {
-        const parsedGallery = JSON.parse(savedGallery);
-        setGallery(parsedGallery);
-        console.log('Loaded gallery data for admin:', parsedGallery);
-      } catch (error) {
-        console.error('Error parsing saved gallery for admin:', error);
-      }
-    }
+    loadGallery();
   }, []);
 
-  // Uloženie galérie do localStorage
-  const saveGalleryToStorage = (updatedGallery: ImageItem[]) => {
-    localStorage.setItem('apartmentGallery', JSON.stringify(updatedGallery));
-    console.log('Saved gallery data to localStorage:', updatedGallery);
+  const loadGallery = async () => {
+    try {
+      const galleryData = await loadGalleryFromDatabase();
+      setGallery(galleryData);
+      console.log('Loaded gallery from Supabase:', galleryData);
+    } catch (error) {
+      console.error('Error loading gallery:', error);
+      toast.error("Chyba pri načítavaní galérie");
+    }
   };
 
-  const openImageDialog = (image: ImageItem | null = null) => {
+  const saveGallery = async (updatedGallery: GalleryImage[]) => {
+    try {
+      await saveGalleryToDatabase(updatedGallery);
+      console.log('Saved gallery to Supabase:', updatedGallery);
+    } catch (error) {
+      console.error('Error saving gallery:', error);
+      toast.error("Chyba pri ukladaní galérie");
+    }
+  };
+
+  const openImageDialog = (image: GalleryImage | null = null) => {
     setCurrentImage(image);
     setIsImageDialogOpen(true);
   };
   
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // V reálnej aplikácii by sa tu nahrával súbor na server
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImage = {
-          id: gallery.length + 1,
-          src: event.target?.result as string,
-          alt: file.name.replace(/\.[^/.]+$/, ""), // Použitie názvu súboru ako alt
-          category: "interior" // Predvolená kategória
-        };
-        
-        let updatedGallery;
-        if (currentImage) {
-          // Úprava existujúceho obrázka
-          updatedGallery = gallery.map(img => 
-            img.id === currentImage.id ? {...img, src: newImage.src} : img
-          );
-          toast.success("Obrázok bol aktualizovaný");
-        } else {
-          // Pridanie nového obrázka
-          updatedGallery = [...gallery, newImage];
-          toast.success("Obrázok bol pridaný");
+    if (!file) return;
+
+    setIsLoading(true);
+    try {
+      // Upload image to Supabase storage
+      const publicUrl = await uploadImageToStorage(file);
+      
+      const newImage: GalleryImage = {
+        id: Date.now(),
+        src: publicUrl,
+        alt: file.name.replace(/\.[^/.]+$/, ""),
+        category: "interior",
+        storage_path: publicUrl.split('/').pop()
+      };
+      
+      let updatedGallery: GalleryImage[];
+      if (currentImage) {
+        // Delete old image from storage if updating
+        if (currentImage.storage_path) {
+          await deleteImageFromStorage(currentImage.storage_path);
         }
         
-        setGallery(updatedGallery);
-        saveGalleryToStorage(updatedGallery);
-        setIsImageDialogOpen(false);
-      };
-      reader.readAsDataURL(file);
+        updatedGallery = gallery.map(img => 
+          img.id === currentImage.id ? {...img, src: newImage.src, storage_path: newImage.storage_path} : img
+        );
+        toast.success("Obrázok bol aktualizovaný");
+      } else {
+        updatedGallery = [...gallery, newImage];
+        toast.success("Obrázok bol pridaný");
+      }
+      
+      setGallery(updatedGallery);
+      await saveGallery(updatedGallery);
+      setIsImageDialogOpen(false);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Chyba pri nahrávaní obrázka");
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const deleteImage = (id: number) => {
-    if (confirm("Naozaj chcete odstrániť tento obrázok?")) {
+  const deleteImage = async (id: number) => {
+    if (!confirm("Naozaj chcete odstrániť tento obrázok?")) return;
+    
+    try {
+      const imageToDelete = gallery.find(img => img.id === id);
+      if (imageToDelete?.storage_path) {
+        await deleteImageFromStorage(imageToDelete.storage_path);
+      }
+      
       const updatedGallery = gallery.filter(img => img.id !== id);
       setGallery(updatedGallery);
-      saveGalleryToStorage(updatedGallery);
+      await saveGallery(updatedGallery);
       toast.success("Obrázok bol odstránený");
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error("Chyba pri odstraňovaní obrázka");
     }
   };
 
-  const updateImageAlt = (id: number, newAlt: string) => {
+  const updateImageAlt = async (id: number, newAlt: string) => {
     const updatedGallery = gallery.map(img => 
       img.id === id ? {...img, alt: newAlt} : img
     );
     setGallery(updatedGallery);
-    saveGalleryToStorage(updatedGallery);
+    await saveGallery(updatedGallery);
+  };
+
+  const updateImageCategory = async (id: number, newCategory: string) => {
+    const updatedGallery = gallery.map(img => 
+      img.id === id ? {...img, category: newCategory} : img
+    );
+    setGallery(updatedGallery);
+    await saveGallery(updatedGallery);
   };
 
   return (
@@ -111,6 +138,7 @@ export const GalleryManager = () => {
         <Button 
           onClick={() => openImageDialog()} 
           className="flex items-center gap-2"
+          disabled={isLoading}
         >
           <Plus size={16} />
           Pridať obrázok
@@ -145,19 +173,26 @@ export const GalleryManager = () => {
               </div>
             </div>
             
-            <div className="p-3 bg-white">
+            <div className="p-3 bg-white space-y-2">
               <Input 
                 value={image.alt}
                 onChange={(e) => updateImageAlt(image.id, e.target.value)}
                 placeholder="Popis obrázka"
-                className="mt-2"
               />
+              <select 
+                value={image.category}
+                onChange={(e) => updateImageCategory(image.id, e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="interior">Interiér</option>
+                <option value="exterior">Exteriér</option>
+                <option value="surroundings">Okolie</option>
+              </select>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Dialóg pre nahratie/úpravu obrázka */}
       <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -176,23 +211,32 @@ export const GalleryManager = () => {
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <FormLabel>Vyberte obrázok</FormLabel>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Vyberte obrázok
+              </label>
               <Input 
                 type="file" 
                 accept="image/*"
                 ref={fileInputRef}
                 onChange={handleImageUpload}
+                disabled={isLoading}
               />
             </div>
             <DialogFooter className="sm:justify-end">
-              <Button type="button" variant="outline" onClick={() => setIsImageDialogOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsImageDialogOpen(false)}
+                disabled={isLoading}
+              >
                 Zrušiť
               </Button>
               <Button 
                 type="button" 
                 onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
               >
-                {currentImage ? "Nahrať nový obrázok" : "Nahrať"}
+                {isLoading ? "Nahráva sa..." : (currentImage ? "Nahrať nový obrázok" : "Nahrať")}
               </Button>
             </DialogFooter>
           </div>
@@ -201,11 +245,3 @@ export const GalleryManager = () => {
     </div>
   );
 };
-
-interface FormLabelProps {
-  children: React.ReactNode;
-}
-
-const FormLabel: React.FC<FormLabelProps> = ({ children }) => (
-  <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>
-);

@@ -3,16 +3,9 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Image } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { loadGalleryFromDatabase, GalleryImage } from '@/utils/supabaseGallery';
 
-// Typ pre obrázok
-interface ImageItem {
-  id: number;
-  src: string;
-  alt: string;
-  category?: string;
-}
-
-const defaultGalleryImages = [
+const defaultGalleryImages: GalleryImage[] = [
   {
     id: 1,
     category: "interior",
@@ -65,20 +58,45 @@ const defaultGalleryImages = [
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [galleryImages, setGalleryImages] = useState<ImageItem[]>(defaultGalleryImages);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(defaultGalleryImages);
 
-  // Načítanie galérie z localStorage
+  // Load gallery from Supabase
   useEffect(() => {
-    const savedGallery = localStorage.getItem('apartmentGallery');
-    if (savedGallery) {
+    const loadGallery = async () => {
       try {
-        const parsedGallery = JSON.parse(savedGallery);
-        setGalleryImages(parsedGallery);
-        console.log('Loaded gallery data for display:', parsedGallery);
+        const supabaseGallery = await loadGalleryFromDatabase();
+        if (supabaseGallery.length > 0) {
+          setGalleryImages(supabaseGallery);
+          console.log('Loaded gallery from Supabase for display:', supabaseGallery);
+        } else {
+          // Fallback to localStorage if no Supabase data
+          const savedGallery = localStorage.getItem('apartmentGallery');
+          if (savedGallery) {
+            try {
+              const parsedGallery = JSON.parse(savedGallery);
+              setGalleryImages(parsedGallery);
+              console.log('Loaded gallery from localStorage for display:', parsedGallery);
+            } catch (error) {
+              console.error('Error parsing saved gallery for display:', error);
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error parsing saved gallery for display:', error);
+        console.error('Error loading gallery from Supabase:', error);
+        // Fallback to localStorage on error
+        const savedGallery = localStorage.getItem('apartmentGallery');
+        if (savedGallery) {
+          try {
+            const parsedGallery = JSON.parse(savedGallery);
+            setGalleryImages(parsedGallery);
+          } catch (parseError) {
+            console.error('Error parsing localStorage gallery:', parseError);
+          }
+        }
       }
-    }
+    };
+
+    loadGallery();
   }, []);
 
   return (
