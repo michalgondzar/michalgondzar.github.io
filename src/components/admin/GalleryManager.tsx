@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Edit, Trash, Plus } from "lucide-react";
+import { Edit, Trash, Plus, Upload } from "lucide-react";
 import { 
   uploadImageToStorage, 
   saveGalleryToDatabase, 
@@ -12,6 +12,7 @@ import {
   deleteImageFromStorage,
   GalleryImage 
 } from "@/utils/supabaseGallery";
+import { isSupabaseConfigured } from "@/integrations/supabase/client";
 
 export const GalleryManager = () => {
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
@@ -30,7 +31,7 @@ export const GalleryManager = () => {
     try {
       const galleryData = await loadGalleryFromDatabase();
       setGallery(galleryData);
-      console.log('Loaded gallery from Supabase:', galleryData);
+      console.log('Loaded gallery from database/localStorage:', galleryData);
     } catch (error) {
       console.error('Error loading gallery:', error);
       toast.error("Chyba pri načítavaní galérie");
@@ -40,7 +41,7 @@ export const GalleryManager = () => {
   const saveGallery = async (updatedGallery: GalleryImage[]) => {
     try {
       await saveGalleryToDatabase(updatedGallery);
-      console.log('Saved gallery to Supabase:', updatedGallery);
+      console.log('Saved gallery:', updatedGallery);
     } catch (error) {
       console.error('Error saving gallery:', error);
       toast.error("Chyba pri ukladaní galérie");
@@ -58,21 +59,31 @@ export const GalleryManager = () => {
 
     setIsLoading(true);
     try {
-      // Upload image to Supabase storage
-      const publicUrl = await uploadImageToStorage(file);
+      let imageSrc: string;
+      let storagePath: string | undefined;
+
+      if (isSupabaseConfigured) {
+        // Upload to Supabase storage
+        imageSrc = await uploadImageToStorage(file);
+        storagePath = imageSrc.split('/').pop();
+      } else {
+        // Create local URL for the image
+        imageSrc = URL.createObjectURL(file);
+        console.log('Supabase not configured, using local URL:', imageSrc);
+      }
       
       const newImage: GalleryImage = {
         id: Date.now(),
-        src: publicUrl,
+        src: imageSrc,
         alt: file.name.replace(/\.[^/.]+$/, ""),
         category: "interior",
-        storage_path: publicUrl.split('/').pop()
+        storage_path: storagePath
       };
       
       let updatedGallery: GalleryImage[];
       if (currentImage) {
-        // Delete old image from storage if updating
-        if (currentImage.storage_path) {
+        // Delete old image from storage if updating and Supabase is configured
+        if (currentImage.storage_path && isSupabaseConfigured) {
           await deleteImageFromStorage(currentImage.storage_path);
         }
         
@@ -88,6 +99,12 @@ export const GalleryManager = () => {
       setGallery(updatedGallery);
       await saveGallery(updatedGallery);
       setIsImageDialogOpen(false);
+      setCurrentImage(null);
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error("Chyba pri nahrávaní obrázka");
@@ -101,7 +118,7 @@ export const GalleryManager = () => {
     
     try {
       const imageToDelete = gallery.find(img => img.id === id);
-      if (imageToDelete?.storage_path) {
+      if (imageToDelete?.storage_path && isSupabaseConfigured) {
         await deleteImageFromStorage(imageToDelete.storage_path);
       }
       
@@ -134,7 +151,14 @@ export const GalleryManager = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Spravovať fotogalériu</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Spravovať fotogalériu</h2>
+          {!isSupabaseConfigured && (
+            <p className="text-sm text-orange-600 mt-1">
+              Supabase nie je nakonfigurovaný - obrázky sa ukladajú lokálne
+            </p>
+          )}
+        </div>
         <Button 
           onClick={() => openImageDialog()} 
           className="flex items-center gap-2"
@@ -222,24 +246,20 @@ export const GalleryManager = () => {
                 disabled={isLoading}
               />
             </div>
-            <DialogFooter className="sm:justify-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsImageDialogOpen(false)}
-                disabled={isLoading}
-              >
-                Zrušiť
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isLoading}
-              >
-                {isLoading ? "Nahráva sa..." : (currentImage ? "Nahrať nový obrázok" : "Nahrať")}
-              </Button>
-            </DialogFooter>
           </div>
+          <DialogFooter className="sm:justify-end">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setIsImageDialogOpen(false);
+                setCurrentImage(null);
+              }}
+              disabled={isLoading}
+            >
+              Zrušiť
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
