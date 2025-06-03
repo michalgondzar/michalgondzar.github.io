@@ -38,19 +38,41 @@ export const apartmentDescription = {
 const Description = () => {
   const [content, setContent] = useState(apartmentDescription);
 
-  // Load content from localStorage on component mount
-  useEffect(() => {
-    const savedContent = localStorage.getItem('apartmentContent');
-    if (savedContent) {
-      try {
+  // Funkcia na načítanie obsahu z localStorage
+  const loadContent = () => {
+    try {
+      const savedContent = localStorage.getItem('apartmentContent');
+      console.log('Description: Attempting to load content from localStorage');
+      
+      if (savedContent) {
         const parsedContent = JSON.parse(savedContent);
+        console.log('Description: Successfully loaded content:', parsedContent);
         setContent(parsedContent);
-        console.log('Description component loaded content from localStorage:', parsedContent);
-      } catch (error) {
-        console.error('Error parsing saved content in Description:', error);
+      } else {
+        console.log('Description: No saved content found, using defaults');
         setContent(apartmentDescription);
       }
+    } catch (error) {
+      console.error('Description: Error parsing saved content:', error);
+      setContent(apartmentDescription);
     }
+  };
+
+  // Load content from localStorage on component mount
+  useEffect(() => {
+    loadContent();
+
+    // Listen for content updates from admin panel
+    const handleContentUpdate = () => {
+      console.log('Description: Received content update event');
+      loadContent();
+    };
+
+    window.addEventListener('apartmentContentUpdated', handleContentUpdate);
+    
+    return () => {
+      window.removeEventListener('apartmentContentUpdated', handleContentUpdate);
+    };
   }, []);
 
   return (

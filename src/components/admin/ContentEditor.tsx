@@ -14,23 +14,41 @@ export const ContentEditor = () => {
 
   // Load content from localStorage on component mount
   useEffect(() => {
-    const savedContent = localStorage.getItem('apartmentContent');
-    if (savedContent) {
-      try {
+    try {
+      const savedContent = localStorage.getItem('apartmentContent');
+      console.log('ContentEditor: Attempting to load content from localStorage');
+      
+      if (savedContent) {
         const parsedContent = JSON.parse(savedContent);
+        console.log('ContentEditor: Successfully loaded content:', parsedContent);
         setContent(parsedContent);
-        console.log('Loaded content from localStorage:', parsedContent);
-      } catch (error) {
-        console.error('Error parsing saved content:', error);
+      } else {
+        console.log('ContentEditor: No saved content found, using defaults');
+        setContent({...apartmentDescription});
       }
+    } catch (error) {
+      console.error('ContentEditor: Error parsing saved content:', error);
+      setContent({...apartmentDescription});
     }
   }, []);
 
   const saveContentChanges = () => {
-    // Save to localStorage
-    localStorage.setItem('apartmentContent', JSON.stringify(content));
-    console.log('Saving content to localStorage:', content);
-    toast.success("Zmeny obsahu boli úspešne uložené");
+    try {
+      // Save to localStorage
+      const contentToSave = JSON.stringify(content);
+      localStorage.setItem('apartmentContent', contentToSave);
+      console.log('ContentEditor: Successfully saved content to localStorage:', content);
+      
+      // Dispatch custom event to notify other components
+      const event = new CustomEvent('apartmentContentUpdated');
+      window.dispatchEvent(event);
+      console.log('ContentEditor: Dispatched content update event');
+      
+      toast.success("Zmeny obsahu boli úspešne uložené");
+    } catch (error) {
+      console.error('ContentEditor: Error saving content:', error);
+      toast.error("Chyba pri ukladaní obsahu");
+    }
   };
   
   const addFeature = () => {
