@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,24 @@ export const ContentEditor = () => {
   const [content, setContent] = useState({...apartmentDescription});
   const [feature, setFeature] = useState("");
 
+  // Load content from localStorage on component mount
+  useEffect(() => {
+    const savedContent = localStorage.getItem('apartmentContent');
+    if (savedContent) {
+      try {
+        const parsedContent = JSON.parse(savedContent);
+        setContent(parsedContent);
+        console.log('Loaded content from localStorage:', parsedContent);
+      } catch (error) {
+        console.error('Error parsing saved content:', error);
+      }
+    }
+  }, []);
+
   const saveContentChanges = () => {
-    // V reálnej aplikácii by tu bol API volanie na uloženie do databázy
+    // Save to localStorage
+    localStorage.setItem('apartmentContent', JSON.stringify(content));
+    console.log('Saving content to localStorage:', content);
     toast.success("Zmeny obsahu boli úspešne uložené");
   };
   
