@@ -1,21 +1,61 @@
+
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useContact } from "@/contexts/ContactContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const Contact = () => {
   const { toast } = useToast();
   const { contactData } = useContact();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
-      title: "Správa odoslaná",
-      description: "Ďakujeme za váš záujem. Budeme vás kontaktovať čo najskôr.",
-    });
-    // Reset form would happen here
+    setIsSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const contactMessage = {
+      name: formData.get('contactName') as string,
+      email: formData.get('contactEmail') as string,
+      subject: formData.get('contactSubject') as string,
+      message: formData.get('contactMessage') as string,
+    };
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([contactMessage]);
+
+      if (error) {
+        console.error('Error saving contact message:', error);
+        toast({
+          title: "Chyba pri odosielaní",
+          description: "Vyskytla sa chyba pri odosielaní správy. Skúste to znovu.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Správa odoslaná",
+          description: "Ďakujeme za váš záujem. Budeme vás kontaktovať čo najskôr.",
+        });
+        
+        // Reset form
+        (e.target as HTMLFormElement).reset();
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Chyba pri odosielaní",
+        description: "Vyskytla sa chyba pri odosielaní správy. Skúste to znovu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -101,23 +141,24 @@ const Contact = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contactName">Meno a priezvisko</Label>
-                  <Input id="contactName" placeholder="Vaše meno" required />
+                  <Input id="contactName" name="contactName" placeholder="Vaše meno" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="contactEmail">Email</Label>
-                  <Input id="contactEmail" type="email" placeholder="Váš email" required />
+                  <Input id="contactEmail" name="contactEmail" type="email" placeholder="Váš email" required />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="contactSubject">Predmet</Label>
-                <Input id="contactSubject" placeholder="Predmet správy" required />
+                <Input id="contactSubject" name="contactSubject" placeholder="Predmet správy" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="contactMessage">Správa</Label>
                 <textarea 
                   id="contactMessage" 
+                  name="contactMessage"
                   className="flex min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Vaša správa..."
                   required
@@ -126,9 +167,10 @@ const Contact = () => {
               
               <Button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full bg-booking-primary hover:bg-booking-secondary"
               >
-                Odoslať správu
+                {isSubmitting ? "Odosielam..." : "Odoslať správu"}
               </Button>
             </form>
           </div>
