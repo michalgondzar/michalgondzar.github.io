@@ -60,12 +60,60 @@ export type Database = {
         }
         Relationships: []
       }
+      page_visits: {
+        Row: {
+          id: string
+          page_url: string
+          referrer: string | null
+          user_agent: string | null
+          visited_at: string
+          visitor_ip: string | null
+        }
+        Insert: {
+          id?: string
+          page_url: string
+          referrer?: string | null
+          user_agent?: string | null
+          visited_at?: string
+          visitor_ip?: string | null
+        }
+        Update: {
+          id?: string
+          page_url?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visited_at?: string
+          visitor_ip?: string | null
+        }
+        Relationships: []
+      }
+      visit_counters: {
+        Row: {
+          id: number
+          total_visits: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_visit_counter: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

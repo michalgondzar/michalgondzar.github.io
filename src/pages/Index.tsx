@@ -7,8 +7,12 @@ import MaritalStays from "@/components/MaritalStays";
 import Booking from "@/components/Booking";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import { useVisitTracker } from "@/hooks/useVisitTracker";
 
 const Index = () => {
+  // Sledovanie návštev hlavnej stránky
+  useVisitTracker("/");
+
   return (
     <div className="min-h-screen">
       <Navbar />

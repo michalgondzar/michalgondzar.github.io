@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { FileText, CalendarIcon, Image, MapPin, Heart, Euro, MessageSquare } from "lucide-react";
+import { FileText, CalendarIcon, Image, MapPin, Heart, Euro, MessageSquare, BarChart3 } from "lucide-react";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthForm } from "@/components/admin/AuthForm";
@@ -14,6 +14,7 @@ import { ContactEditor } from "@/components/admin/ContactEditor";
 import { MaritalStaysEditor } from "@/components/admin/MaritalStaysEditor";
 import { PricingEditor } from "@/components/admin/PricingEditor";
 import { ContactMessagesManager } from "@/components/admin/ContactMessagesManager";
+import { VisitStatistics } from "@/components/admin/VisitStatistics";
 import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
@@ -80,6 +81,10 @@ const Admin = () => {
               <MessageSquare size={16} />
               Správy
             </TabsTrigger>
+            <TabsTrigger value="statistics" className="flex items-center gap-2">
+              <BarChart3 size={16} />
+              Štatistiky
+            </TabsTrigger>
             <TabsTrigger value="bookings" className="flex items-center gap-2">
               <CalendarIcon size={16} />
               Rezervácie
@@ -114,6 +119,11 @@ const Admin = () => {
           {/* Správy */}
           <TabsContent value="messages" className="space-y-6">
             <ContactMessagesManager />
+          </TabsContent>
+          
+          {/* Štatistiky */}
+          <TabsContent value="statistics" className="space-y-6">
+            <VisitStatistics />
           </TabsContent>
           
           {/* Rezervácie */}
