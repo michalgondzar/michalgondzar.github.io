@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,7 +29,7 @@ export const apartmentDescription = {
       alt: "Apartmán spálňa"
     },
     {
-      src: "/lovable-uploads/ac2ea6ce-fc8b-4aa8-9d34-c826f7f57310.png",
+      src: "/lovable-uploads/bf25f9e7-e8ac-494c-9414-ac0e6da43c64.png",
       alt: "Výhľad z apartmánu"
     }
   ]
