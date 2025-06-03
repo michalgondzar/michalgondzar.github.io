@@ -29,7 +29,7 @@ export const apartmentDescription = {
       alt: "Apartmán spálňa"
     },
     {
-      src: "/lovable-uploads/e0d6e731-19cb-4f27-b266-77fa22211eb6.png",
+      src: "/lovable-uploads/ac2ea6ce-fc8b-4aa8-9d34-c826f7f57310.png",
       alt: "Výhľad z apartmánu"
     }
   ]
