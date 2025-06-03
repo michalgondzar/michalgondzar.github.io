@@ -21,16 +21,16 @@ export const apartmentDescription = {
   ],
   images: [
     {
-      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      alt: "Apartmán obývačka"
+      src: "/lovable-uploads/2c593486-67fc-4e6f-9a4c-827cde9f1af7.png",
+      alt: "Apartmán obývačka a kuchyňa"
     },
     {
-      src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
-      alt: "Apartmán kuchyňa"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd",
+      src: "/lovable-uploads/c41e31f7-9a72-463b-9f42-a0747f94423f.png",
       alt: "Apartmán spálňa"
+    },
+    {
+      src: "/lovable-uploads/e0d6e731-19cb-4f27-b266-77fa22211eb6.png",
+      alt: "Výhľad z apartmánu"
     }
   ]
 };
