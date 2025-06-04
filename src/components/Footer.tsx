@@ -1,11 +1,14 @@
+
 import { Logo } from "./Logo";
 import { Link } from "react-scroll";
 import { Button } from "./ui/button"; 
 import { useNavigate } from "react-router-dom";
+import { useContact } from "@/contexts/ContactContext";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
+  const { contactData } = useContact();
   
   const handleAdminEntry = () => {
     navigate("/admin");
@@ -45,10 +48,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Kontakt</h3>
             <address className="not-italic text-gray-300 space-y-2">
-              <p>Bešeňová 123</p>
-              <p>034 83 Bešeňová</p>
-              <p>+421 900 123 456</p>
-              <p>info@trivily.sk</p>
+              <p>{contactData.address}</p>
+              <p>{contactData.postalCode}</p>
+              <p>{contactData.phone}</p>
+              <p>{contactData.email}</p>
             </address>
           </div>
           
