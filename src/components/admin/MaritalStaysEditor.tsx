@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,9 +14,43 @@ export const MaritalStaysEditor = () => {
   const [newImageAlt, setNewImageAlt] = useState("");
   const [newImageDescription, setNewImageDescription] = useState("");
 
+  // Načítanie obsahu z localStorage pri načítaní komponenty
+  useEffect(() => {
+    try {
+      const savedContent = localStorage.getItem('maritalStaysContent');
+      console.log('MaritalStaysEditor: Attempting to load content from localStorage');
+      
+      if (savedContent) {
+        const parsedContent = JSON.parse(savedContent);
+        console.log('MaritalStaysEditor: Successfully loaded content:', parsedContent);
+        setContent(parsedContent);
+      } else {
+        console.log('MaritalStaysEditor: No saved content found, using defaults');
+        setContent({...maritalStaysData});
+      }
+    } catch (error) {
+      console.error('MaritalStaysEditor: Error parsing saved content:', error);
+      setContent({...maritalStaysData});
+    }
+  }, []);
+
   const saveMaritalStaysChanges = () => {
-    // V reálnej aplikácii by tu bol API volanie na uloženie do databázy
-    toast.success("Sekcia manželských pobytov bola úspešne uložená");
+    try {
+      // Uloženie do localStorage
+      const contentToSave = JSON.stringify(content);
+      localStorage.setItem('maritalStaysContent', contentToSave);
+      console.log('MaritalStaysEditor: Successfully saved content to localStorage:', content);
+      
+      // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
+      const event = new CustomEvent('maritalStaysContentUpdated');
+      window.dispatchEvent(event);
+      console.log('MaritalStaysEditor: Dispatched content update event');
+      
+      toast.success("Sekcia tématických pobytov bola úspešne uložená");
+    } catch (error) {
+      console.error('MaritalStaysEditor: Error saving content:', error);
+      toast.error("Chyba pri ukladaní obsahu");
+    }
   };
   
   const addImage = () => {
@@ -53,7 +87,7 @@ export const MaritalStaysEditor = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-6">Upraviť sekciu manželských pobytov</h2>
+      <h2 className="text-xl font-semibold mb-6">Upraviť sekciu tématických pobytov</h2>
       
       <div className="space-y-6">
         <div>
@@ -186,7 +220,7 @@ export const MaritalStaysEditor = () => {
           className="bg-booking-primary hover:bg-booking-secondary flex gap-2"
         >
           <Save size={16} />
-          Uložiť zmeny manželských pobytov
+          Uložiť zmeny tématických pobytov
         </Button>
       </div>
     </div>

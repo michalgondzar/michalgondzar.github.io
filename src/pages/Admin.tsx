@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -67,7 +66,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="marital-stays" className="flex items-center gap-2">
               <Heart size={16} />
-              Manželské pobyty
+              Tématické pobyty
             </TabsTrigger>
             <TabsTrigger value="pricing" className="flex items-center gap-2">
               <Euro size={16} />
@@ -101,7 +100,7 @@ const Admin = () => {
             <GalleryManager />
           </TabsContent>
           
-          {/* Manželské pobyty */}
+          {/* Tématické pobyty */}
           <TabsContent value="marital-stays" className="space-y-6">
             <MaritalStaysEditor />
           </TabsContent>

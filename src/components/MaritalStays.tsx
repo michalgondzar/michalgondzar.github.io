@@ -1,11 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-// Predvolené údaje pre sekciu manželských pobytov
+// Predvolené údaje pre sekciu tématických pobytov
 export const maritalStaysData = {
-  title: "Manželské pobyty",
+  title: "Tématické pobyty",
   description: "Doprajte si romantický pobyt v útulnom prostredí nášho apartmánu. Vytvorte si nezabudnuteľné chvíle s vašou láskou v krásnom prostredí Bešeňovej.",
   images: [
     {
@@ -31,21 +31,64 @@ export const maritalStaysData = {
 };
 
 const MaritalStays = () => {
+  const [content, setContent] = useState(maritalStaysData);
+
+  // Načítanie obsahu z localStorage pri načítaní komponenty
+  useEffect(() => {
+    try {
+      const savedContent = localStorage.getItem('maritalStaysContent');
+      console.log('MaritalStays: Attempting to load content from localStorage');
+      
+      if (savedContent) {
+        const parsedContent = JSON.parse(savedContent);
+        console.log('MaritalStays: Successfully loaded content:', parsedContent);
+        setContent(parsedContent);
+      } else {
+        console.log('MaritalStays: No saved content found, using defaults');
+        setContent(maritalStaysData);
+      }
+    } catch (error) {
+      console.error('MaritalStays: Error parsing saved content:', error);
+      setContent(maritalStaysData);
+    }
+  }, []);
+
+  // Poslúchanie na zmeny obsahu z admin panelu
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      try {
+        const savedContent = localStorage.getItem('maritalStaysContent');
+        if (savedContent) {
+          const parsedContent = JSON.parse(savedContent);
+          console.log('MaritalStays: Content updated from admin panel:', parsedContent);
+          setContent(parsedContent);
+        }
+      } catch (error) {
+        console.error('MaritalStays: Error loading updated content:', error);
+      }
+    };
+
+    window.addEventListener('maritalStaysContentUpdated', handleContentUpdate);
+    return () => {
+      window.removeEventListener('maritalStaysContentUpdated', handleContentUpdate);
+    };
+  }, []);
+
   return (
-    <section id="manzelske-pobyty" className="bg-white py-16">
+    <section id="tematicke-pobyty" className="bg-white py-16">
       <div className="section-container">
         <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg shadow-sm p-6 md:p-8">
           <div className="flex items-center gap-2 mb-4">
             <Heart className="h-6 w-6 text-pink-500" />
-            <h2 className="section-title mb-0">{maritalStaysData.title}</h2>
+            <h2 className="section-title mb-0">{content.title}</h2>
           </div>
           
           <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-            {maritalStaysData.description}
+            {content.description}
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {maritalStaysData.images.map((image) => (
+            {content.images.map((image) => (
               <div key={image.id} className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
                 <img 
                   src={image.src} 
@@ -68,7 +111,7 @@ const MaritalStays = () => {
               className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 text-lg"
             >
               <a 
-                href={maritalStaysData.externalLink} 
+                href={content.externalLink} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
