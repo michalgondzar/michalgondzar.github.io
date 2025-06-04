@@ -136,17 +136,7 @@ export const PricingEditor = () => {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="cleaning-fee">Úklidový poplatok (€)</Label>
-            <Input
-              id="cleaning-fee"
-              type="number"
-              value={pricing.cleaningFee}
-              onChange={(e) => updateFee('cleaningFee', e.target.value)}
-              placeholder="25"
-            />
-          </div>
-          <div>
-            <Label htmlFor="tourist-tax">Kurtaxe na osobu/noc (€)</Label>
+            <Label htmlFor="tourist-tax">Pobytová daň na osobu/noc (€)</Label>
             <Input
               id="tourist-tax"
               type="number"

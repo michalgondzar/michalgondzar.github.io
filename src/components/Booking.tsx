@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,11 +159,7 @@ const Booking = () => {
                 <h4 className="font-semibold mb-3 text-gray-800">Dodatočné poplatky</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Úklidový poplatok</span>
-                    <span className="font-semibold">{pricing.cleaningFee}€</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Kurtaxe (za osobu/noc)</span>
+                    <span className="text-gray-600">Pobytová daň (za osobu/noc)</span>
                     <span className="font-semibold">{pricing.touristTax}€</span>
                   </div>
                 </div>
@@ -174,7 +171,7 @@ const Booking = () => {
                   <div className="text-sm text-gray-600">
                     <p className="font-medium mb-1">Dôležité informácie:</p>
                     <ul className="space-y-1 text-xs">
-                      <li>• Check-in: 15:00 - 18:00</li>
+                      <li>• Check-in: 14:00 - 18:00</li>
                       <li>• Check-out: do 10:00</li>
                       <li>• Minimálny pobyt: 2 noci</li>
                       <li>• Maximálne 4 osoby</li>
