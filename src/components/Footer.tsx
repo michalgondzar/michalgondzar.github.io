@@ -1,4 +1,3 @@
-
 import { Logo } from "./Logo";
 import { Link } from "react-scroll";
 import { Button } from "./ui/button"; 
@@ -58,7 +57,6 @@ const Footer = () => {
             <div className="flex flex-wrap gap-2">
               <div className="bg-white/10 px-3 py-2 rounded text-sm">Hotovosť</div>
               <div className="bg-white/10 px-3 py-2 rounded text-sm">Bankový prevod</div>
-              <div className="bg-white/10 px-3 py-2 rounded text-sm">Platobná karta</div>
             </div>
           </div>
         </div>
