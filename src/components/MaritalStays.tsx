@@ -5,26 +5,26 @@ import { Button } from "@/components/ui/button";
 
 // Predvolené údaje pre sekciu tématických pobytov
 export const maritalStaysData = {
-  title: "Tématické pobyty",
-  description: "Doprajte si romantický pobyt v útulnom prostredí nášho apartmánu. Vytvorte si nezabudnuteľné chvíle s vašou láskou v krásnom prostredí Bešeňovej.",
+  title: "Zážitkové pobyty",
+  description: "Vyberte si z našich pripravených zážitkových programov, ktoré vám sprístupnia jedinečné chvíle v krásnom prostredí Bešeňovej. Každý balíček obsahuje starostlivo pripravené aktivity pre nezabudnuteľné zážitky.",
   images: [
     {
       id: 1,
-      src: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=800&q=80",
-      alt: "Romantická obývacia izba",
-      description: "Útulná a štýlovo zariadená obývacia izba s pohodlným sedením je ideálnym miestom pre romantické večery. Jemné osvetlenie a teplé farby vytvárajú atmosféru intimity a pokoja. Tu si môžete vychutnať spoločné chvíle pri víne, sledovaní filmu alebo len tak pri rozhovoroch o vašich snoch a plánoch. Priestor je navrhnutý tak, aby podporoval blízkosť a vytváranie krásnych spomienok na váš manželský pobyt."
+      src: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+      alt: "Manželský pobyt",
+      description: "Romantický balíček pre manželské páry zahŕňa intímne zážitky, candlelight dinner, relaxačné procedúry a spoločné aktivity zamerané na posilnenie vzájomnej blízkosti. Program obsahuje prechádzky prírodou, degustácie miestnych špecialít a večerné chvíle pri sviečkach. Vytvorte si nezabudnuteľné spomienky v útulnom prostredí nášho apartmánu s výhľadom na krásnu prírodu Bešeňovej."
     },
     {
       id: 2,
-      src: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80",
-      alt: "Krásne okolie pre romantické prechádzky",
-      description: "Nádherná príroda okolo apartmánu ponúka nekonečné možnosti pre romantické prechádzky a výlety. Zelené lesy, čisté horské vzduch a pokojná atmosféra vytvárajú perfektné prostredie pre páry, ktoré chcú uniknúť z každodenného zhonu. Môžete objaviť skryté chodníčky, piknikovať v prírode alebo si len tak užívať ticho a krásu slovenskej krajiny. Každý krok v tomto prostredí prináša nové zážitky a posilňuje vašu vzájomnú lásku."
+      src: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+      alt: "Rodinný pobyt",
+      description: "Rodinný zážitkový program je navrhnutý pre rodiny s deťmi a obsahuje aktivity vhodné pre všetky vekové kategórie. Zahŕňa výlety do okolia, návštevu aquaparku, spoločné hry a tvorivé workshopy. Pripravené sú aj piknikové balíčky, poznávacie túry po okolí a zábavné aktivity, ktoré zbližujú rodinných príslušníkov a vytvárajú krásne spoločné spomienky."
     },
     {
       id: 3,
-      src: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=800&q=80",
-      alt: "Útulné prostredie apartmánu",
-      description: "Interiér apartmánu je navrhnutý s dôrazom na pohodlie a romantiku. Každý detail je starostlivo vybratý tak, aby vytvoril harmonické prostredie pre manželské páry. Od mäkkých textílií až po jemné osvetlenie - všetko prispieva k atmosfére lásky a oddychu. Apartmán poskytuje súkromie a kľud potrebný na obnovenie vašej vzájomnej blízkosti. Je to miesto, kde môžete zabudnúť na starosti a sústrediť sa len na seba navzájom."
+      src: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=80",
+      alt: "Pobyt v komôrke",
+      description: "Exkluzívny program pre tých, ktorí hľadajú úplné súkromie a oddych od civilizácie. Pobyt v komôrke obsahuje digitálny detox, meditačné chvíle, čítanie kníh a aktivity zamerané na vnútorný pokoj. Program zahŕňa aj zdravé stravovanie, jemné relaxačné cvičenia a možnosť úplného odpojenia od vonkajšieho sveta v tichom a pokojnom prostredí apartmánu."
     }
   ],
   externalLink: "https://www.manzelkepobyty.sk"
