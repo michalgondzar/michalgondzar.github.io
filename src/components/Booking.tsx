@@ -1,16 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Euro, Users, Clock } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar, Euro, Users, Clock, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 const Booking = () => {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("2");
+  const [selectedStay, setSelectedStay] = useState("");
   const [pricing, setPricing] = useState({
     lowSeason: {
       weekday: "45",
@@ -38,10 +39,20 @@ const Booking = () => {
     }
   }, []);
 
+  const stayOptions = [
+    { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
+    { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
+    { id: "komôrka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkIn || !checkOut) {
       toast.error("Prosím vyplňte dátum príchodu a odchodu");
+      return;
+    }
+    if (!selectedStay) {
+      toast.error("Prosím vyberte typ pobytu");
       return;
     }
     toast.success("Nezáväzná rezervácia bola odoslaná!");
@@ -105,6 +116,27 @@ const Booking = () => {
                     onChange={(e) => setGuests(e.target.value)}
                   />
                 </div>
+                
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-pink-500" />
+                    Typ pobytu
+                  </Label>
+                  <RadioGroup value={selectedStay} onValueChange={setSelectedStay}>
+                    {stayOptions.map((option) => (
+                      <div key={option.id} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
+                        <RadioGroupItem value={option.id} id={option.id} />
+                        <div className="flex-1">
+                          <Label htmlFor={option.id} className="font-medium cursor-pointer">
+                            {option.label}
+                          </Label>
+                          <p className="text-sm text-gray-500">{option.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+                
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
                   Odoslať nezáväznú rezerváciu
                 </Button>

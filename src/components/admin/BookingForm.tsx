@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, Form } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
 
 interface BookingFormProps {
@@ -12,6 +14,12 @@ interface BookingFormProps {
 }
 
 export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFormProps) => {
+  const stayOptions = [
+    { id: "manzelsky", label: "Manželský pobyt" },
+    { id: "rodinny", label: "Rodinný pobyt" },
+    { id: "komôrka", label: "Pobyt v komôrke" }
+  ];
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -97,6 +105,29 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
             )}
           />
         </div>
+        
+        <FormField
+          control={form.control}
+          name="stayType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Typ pobytu</FormLabel>
+              <FormControl>
+                <RadioGroup value={field.value} onValueChange={field.onChange}>
+                  {stayOptions.map((option) => (
+                    <div key={option.id} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.id} id={option.id} />
+                      <Label htmlFor={option.id} className="cursor-pointer">
+                        {option.label}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
         <DialogFooter className="sm:justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>
             Zrušiť

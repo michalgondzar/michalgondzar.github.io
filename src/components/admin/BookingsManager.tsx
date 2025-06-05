@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CalendarIcon, Edit, Trash, Plus } from "lucide-react";
+import { CalendarIcon, Edit, Trash, Plus, Heart } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
@@ -19,14 +19,15 @@ interface Booking {
   dateTo: string;
   guests: number;
   status: string;
+  stayType?: string;
 }
 
 export const BookingsManager = () => {
   // Dáta pre kalendár rezervácií
   const [bookings, setBookings] = useState<Booking[]>([
-    { id: 1, name: "Ján Novák", email: "jan@example.com", dateFrom: "2025-06-01", dateTo: "2025-06-05", guests: 2, status: "Potvrdené" },
-    { id: 2, name: "Anna Kováčová", email: "anna@example.com", dateFrom: "2025-06-10", dateTo: "2025-06-15", guests: 3, status: "Čaká na potvrdenie" },
-    { id: 3, name: "Peter Malý", email: "peter@example.com", dateFrom: "2025-06-20", dateTo: "2025-06-22", guests: 2, status: "Potvrdené" }
+    { id: 1, name: "Ján Novák", email: "jan@example.com", dateFrom: "2025-06-01", dateTo: "2025-06-05", guests: 2, status: "Potvrdené", stayType: "manzelsky" },
+    { id: 2, name: "Anna Kováčová", email: "anna@example.com", dateFrom: "2025-06-10", dateTo: "2025-06-15", guests: 3, status: "Čaká na potvrdenie", stayType: "rodinny" },
+    { id: 3, name: "Peter Malý", email: "peter@example.com", dateFrom: "2025-06-20", dateTo: "2025-06-22", guests: 2, status: "Potvrdené", stayType: "komôrka" }
   ]);
 
   // Správa dialógov
@@ -46,9 +47,19 @@ export const BookingsManager = () => {
       dateFrom: "",
       dateTo: "",
       guests: 2,
-      status: "Čaká na potvrdenie"
+      status: "Čaká na potvrdenie",
+      stayType: ""
     }
   });
+
+  const getStayTypeLabel = (stayType?: string) => {
+    const stayTypes = {
+      "manzelsky": "Manželský pobyt",
+      "rodinny": "Rodinný pobyt", 
+      "komôrka": "Pobyt v komôrke"
+    };
+    return stayType ? stayTypes[stayType as keyof typeof stayTypes] || stayType : "Neuvedené";
+  };
 
   const openAddDialog = () => {
     form.reset({
@@ -57,7 +68,8 @@ export const BookingsManager = () => {
       dateFrom: "",
       dateTo: "",
       guests: 2,
-      status: "Čaká na potvrdenie"
+      status: "Čaká na potvrdenie",
+      stayType: ""
     });
     setIsAddDialogOpen(true);
   };
@@ -70,7 +82,8 @@ export const BookingsManager = () => {
       dateFrom: booking.dateFrom,
       dateTo: booking.dateTo,
       guests: booking.guests,
-      status: booking.status
+      status: booking.status,
+      stayType: booking.stayType || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -144,6 +157,7 @@ export const BookingsManager = () => {
                 <TableHead>Od</TableHead>
                 <TableHead>Do</TableHead>
                 <TableHead>Hostia</TableHead>
+                <TableHead>Typ pobytu</TableHead>
                 <TableHead>Stav</TableHead>
                 <TableHead className="text-right">Akcie</TableHead>
               </TableRow>
@@ -156,6 +170,12 @@ export const BookingsManager = () => {
                   <TableCell>{booking.dateFrom}</TableCell>
                   <TableCell>{booking.dateTo}</TableCell>
                   <TableCell>{booking.guests}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Heart size={14} className="text-pink-500" />
+                      <span className="text-sm">{getStayTypeLabel(booking.stayType)}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       booking.status === "Potvrdené" 
