@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 // Predvolené údaje pre sekciu tématických pobytov
 export const maritalStaysData = {
-  title: "Zážitkové pobyty",
+  title: "Tématické pobyty",
   description: "Vyberte si z našich pripravených zážitkových programov, ktoré vám sprístupnia jedinečné chvíle v krásnom prostredí Bešeňovej. Každý balíček obsahuje starostlivo pripravené aktivity pre nezabudnuteľné zážitky.",
   images: [
     {
@@ -16,13 +16,13 @@ export const maritalStaysData = {
     },
     {
       id: 2,
-      src: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+      src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80",
       alt: "Rodinný pobyt",
       description: "Rodinný zážitkový program je navrhnutý pre rodiny s deťmi a obsahuje aktivity vhodné pre všetky vekové kategórie. Zahŕňa výlety do okolia, návštevu aquaparku, spoločné hry a tvorivé workshopy. Pripravené sú aj piknikové balíčky, poznávacie túry po okolí a zábavné aktivity, ktoré zbližujú rodinných príslušníkov a vytvárajú krásne spoločné spomienky."
     },
     {
       id: 3,
-      src: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=80",
+      src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80",
       alt: "Pobyt v komôrke",
       description: "Exkluzívny program pre tých, ktorí hľadajú úplné súkromie a oddych od civilizácie. Pobyt v komôrke obsahuje digitálny detox, meditačné chvíle, čítanie kníh a aktivity zamerané na vnútorný pokoj. Program zahŕňa aj zdravé stravovanie, jemné relaxačné cvičenia a možnosť úplného odpojenia od vonkajšieho sveta v tichom a pokojnom prostredí apartmánu."
     }
