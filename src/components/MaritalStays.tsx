@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Heart, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ export const maritalStaysData = {
   images: [
     {
       id: 1,
-      src: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+      src: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=800&q=80",
       alt: "Manželský pobyt",
       description: "Romantický balíček pre manželské páry zahŕňa intímne zážitky, candlelight dinner, relaxačné procedúry a spoločné aktivity zamerané na posilnenie vzájomnej blízkosti. Program obsahuje prechádzky prírodou, degustácie miestnych špecialít a večerné chvíle pri sviečkach. Vytvorte si nezabudnuteľné spomienky v útulnom prostredí nášho apartmánu s výhľadom na krásnu prírodu Bešeňovej."
     },
