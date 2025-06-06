@@ -69,18 +69,14 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
 
   const updateContactData = async (data: ContactData) => {
     try {
-      const { error } = await supabase
-        .from('contact_info')
-        .update({
-          address: data.address,
-          postal_code: data.postalCode,
-          phone: data.phone,
-          email: data.email,
-          checkin_time: data.checkinTime,
-          checkout_time: data.checkoutTime,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', 1);
+      const { error } = await supabase.rpc('update_contact_info', {
+        p_address: data.address,
+        p_postal_code: data.postalCode,
+        p_phone: data.phone,
+        p_email: data.email,
+        p_checkin_time: data.checkinTime,
+        p_checkout_time: data.checkoutTime
+      });
 
       if (error) {
         console.error('Error updating contact data:', error);
