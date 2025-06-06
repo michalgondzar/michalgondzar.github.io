@@ -76,8 +76,7 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
     console.log('Starting contact data update with:', data);
     
     try {
-      // Skúsime najprv priamy UPDATE pre test
-      const { error: directError } = await supabase
+      const { error } = await supabase
         .from('contact_info')
         .update({
           address: data.address,
@@ -90,32 +89,13 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
         })
         .eq('id', 1);
 
-      if (directError) {
-        console.error('Direct update failed:', directError);
-        
-        // Ak priamy UPDATE zlyhá, skúsime RPC funkciu
-        console.log('Trying RPC function update_contact_info...');
-        const { error: rpcError } = await (supabase as any).rpc('update_contact_info', {
-          p_address: data.address,
-          p_postal_code: data.postalCode,
-          p_phone: data.phone,
-          p_email: data.email,
-          p_checkin_time: data.checkinTime,
-          p_checkout_time: data.checkoutTime
-        });
-
-        if (rpcError) {
-          console.error('RPC update also failed:', rpcError);
-          throw rpcError;
-        }
-        
-        console.log('RPC update successful');
-      } else {
-        console.log('Direct update successful');
+      if (error) {
+        console.error('Error updating contact data:', error);
+        throw error;
       }
 
       setContactData(data);
-      console.log('Contact data updated successfully in state');
+      console.log('Contact data updated successfully');
     } catch (error) {
       console.error('Error in updateContactData:', error);
       throw error;
