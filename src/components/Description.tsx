@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export const apartmentDescription = {
   title: "Opis apartmánu",
   subtitle: "Komfortné ubytovanie pre vašu relaxačnú dovolenku",
-  paragraph1: "Apartmán Tri víly sa nachádza v pokojnej časti obce Bešeňová, len niekoľko minút od známeho aquaparku. Náš moderný apartmán ponúka všetko, čo potrebujete pre dokonalý pobyt v tejto turisticky atraktívnej lokalite.",
+  paragraph1: "Apartmán Tília sa nachádza v pokojnej časti obce Bešeňová, len niekoľko minút od známeho aquaparku. Náš moderný apartmán ponúka všetko, čo potrebujete pre dokonalý pobyt v tejto turisticky atraktívnej lokalite.",
   paragraph2: "Apartmán je vhodný pre páry aj rodiny s deťmi. Ponúka priestranný obývací priestor s plne vybavenou kuchyňou, samostatnú spálňu a moderné sociálne zariadenie. Z terasy si môžete vychutnávať krásny výhľad na okolitú prírodu.",
   features: [
     "Kompletne vybavená kuchyňa",
