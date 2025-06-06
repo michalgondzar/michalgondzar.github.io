@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar, Euro, Users, Clock, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { useContact } from "@/contexts/ContactContext";
 
 const Booking = () => {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("2");
   const [selectedStay, setSelectedStay] = useState("");
+  const { contactData } = useContact();
   const [pricing, setPricing] = useState({
     lowSeason: {
       weekday: "45",
@@ -59,7 +62,7 @@ const Booking = () => {
   };
 
   return (
-    <section id="booking" className="py-16 bg-gradient-to-br from-blue-50 to-white">
+    <section id="rezervacia" className="py-16 bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
@@ -203,8 +206,8 @@ const Booking = () => {
                   <div className="text-sm text-gray-600">
                     <p className="font-medium mb-1">Dôležité informácie:</p>
                     <ul className="space-y-1 text-xs">
-                      <li>• Check-in: 14:00 - 18:00</li>
-                      <li>• Check-out: do 10:00</li>
+                      <li>• Check-in: {contactData.checkinTime}</li>
+                      <li>• Check-out: {contactData.checkoutTime}</li>
                       <li>• Minimálny pobyt: 2 noci</li>
                       <li>• Maximálne 4 osoby</li>
                     </ul>
