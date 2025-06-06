@@ -41,7 +41,7 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
           .from('contact_info')
           .select('*')
           .eq('id', 1)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error loading contact data:', error);
