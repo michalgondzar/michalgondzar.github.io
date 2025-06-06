@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContactData {
   address: string;
@@ -23,29 +24,79 @@ const initialContactData: ContactData = {
 interface ContactContextType {
   contactData: ContactData;
   updateContactData: (data: ContactData) => void;
+  isLoading: boolean;
 }
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
 
 export const ContactProvider = ({ children }: { children: ReactNode }) => {
-  // Force clear old data and use fresh initial data
-  const [contactData, setContactData] = useState<ContactData>(() => {
-    // Clear any old cached data
-    localStorage.removeItem('apartman-contact-data');
-    return initialContactData;
-  });
+  const [contactData, setContactData] = useState<ContactData>(initialContactData);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save to localStorage whenever data changes
+  // Načítanie kontaktných údajov z Supabase
   useEffect(() => {
-    localStorage.setItem('apartman-contact-data', JSON.stringify(contactData));
-  }, [contactData]);
+    const loadContactData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('contact_info')
+          .select('*')
+          .eq('id', 1)
+          .single();
 
-  const updateContactData = (data: ContactData) => {
-    setContactData(data);
+        if (error) {
+          console.error('Error loading contact data:', error);
+          setContactData(initialContactData);
+        } else if (data) {
+          setContactData({
+            address: data.address,
+            postalCode: data.postal_code,
+            phone: data.phone,
+            email: data.email,
+            checkinTime: data.checkin_time,
+            checkoutTime: data.checkout_time
+          });
+        }
+      } catch (error) {
+        console.error('Error in loadContactData:', error);
+        setContactData(initialContactData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContactData();
+  }, []);
+
+  const updateContactData = async (data: ContactData) => {
+    try {
+      const { error } = await supabase
+        .from('contact_info')
+        .update({
+          address: data.address,
+          postal_code: data.postalCode,
+          phone: data.phone,
+          email: data.email,
+          checkin_time: data.checkinTime,
+          checkout_time: data.checkoutTime,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 1);
+
+      if (error) {
+        console.error('Error updating contact data:', error);
+        throw error;
+      }
+
+      setContactData(data);
+      console.log('Contact data updated successfully');
+    } catch (error) {
+      console.error('Error in updateContactData:', error);
+      throw error;
+    }
   };
 
   return (
-    <ContactContext.Provider value={{ contactData, updateContactData }}>
+    <ContactContext.Provider value={{ contactData, updateContactData, isLoading }}>
       {children}
     </ContactContext.Provider>
   );

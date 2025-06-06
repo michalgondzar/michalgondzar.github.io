@@ -4,22 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useContact } from "@/contexts/ContactContext";
 
 export const ContactEditor = () => {
-  const { contactData, updateContactData } = useContact();
+  const { contactData, updateContactData, isLoading } = useContact();
   const [contact, setContact] = useState(contactData);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Synchronize local state with context data
   useEffect(() => {
     setContact(contactData);
   }, [contactData]);
 
-  const saveContactChanges = () => {
-    updateContactData(contact);
-    toast.success("Kontaktné údaje boli úspešne uložené");
+  const saveContactChanges = async () => {
+    setIsSaving(true);
+    try {
+      await updateContactData(contact);
+      toast.success("Kontaktné údaje boli úspešne uložené");
+    } catch (error) {
+      console.error('Error saving contact data:', error);
+      toast.error("Chyba pri ukladaní kontaktných údajov");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center justify-center h-32">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">Načítavam kontaktné údaje...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -83,10 +103,15 @@ export const ContactEditor = () => {
         
         <Button 
           onClick={saveContactChanges}
+          disabled={isSaving}
           className="mt-6 bg-booking-primary hover:bg-booking-secondary flex gap-2"
         >
-          <Save size={16} />
-          Uložiť kontaktné údaje
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save size={16} />
+          )}
+          {isSaving ? "Ukladám..." : "Uložiť kontaktné údaje"}
         </Button>
       </div>
     </div>
