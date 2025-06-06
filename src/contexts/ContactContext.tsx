@@ -37,6 +37,7 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const loadContactData = async () => {
       try {
+        console.log('Loading contact data from Supabase...');
         const { data, error } = await supabase
           .from('contact_info')
           .select('*')
@@ -47,6 +48,7 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
           console.error('Error loading contact data:', error);
           setContactData(initialContactData);
         } else if (data) {
+          console.log('Contact data loaded successfully:', data);
           setContactData({
             address: data.address,
             postalCode: data.postal_code,
@@ -55,6 +57,9 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
             checkinTime: data.checkin_time,
             checkoutTime: data.checkout_time
           });
+        } else {
+          console.log('No contact data found, using defaults');
+          setContactData(initialContactData);
         }
       } catch (error) {
         console.error('Error in loadContactData:', error);
@@ -68,24 +73,49 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const updateContactData = async (data: ContactData) => {
+    console.log('Starting contact data update with:', data);
+    
     try {
-      // Použitie any pre obídenie problému s typmi až kým sa neaktualizujú automaticky
-      const { error } = await (supabase as any).rpc('update_contact_info', {
-        p_address: data.address,
-        p_postal_code: data.postalCode,
-        p_phone: data.phone,
-        p_email: data.email,
-        p_checkin_time: data.checkinTime,
-        p_checkout_time: data.checkoutTime
-      });
+      // Skúsime najprv priamy UPDATE pre test
+      const { error: directError } = await supabase
+        .from('contact_info')
+        .update({
+          address: data.address,
+          postal_code: data.postalCode,
+          phone: data.phone,
+          email: data.email,
+          checkin_time: data.checkinTime,
+          checkout_time: data.checkoutTime,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 1);
 
-      if (error) {
-        console.error('Error updating contact data:', error);
-        throw error;
+      if (directError) {
+        console.error('Direct update failed:', directError);
+        
+        // Ak priamy UPDATE zlyhá, skúsime RPC funkciu
+        console.log('Trying RPC function update_contact_info...');
+        const { error: rpcError } = await (supabase as any).rpc('update_contact_info', {
+          p_address: data.address,
+          p_postal_code: data.postalCode,
+          p_phone: data.phone,
+          p_email: data.email,
+          p_checkin_time: data.checkinTime,
+          p_checkout_time: data.checkoutTime
+        });
+
+        if (rpcError) {
+          console.error('RPC update also failed:', rpcError);
+          throw rpcError;
+        }
+        
+        console.log('RPC update successful');
+      } else {
+        console.log('Direct update successful');
       }
 
       setContactData(data);
-      console.log('Contact data updated successfully');
+      console.log('Contact data updated successfully in state');
     } catch (error) {
       console.error('Error in updateContactData:', error);
       throw error;
