@@ -69,7 +69,8 @@ export const ContactProvider = ({ children }: { children: ReactNode }) => {
 
   const updateContactData = async (data: ContactData) => {
     try {
-      const { error } = await supabase.rpc('update_contact_info', {
+      // Použitie any pre obídenie problému s typmi až kým sa neaktualizujú automaticky
+      const { error } = await (supabase as any).rpc('update_contact_info', {
         p_address: data.address,
         p_postal_code: data.postalCode,
         p_phone: data.phone,
