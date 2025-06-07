@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,17 +56,12 @@ export const MaritalStaysEditor = () => {
     loadContent();
   }, []);
 
-  // Automaticky uložiť aktualizovaný obsah po načítaní
-  useEffect(() => {
-    if (!isLoading) {
-      forceSaveUpdatedContent();
-    }
-  }, [isLoading]);
-
-  const forceSaveUpdatedContent = async () => {
+  const loadContent = async () => {
     try {
-      console.log('MaritalStaysEditor: Force saving updated content with new uploaded image');
+      console.log('MaritalStaysEditor: Attempting to load content from Supabase');
+      setIsLoading(true);
       
+      // Najprv uložíme správny obsah s novou fotkou
       const correctContent = {
         title: "Tematické pobyty",
         description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -94,7 +88,9 @@ export const MaritalStaysEditor = () => {
         ]
       };
 
-      const { error } = await supabase
+      console.log('MaritalStaysEditor: Saving correct content with new image to database');
+      
+      const { error: saveError } = await supabase
         .from('marital_stays_content')
         .upsert({
           id: 1,
@@ -105,29 +101,18 @@ export const MaritalStaysEditor = () => {
           updated_at: new Date().toISOString()
         });
 
-      if (error) {
-        console.error('MaritalStaysEditor: Error force saving content:', error);
-        return;
+      if (saveError) {
+        console.error('MaritalStaysEditor: Error saving correct content:', saveError);
+      } else {
+        console.log('MaritalStaysEditor: Successfully saved correct content with new image');
+        
+        // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
+        const event = new CustomEvent('maritalStaysContentUpdated');
+        window.dispatchEvent(event);
+        console.log('MaritalStaysEditor: Dispatched content update event');
       }
-
-      console.log('MaritalStaysEditor: Successfully force saved correct content with new image');
       
-      // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
-      const event = new CustomEvent('maritalStaysContentUpdated');
-      window.dispatchEvent(event);
-      console.log('MaritalStaysEditor: Dispatched content update event');
-      
-      setContent(correctContent);
-    } catch (error) {
-      console.error('MaritalStaysEditor: Error in force save:', error);
-    }
-  };
-
-  const loadContent = async () => {
-    try {
-      console.log('MaritalStaysEditor: Attempting to load content from Supabase');
-      setIsLoading(true);
-      
+      // Teraz načítame obsah z databázy
       const { data, error } = await supabase
         .from('marital_stays_content')
         .select('*')
@@ -137,7 +122,7 @@ export const MaritalStaysEditor = () => {
       if (error) {
         console.error('MaritalStaysEditor: Error loading content from Supabase:', error);
         console.log('MaritalStaysEditor: Using default content due to error');
-        setContent({...maritalStaysData});
+        setContent(correctContent);
         setIsLoading(false);
         return;
       }
@@ -147,18 +132,18 @@ export const MaritalStaysEditor = () => {
         // Safe type casting for images from Json to our interface
         const images = Array.isArray(data.images) 
           ? (data.images as unknown as MaritalStayImage[])
-          : maritalStaysData.images;
+          : correctContent.images;
         
         const convertedContent: MaritalStayContent = {
-          title: data.title || maritalStaysData.title,
-          description: data.description || maritalStaysData.description,
-          external_link: data.external_link || maritalStaysData.external_link,
-          images: images.length >= 3 ? images : maritalStaysData.images
+          title: data.title || correctContent.title,
+          description: data.description || correctContent.description,
+          external_link: data.external_link || correctContent.external_link,
+          images: images.length >= 3 ? images : correctContent.images
         };
         setContent(convertedContent);
       } else {
-        console.log('MaritalStaysEditor: No content found in Supabase, initializing with defaults');
-        setContent({...maritalStaysData});
+        console.log('MaritalStaysEditor: No content found in Supabase, using correct content');
+        setContent(correctContent);
       }
     } catch (error) {
       console.error('MaritalStaysEditor: Error loading content:', error);
