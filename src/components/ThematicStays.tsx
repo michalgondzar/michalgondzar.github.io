@@ -2,9 +2,43 @@
 import { Heart, Users, Coffee } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useThematicStays } from "@/hooks/useThematicStays";
+import { useEffect, useState } from "react";
 
 const ThematicStays = () => {
   const { stays, updateCounter } = useThematicStays();
+  const [forceRenderKey, setForceRenderKey] = useState(0);
+
+  // Additional effect to listen for external updates
+  useEffect(() => {
+    const handleExternalUpdate = () => {
+      console.log('External update detected in ThematicStays');
+      setForceRenderKey(prev => prev + 1);
+    };
+
+    // Listen for multiple types of update events
+    window.addEventListener('thematicStaysUpdated', handleExternalUpdate);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'apartmentThematicStays') {
+        handleExternalUpdate();
+      }
+    });
+
+    // BroadcastChannel listener
+    let broadcastChannel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      broadcastChannel = new BroadcastChannel('thematic-stays-updates');
+      broadcastChannel.addEventListener('message', handleExternalUpdate);
+    }
+
+    return () => {
+      window.removeEventListener('thematicStaysUpdated', handleExternalUpdate);
+      window.removeEventListener('storage', handleExternalUpdate);
+      if (broadcastChannel) {
+        broadcastChannel.removeEventListener('message', handleExternalUpdate);
+        broadcastChannel.close();
+      }
+    };
+  }, []);
 
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
@@ -15,8 +49,8 @@ const ThematicStays = () => {
     }
   };
 
-  // Force re-render with unique keys
-  const renderKey = `stays-${updateCounter}-${Date.now()}`;
+  // Enhanced render key for forcing updates
+  const renderKey = `stays-${updateCounter}-${forceRenderKey}-${Date.now()}`;
 
   return (
     <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50" key={renderKey}>
@@ -33,7 +67,7 @@ const ThematicStays = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {stays.map((stay, index) => {
             const IconComponent = getIconComponent(stay.icon);
-            const uniqueKey = `${stay.id}-${updateCounter}-${index}`;
+            const uniqueKey = `${stay.id}-${updateCounter}-${forceRenderKey}-${index}`;
             
             return (
               <Card key={uniqueKey} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">

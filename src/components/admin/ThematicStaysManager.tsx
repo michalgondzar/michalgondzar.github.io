@@ -74,27 +74,61 @@ const ThematicStaysManager = () => {
   };
 
   const handleSave = () => {
-    // Force a stronger update by triggering multiple events
-    const staysData = JSON.stringify(stays);
-    localStorage.setItem('apartmentThematicStays', staysData);
+    // Generate new version and save with timestamp
+    const timestamp = Date.now();
+    const versionedData = {
+      data: stays,
+      version: timestamp,
+      lastUpdated: new Date().toISOString()
+    };
     
-    // Enhanced mobile support - force page refresh after save
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      setTimeout(() => {
-        console.log('Mobile device detected, forcing page refresh after save...');
-        window.location.reload();
-      }, 1000);
-    }
+    // Save to localStorage with versioning
+    localStorage.setItem('apartmentThematicStays', JSON.stringify(stays));
+    localStorage.setItem('apartmentThematicStaysVersion', timestamp.toString());
+    localStorage.setItem('apartmentThematicStaysLastUpdate', new Date().toISOString());
     
-    // Multiple event dispatch
-    window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: stays }));
+    // Multiple broadcast methods for cross-device sync
+    const updateData = { stays, version: timestamp, timestamp };
+    
+    // Method 1: Storage events
     window.dispatchEvent(new StorageEvent('storage', {
       key: 'apartmentThematicStays',
-      newValue: staysData,
+      newValue: JSON.stringify(stays),
       storageArea: localStorage
     }));
     
-    toast.success("Tematické pobyty boli uložené");
+    // Method 2: Custom events
+    window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updateData }));
+    
+    // Method 3: BroadcastChannel
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('thematic-stays-updates');
+      channel.postMessage(updateData);
+      channel.close();
+    }
+    
+    // Method 4: Force page refresh on mobile after delay
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Show success message first
+      toast.success("Tematické pobyty boli uložené - stránka sa obnoví");
+      
+      // Force refresh after short delay
+      setTimeout(() => {
+        console.log('Mobile device detected, forcing page refresh...');
+        window.location.reload();
+      }, 1500);
+    } else {
+      toast.success("Tematické pobyty boli uložené");
+      
+      // For desktop, trigger multiple update events
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updateData }));
+      }, 500);
+    }
+    
+    console.log('Saved thematic stays with enhanced sync:', updateData);
   };
 
   const getIconComponent = (iconName: string) => {
