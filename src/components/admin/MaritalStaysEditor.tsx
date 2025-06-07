@@ -56,6 +56,70 @@ export const MaritalStaysEditor = () => {
     loadContent();
   }, []);
 
+  // Automaticky uložiť aktualizovaný obsah pri prvom načítaní
+  useEffect(() => {
+    if (!isLoading) {
+      saveUpdatedContent();
+    }
+  }, [isLoading]);
+
+  const saveUpdatedContent = async () => {
+    try {
+      console.log('MaritalStaysEditor: Auto-saving updated content with new image');
+      
+      const updatedContent = {
+        ...maritalStaysData,
+        images: [
+          {
+            id: 1,
+            src: "/lovable-uploads/bca50a53-13e8-4ca3-b4ba-502f35579c65.png",
+            alt: "Manželský pobyt",
+            description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
+          },
+          {
+            id: 2,
+            src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            alt: "Rodinný pobyt",
+            description: "Akčný rodinný pobyt plný dobrodružstv pre celú rodinu. Obsahuje 3 noci v apartmáne, raňajky, vstupy do aquaparku, rafting na Váhu, návštevu Bojnického zámku a interaktívne workshopy pre deti. Program je prispôsobený rodinám s deťmi od 6 rokov."
+          },
+          {
+            id: 3,
+            src: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            alt: "Pobyt v komôrke",
+            description: "Jedinečný pobyt v štýlovej komôrke pre tých, ktorí hľadajú niečo výnimočné. Obsahuje 1 noc v autenticky zariadenom priestore, raňajky, degustáciu miestnych špecialít a sprievodcu po historických miestach. Ideálne pre páry hľadajúce nekonvenčný zážitok."
+          }
+        ]
+      };
+
+      const { error } = await supabase
+        .from('marital_stays_content')
+        .upsert({
+          id: 1,
+          title: updatedContent.title,
+          description: updatedContent.description,
+          external_link: updatedContent.external_link,
+          images: updatedContent.images as any,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('MaritalStaysEditor: Error auto-saving updated content:', error);
+        return;
+      }
+
+      console.log('MaritalStaysEditor: Successfully auto-saved updated content');
+      
+      // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
+      const event = new CustomEvent('maritalStaysContentUpdated');
+      window.dispatchEvent(event);
+      console.log('MaritalStaysEditor: Dispatched content update event');
+      
+      setContent(updatedContent);
+    } catch (error) {
+      console.error('MaritalStaysEditor: Error in auto-save:', error);
+    }
+  };
+
   const loadContent = async () => {
     try {
       console.log('MaritalStaysEditor: Attempting to load content from Supabase');
