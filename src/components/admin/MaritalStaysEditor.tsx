@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,9 @@ interface MaritalStayContent {
 
 export const MaritalStaysEditor = () => {
   const [content, setContent] = useState<MaritalStayContent>({
-    ...maritalStaysData,
+    title: "Tematické pobyty",
+    description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
+    external_link: "https://www.manzelkepobyty.sk",
     images: [
       {
         id: 1,
@@ -51,17 +54,16 @@ export const MaritalStaysEditor = () => {
   const [newImageDescription, setNewImageDescription] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Načítanie obsahu z Supabase pri načítaní komponenty
   useEffect(() => {
-    loadContent();
+    initializeContent();
   }, []);
 
-  const loadContent = async () => {
+  const initializeContent = async () => {
     try {
-      console.log('MaritalStaysEditor: Attempting to load content from Supabase');
+      console.log('MaritalStaysEditor: Initializing content with correct image');
       setIsLoading(true);
       
-      // Najprv uložíme správny obsah s novou fotkou
+      // Definícia správneho obsahu s novou fotkou
       const correctContent = {
         title: "Tematické pobyty",
         description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -88,66 +90,66 @@ export const MaritalStaysEditor = () => {
         ]
       };
 
-      console.log('MaritalStaysEditor: Saving correct content with new image to database');
+      // Najprv vymazať existujúce dáta a uložiť nové
+      console.log('MaritalStaysEditor: Deleting old content and saving new');
       
-      const { error: saveError } = await supabase
+      await supabase
         .from('marital_stays_content')
-        .upsert({
+        .delete()
+        .eq('id', 1);
+
+      const { error: insertError } = await supabase
+        .from('marital_stays_content')
+        .insert({
           id: 1,
           title: correctContent.title,
           description: correctContent.description,
           external_link: correctContent.external_link,
           images: correctContent.images as any,
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
 
-      if (saveError) {
-        console.error('MaritalStaysEditor: Error saving correct content:', saveError);
+      if (insertError) {
+        console.error('MaritalStaysEditor: Error inserting content:', insertError);
+        setContent(correctContent);
       } else {
-        console.log('MaritalStaysEditor: Successfully saved correct content with new image');
+        console.log('MaritalStaysEditor: Successfully saved correct content');
+        setContent(correctContent);
         
-        // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
+        // Odoslanie udalosti pre obnovenie
         const event = new CustomEvent('maritalStaysContentUpdated');
         window.dispatchEvent(event);
-        console.log('MaritalStaysEditor: Dispatched content update event');
       }
       
-      // Teraz načítame obsah z databázy
-      const { data, error } = await supabase
-        .from('marital_stays_content')
-        .select('*')
-        .eq('id', 1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('MaritalStaysEditor: Error loading content from Supabase:', error);
-        console.log('MaritalStaysEditor: Using default content due to error');
-        setContent(correctContent);
-        setIsLoading(false);
-        return;
-      }
-
-      if (data) {
-        console.log('MaritalStaysEditor: Successfully loaded content from Supabase:', data);
-        // Safe type casting for images from Json to our interface
-        const images = Array.isArray(data.images) 
-          ? (data.images as unknown as MaritalStayImage[])
-          : correctContent.images;
-        
-        const convertedContent: MaritalStayContent = {
-          title: data.title || correctContent.title,
-          description: data.description || correctContent.description,
-          external_link: data.external_link || correctContent.external_link,
-          images: images.length >= 3 ? images : correctContent.images
-        };
-        setContent(convertedContent);
-      } else {
-        console.log('MaritalStaysEditor: No content found in Supabase, using correct content');
-        setContent(correctContent);
-      }
     } catch (error) {
-      console.error('MaritalStaysEditor: Error loading content:', error);
-      setContent({...maritalStaysData});
+      console.error('MaritalStaysEditor: Error initializing content:', error);
+      // Použiť správny obsah aj v prípade chyby
+      setContent({
+        title: "Tematické pobyty",
+        description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
+        external_link: "https://www.manzelkepobyty.sk",
+        images: [
+          {
+            id: 1,
+            src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
+            alt: "Manželský pobyt",
+            description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
+          },
+          {
+            id: 2,
+            src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            alt: "Rodinný pobyt",
+            description: "Akčný rodinný pobyt plný dobrodružstv pre celú rodinu. Obsahuje 3 noci v apartmáne, raňajky, vstupy do aquaparku, rafting na Váhu, návštevu Bojnického zámku a interaktívne workshopy pre deti. Program je prispôsobený rodinám s deťmi od 6 rokov."
+          },
+          {
+            id: 3,
+            src: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            alt: "Pobyt v komôrke",
+            description: "Jedinečný pobyt v štýlovej komôrke pre tých, ktorí hľadajú niečo výnimočné. Obsahuje 1 noc v autenticky zariadenom priestore, raňajky, degustáciu miestnych špecialít a sprievodcu po historických miestach. Ideálne pre páry hľadajúce nekonvenčný zážitok."
+          }
+        ]
+      });
     } finally {
       setIsLoading(false);
     }

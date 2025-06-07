@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah tematických pobytov s novou fotkou páru
+// Predvolený obsah s novou fotkou
 export const maritalStaysData = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -49,10 +49,9 @@ const MaritalStays = () => {
   const [content, setContent] = useState<MaritalStayContent>(maritalStaysData);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Funkcia na načítanie obsahu z Supabase
   const loadContent = async () => {
     try {
-      console.log('MaritalStays: Attempting to load content from Supabase');
+      console.log('MaritalStays: Loading content from database');
       setIsLoading(true);
       
       const { data, error } = await supabase
@@ -62,16 +61,14 @@ const MaritalStays = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('MaritalStays: Error loading content from Supabase:', error);
-        console.log('MaritalStays: Using default content due to error');
+        console.error('MaritalStays: Error loading content:', error);
         setContent(maritalStaysData);
         setIsLoading(false);
         return;
       }
 
       if (data) {
-        console.log('MaritalStays: Successfully loaded content from Supabase:', data);
-        // Safe type casting for images from Json to our interface
+        console.log('MaritalStays: Successfully loaded content from database:', data);
         const images = Array.isArray(data.images) 
           ? (data.images as unknown as MaritalStayImage[])
           : maritalStaysData.images;
@@ -84,7 +81,7 @@ const MaritalStays = () => {
         };
         setContent(convertedContent);
       } else {
-        console.log('MaritalStays: No content found in Supabase, using defaults');
+        console.log('MaritalStays: No content found, using defaults');
         setContent(maritalStaysData);
       }
     } catch (error) {
@@ -95,13 +92,11 @@ const MaritalStays = () => {
     }
   };
 
-  // Load content from Supabase on component mount
   useEffect(() => {
     loadContent();
 
-    // Listen for content updates from admin panel
     const handleContentUpdate = () => {
-      console.log('MaritalStays: Received content update event');
+      console.log('MaritalStays: Received content update event, reloading...');
       loadContent();
     };
 
