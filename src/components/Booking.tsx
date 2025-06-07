@@ -29,6 +29,7 @@ const Booking = () => {
   const [guests, setGuests] = useState("2");
   const [selectedStay, setSelectedStay] = useState("");
   const [stayOptions, setStayOptions] = useState(DEFAULT_STAY_OPTIONS);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const { contactData } = useContact();
   const [pricing, setPricing] = useState({
     lowSeason: {
@@ -57,27 +58,54 @@ const Booking = () => {
     }
   }, []);
 
-  // Load thematic stays data
+  // Load thematic stays data with enhanced mobile support
   useEffect(() => {
     loadStayOptions();
     
-    // Listen for updates from admin panel
+    // Listen for updates from admin panel with multiple event types
     const handleStorageChange = () => {
+      console.log('Storage change detected in booking, reloading stay options...');
+      loadStayOptions();
+      setForceUpdate(prev => prev + 1);
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Page became visible in booking, checking for updates...');
+        loadStayOptions();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('Window focused in booking, checking for updates...');
       loadStayOptions();
     };
 
+    // Multiple event listeners to catch updates reliably
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('thematicStaysUpdated', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Periodic check every 2 seconds for mobile reliability
+    const intervalId = setInterval(() => {
+      loadStayOptions();
+    }, 2000);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('thematicStaysUpdated', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
     };
   }, []);
 
   const loadStayOptions = () => {
     try {
       const savedStays = localStorage.getItem('apartmentThematicStays');
+      console.log('Loading stay options from localStorage:', savedStays);
+      
       if (savedStays) {
         const parsedStays: ThematicStay[] = JSON.parse(savedStays);
         const options = parsedStays.map(stay => ({
@@ -85,15 +113,17 @@ const Booking = () => {
           label: stay.title,
           description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
         }));
-        setStayOptions(options);
-        console.log('Loaded stay options from localStorage:', options);
+        console.log('Updated stay options:', options);
+        
+        // Force re-render by creating new array reference
+        setStayOptions([...options]);
       } else {
         console.log('No saved thematic stays, using defaults');
-        setStayOptions(DEFAULT_STAY_OPTIONS);
+        setStayOptions([...DEFAULT_STAY_OPTIONS]);
       }
     } catch (error) {
       console.error('Error loading stay options:', error);
-      setStayOptions(DEFAULT_STAY_OPTIONS);
+      setStayOptions([...DEFAULT_STAY_OPTIONS]);
     }
   };
 
@@ -169,17 +199,17 @@ const Booking = () => {
                   />
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-3" key={`stay-options-${forceUpdate}`}>
                   <Label className="flex items-center gap-2">
                     <Heart className="h-4 w-4 text-pink-500" />
                     Typ pobytu
                   </Label>
                   <RadioGroup value={selectedStay} onValueChange={setSelectedStay}>
                     {stayOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
-                        <RadioGroupItem value={option.id} id={option.id} />
+                      <div key={`${option.id}-${forceUpdate}`} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
+                        <RadioGroupItem value={option.id} id={`${option.id}-${forceUpdate}`} />
                         <div className="flex-1">
-                          <Label htmlFor={option.id} className="font-medium cursor-pointer">
+                          <Label htmlFor={`${option.id}-${forceUpdate}`} className="font-medium cursor-pointer">
                             {option.label}
                           </Label>
                           <p className="text-sm text-gray-500">{option.description}</p>

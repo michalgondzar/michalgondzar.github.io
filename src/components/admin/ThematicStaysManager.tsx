@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,9 +78,31 @@ const ThematicStaysManager = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedStays));
       console.log('Saved thematic stays:', updatedStays);
       
-      // Trigger events for component refresh
-      window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updatedStays }));
-      window.dispatchEvent(new Event('storage'));
+      // Enhanced event triggering for better mobile support
+      const customEvent = new CustomEvent('thematicStaysUpdated', { 
+        detail: updatedStays,
+        bubbles: true 
+      });
+      window.dispatchEvent(customEvent);
+      
+      // Force storage event for same-window updates
+      const storageEvent = new StorageEvent('storage', {
+        key: STORAGE_KEY,
+        newValue: JSON.stringify(updatedStays),
+        storageArea: localStorage
+      });
+      window.dispatchEvent(storageEvent);
+      
+      // Additional custom event for cross-component communication
+      window.dispatchEvent(new Event('apartmentDataUpdated'));
+      
+      // Force page refresh on mobile devices for reliability
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+          console.log('Mobile device detected, forcing page refresh...');
+          window.location.reload();
+        }, 500);
+      }
       
       toast.success("Tematické pobyty boli uložené");
     } catch (error) {
