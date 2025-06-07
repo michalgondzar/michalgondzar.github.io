@@ -7,115 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Heart, Users, Coffee, Upload, Save } from "lucide-react";
 import { useOtherImagesManager } from "@/hooks/useOtherImagesManager";
-
-interface ThematicStay {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  icon: string;
-  features: string[];
-}
-
-const STORAGE_KEY = 'apartmentThematicStays';
-
-const DEFAULT_STAYS: ThematicStay[] = [
-  {
-    id: "manzelsky",
-    title: "Manželský pobyt",
-    description: "Romantický pobyt pre páry s možnosťou relaxu a súkromia. Ideálny na oslavu výročia alebo jednoducho na strávenie kvalitného času spolu.",
-    image: "/lovable-uploads/0b235c75-170d-4c29-b94b-ea1fc022003f.png",
-    icon: "Heart",
-    features: ["Romantická atmosféra", "Súkromie", "Relaxácia pre dvoch"]
-  },
-  {
-    id: "rodinny",
-    title: "Rodinný pobyt",
-    description: "Pobyt vhodný pre celú rodinu s deťmi. Priestranný apartmán s pohodlným ubytovaním a blízkosťou k rodinným aktivitám.",
-    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop",
-    icon: "Users",
-    features: ["Vhodné pre deti", "Priestranný apartmán", "Rodinné aktivity"]
-  },
-  {
-    id: "komorka",
-    title: "Pobyt v komôrke",
-    description: "Exkluzívny a pokojný pobyt v tichej časti apartmánu. Ideálny pre tých, ktorí hľadajú úplné súkromie a relaxáciu.",
-    image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop",
-    icon: "Coffee",
-    features: ["Absolútne súkromie", "Tichá lokalita", "Relaxačná atmosféra"]
-  }
-];
+import { useThematicStays } from "@/hooks/useThematicStays";
 
 const ThematicStaysManager = () => {
-  const [stays, setStays] = useState<ThematicStay[]>(DEFAULT_STAYS);
+  const { stays, updateStays } = useThematicStays();
   const [editingStay, setEditingStay] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   const { uploadImage } = useOtherImagesManager();
 
-  useEffect(() => {
-    loadStays();
-  }, []);
-
-  const loadStays = () => {
-    try {
-      const savedStays = localStorage.getItem(STORAGE_KEY);
-      if (savedStays) {
-        const parsedStays = JSON.parse(savedStays);
-        setStays(parsedStays);
-        console.log('Loaded thematic stays:', parsedStays);
-      } else {
-        console.log('No saved thematic stays, using defaults');
-        saveStays(DEFAULT_STAYS);
-      }
-    } catch (error) {
-      console.error('Error loading thematic stays:', error);
-      setStays(DEFAULT_STAYS);
-    }
-  };
-
-  const saveStays = (updatedStays: ThematicStay[]) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedStays));
-      console.log('Saved thematic stays:', updatedStays);
-      
-      // Enhanced event triggering for better mobile support
-      const customEvent = new CustomEvent('thematicStaysUpdated', { 
-        detail: updatedStays,
-        bubbles: true 
-      });
-      window.dispatchEvent(customEvent);
-      
-      // Force storage event for same-window updates
-      const storageEvent = new StorageEvent('storage', {
-        key: STORAGE_KEY,
-        newValue: JSON.stringify(updatedStays),
-        storageArea: localStorage
-      });
-      window.dispatchEvent(storageEvent);
-      
-      // Additional custom event for cross-component communication
-      window.dispatchEvent(new Event('apartmentDataUpdated'));
-      
-      // Force page refresh on mobile devices for reliability
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        setTimeout(() => {
-          console.log('Mobile device detected, forcing page refresh...');
-          window.location.reload();
-        }, 500);
-      }
-      
-      toast.success("Tematické pobyty boli uložené");
-    } catch (error) {
-      console.error('Error saving thematic stays:', error);
-      toast.error("Chyba pri ukladaní tematických pobytov");
-    }
-  };
-
-  const updateStayField = (stayId: string, field: keyof ThematicStay, value: string | string[]) => {
+  const updateStayField = (stayId: string, field: keyof typeof stays[0], value: string | string[]) => {
     const updatedStays = stays.map(stay => 
       stay.id === stayId ? { ...stay, [field]: value } : stay
     );
-    setStays(updatedStays);
+    updateStays(updatedStays);
   };
 
   const updateFeature = (stayId: string, featureIndex: number, value: string) => {
@@ -127,14 +31,14 @@ const ThematicStaysManager = () => {
       }
       return stay;
     });
-    setStays(updatedStays);
+    updateStays(updatedStays);
   };
 
   const addFeature = (stayId: string) => {
     const updatedStays = stays.map(stay => 
       stay.id === stayId ? { ...stay, features: [...stay.features, "Nová vlastnosť"] } : stay
     );
-    setStays(updatedStays);
+    updateStays(updatedStays);
   };
 
   const removeFeature = (stayId: string, featureIndex: number) => {
@@ -145,7 +49,7 @@ const ThematicStaysManager = () => {
       }
       return stay;
     });
-    setStays(updatedStays);
+    updateStays(updatedStays);
   };
 
   const handleImageUpload = async (stayId: string, file: File) => {
@@ -169,6 +73,30 @@ const ThematicStaysManager = () => {
     }
   };
 
+  const handleSave = () => {
+    // Force a stronger update by triggering multiple events
+    const staysData = JSON.stringify(stays);
+    localStorage.setItem('apartmentThematicStays', staysData);
+    
+    // Enhanced mobile support - force page refresh after save
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        console.log('Mobile device detected, forcing page refresh after save...');
+        window.location.reload();
+      }, 1000);
+    }
+    
+    // Multiple event dispatch
+    window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: stays }));
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'apartmentThematicStays',
+      newValue: staysData,
+      storageArea: localStorage
+    }));
+    
+    toast.success("Tematické pobyty boli uložené");
+  };
+
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
       case 'Heart': return Heart;
@@ -185,7 +113,7 @@ const ThematicStaysManager = () => {
           <h2 className="text-2xl font-bold">Tematické pobyty</h2>
           <p className="text-gray-600">Upravte texty a obrázky pre jednotlivé typy pobytov</p>
         </div>
-        <Button onClick={() => saveStays(stays)} className="flex items-center gap-2">
+        <Button onClick={handleSave} className="flex items-center gap-2">
           <Save className="h-4 w-4" />
           Uložiť zmeny
         </Button>

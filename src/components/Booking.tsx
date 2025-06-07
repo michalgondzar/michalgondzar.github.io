@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar, Euro, Users, Clock, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useContact } from "@/contexts/ContactContext";
+import { useThematicStays } from "@/hooks/useThematicStays";
 
 interface ThematicStay {
   id: string;
@@ -28,9 +29,9 @@ const Booking = () => {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("2");
   const [selectedStay, setSelectedStay] = useState("");
-  const [stayOptions, setStayOptions] = useState(DEFAULT_STAY_OPTIONS);
-  const [forceUpdate, setForceUpdate] = useState(0);
   const { contactData } = useContact();
+  const { stays, updateCounter } = useThematicStays();
+  
   const [pricing, setPricing] = useState({
     lowSeason: {
       weekday: "45",
@@ -58,74 +59,12 @@ const Booking = () => {
     }
   }, []);
 
-  // Load thematic stays data with enhanced mobile support
-  useEffect(() => {
-    loadStayOptions();
-    
-    // Listen for updates from admin panel with multiple event types
-    const handleStorageChange = () => {
-      console.log('Storage change detected in booking, reloading stay options...');
-      loadStayOptions();
-      setForceUpdate(prev => prev + 1);
-    };
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('Page became visible in booking, checking for updates...');
-        loadStayOptions();
-      }
-    };
-
-    const handleFocus = () => {
-      console.log('Window focused in booking, checking for updates...');
-      loadStayOptions();
-    };
-
-    // Multiple event listeners to catch updates reliably
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('thematicStaysUpdated', handleStorageChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    // Periodic check every 2 seconds for mobile reliability
-    const intervalId = setInterval(() => {
-      loadStayOptions();
-    }, 2000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('thematicStaysUpdated', handleStorageChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-      clearInterval(intervalId);
-    };
-  }, []);
-
-  const loadStayOptions = () => {
-    try {
-      const savedStays = localStorage.getItem('apartmentThematicStays');
-      console.log('Loading stay options from localStorage:', savedStays);
-      
-      if (savedStays) {
-        const parsedStays: ThematicStay[] = JSON.parse(savedStays);
-        const options = parsedStays.map(stay => ({
-          id: stay.id,
-          label: stay.title,
-          description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
-        }));
-        console.log('Updated stay options:', options);
-        
-        // Force re-render by creating new array reference
-        setStayOptions([...options]);
-      } else {
-        console.log('No saved thematic stays, using defaults');
-        setStayOptions([...DEFAULT_STAY_OPTIONS]);
-      }
-    } catch (error) {
-      console.error('Error loading stay options:', error);
-      setStayOptions([...DEFAULT_STAY_OPTIONS]);
-    }
-  };
+  // Convert thematic stays to booking options
+  const stayOptions = stays.length > 0 ? stays.map(stay => ({
+    id: stay.id,
+    label: stay.title,
+    description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
+  })) : DEFAULT_STAY_OPTIONS;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,8 +79,10 @@ const Booking = () => {
     toast.success("Nezáväzná rezervácia bola odoslaná!");
   };
 
+  const renderKey = `booking-${updateCounter}-${Date.now()}`;
+
   return (
-    <section id="rezervacia" className="py-16 bg-gradient-to-br from-blue-50 to-white">
+    <section id="rezervacia" className="py-16 bg-gradient-to-br from-blue-50 to-white" key={renderKey}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
@@ -199,23 +140,26 @@ const Booking = () => {
                   />
                 </div>
                 
-                <div className="space-y-3" key={`stay-options-${forceUpdate}`}>
+                <div className="space-y-3" key={`stay-options-${updateCounter}`}>
                   <Label className="flex items-center gap-2">
                     <Heart className="h-4 w-4 text-pink-500" />
                     Typ pobytu
                   </Label>
                   <RadioGroup value={selectedStay} onValueChange={setSelectedStay}>
-                    {stayOptions.map((option) => (
-                      <div key={`${option.id}-${forceUpdate}`} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
-                        <RadioGroupItem value={option.id} id={`${option.id}-${forceUpdate}`} />
-                        <div className="flex-1">
-                          <Label htmlFor={`${option.id}-${forceUpdate}`} className="font-medium cursor-pointer">
-                            {option.label}
-                          </Label>
-                          <p className="text-sm text-gray-500">{option.description}</p>
+                    {stayOptions.map((option, index) => {
+                      const uniqueKey = `${option.id}-${updateCounter}-${index}`;
+                      return (
+                        <div key={uniqueKey} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
+                          <RadioGroupItem value={option.id} id={uniqueKey} />
+                          <div className="flex-1">
+                            <Label htmlFor={uniqueKey} className="font-medium cursor-pointer">
+                              {option.label}
+                            </Label>
+                            <p className="text-sm text-gray-500">{option.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </RadioGroup>
                 </div>
                 
