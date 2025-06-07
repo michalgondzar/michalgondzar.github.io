@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// NOVÝ obsah s novou fotkou
+// Správny obsah s novou fotkou
 export const maritalStaysData = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -49,15 +49,15 @@ const MaritalStays = () => {
   const [content, setContent] = useState<MaritalStayContent>(maritalStaysData);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadContentWithNewPhoto = async () => {
+  const loadContent = async () => {
     try {
-      console.log('MaritalStays: Loading with FORCED new photo');
+      console.log('MaritalStays: Loading content with correct photo');
       setIsLoading(true);
       
-      // Vždy použiť nové dáta s novou fotkou
+      // Vždy použiť správne dáta
       setContent(maritalStaysData);
       
-      // Pokus načítať z databázy, ale vždy použiť novú fotku pre Manželský pobyt
+      // Pokús načítať z databázy, ale vždy použiť správnu fotku
       const { data, error } = await supabase
         .from('marital_stays_content')
         .select('*')
@@ -65,26 +65,23 @@ const MaritalStays = () => {
         .maybeSingle();
 
       if (data && !error) {
-        console.log('Loaded from database, but FORCING new photo');
+        console.log('Loaded from database, forcing correct photo');
         const images = Array.isArray(data.images) 
           ? (data.images as unknown as MaritalStayImage[])
           : maritalStaysData.images;
         
-        // VŽDY nahradiť prvý obrázok novým obrázkom
-        const updatedImages = images.map((img, index) => 
+        // VŽDY nahradiť prvý obrázok správnou fotkou
+        const correctedImages = images.map((img, index) => 
           index === 0 ? maritalStaysData.images[0] : img
         );
         
-        const convertedContent: MaritalStayContent = {
+        const correctedContent: MaritalStayContent = {
           title: data.title || maritalStaysData.title,
           description: data.description || maritalStaysData.description,
           external_link: data.external_link || maritalStaysData.external_link,
-          images: updatedImages
+          images: correctedImages
         };
-        setContent(convertedContent);
-      } else {
-        console.log('Using default data with new photo');
-        setContent(maritalStaysData);
+        setContent(correctedContent);
       }
     } catch (error) {
       console.error('Error loading content:', error);
@@ -95,11 +92,11 @@ const MaritalStays = () => {
   };
 
   useEffect(() => {
-    loadContentWithNewPhoto();
+    loadContent();
 
     const handleContentUpdate = () => {
-      console.log('MaritalStays: Received update event, reloading with new photo...');
-      loadContentWithNewPhoto();
+      console.log('MaritalStays: Received update event, reloading...');
+      loadContent();
     };
 
     window.addEventListener('maritalStaysContentUpdated', handleContentUpdate);

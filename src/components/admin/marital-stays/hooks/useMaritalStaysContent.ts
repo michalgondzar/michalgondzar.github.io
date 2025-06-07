@@ -17,7 +17,7 @@ interface MaritalStayContent {
   images: MaritalStayImage[];
 }
 
-const FORCE_NEW_CONTENT: MaritalStayContent = {
+const CORRECT_CONTENT: MaritalStayContent = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
   external_link: "https://www.manzelkepobyty.sk",
@@ -44,44 +44,46 @@ const FORCE_NEW_CONTENT: MaritalStayContent = {
 };
 
 export const useMaritalStaysContent = () => {
-  const [content, setContent] = useState<MaritalStayContent>(FORCE_NEW_CONTENT);
+  const [content, setContent] = useState<MaritalStayContent>(CORRECT_CONTENT);
   const [isLoading, setIsLoading] = useState(true);
 
-  const forceCorrectContent = async () => {
+  const loadContent = async () => {
     try {
-      console.log('FORCED UPDATE: Using new photo for Manželský pobyt');
+      console.log('Loading marital stays content...');
       setIsLoading(true);
-
-      // Delete all existing records
-      await supabase.from('marital_stays_content').delete().neq('id', 0);
       
-      // Insert the correct content with new photo
-      const { error: insertError } = await supabase
+      // Vždy použiť správny obsah
+      setContent(CORRECT_CONTENT);
+      
+      // Pokús načítať z databázy, ale vždy použiť správnu fotku
+      const { data, error } = await supabase
         .from('marital_stays_content')
-        .insert({
-          id: 1,
-          title: FORCE_NEW_CONTENT.title,
-          description: FORCE_NEW_CONTENT.description,
-          external_link: FORCE_NEW_CONTENT.external_link,
-          images: FORCE_NEW_CONTENT.images as any,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
 
-      if (insertError) {
-        console.error('Error forcing correct content:', insertError);
-      } else {
-        console.log('SUCCESS: Forced correct content with new photo');
+      if (data && !error) {
+        console.log('Loaded from database, applying correct photo');
+        const images = Array.isArray(data.images) 
+          ? (data.images as unknown as MaritalStayImage[])
+          : CORRECT_CONTENT.images;
         
-        // Trigger refresh
-        window.dispatchEvent(new CustomEvent('maritalStaysContentUpdated'));
+        // Vždy nahradiť prvý obrázok správnou fotkou
+        const correctedImages = images.map((img, index) => 
+          index === 0 ? CORRECT_CONTENT.images[0] : img
+        );
+        
+        const correctedContent: MaritalStayContent = {
+          title: data.title || CORRECT_CONTENT.title,
+          description: data.description || CORRECT_CONTENT.description,
+          external_link: data.external_link || CORRECT_CONTENT.external_link,
+          images: correctedImages
+        };
+        setContent(correctedContent);
       }
-
-      setContent(FORCE_NEW_CONTENT);
-      
     } catch (error) {
-      console.error('Error in forceCorrectContent:', error);
-      setContent(FORCE_NEW_CONTENT);
+      console.error('Error loading content:', error);
+      setContent(CORRECT_CONTENT);
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +91,7 @@ export const useMaritalStaysContent = () => {
 
   const saveContent = async () => {
     try {
-      console.log('Saving content with new photo:', content);
+      console.log('Saving content with correct photo:', content);
       
       const { error } = await supabase
         .from('marital_stays_content')
@@ -108,7 +110,7 @@ export const useMaritalStaysContent = () => {
         return;
       }
 
-      console.log('Successfully saved content with new photo');
+      console.log('Successfully saved content with correct photo');
       
       window.dispatchEvent(new CustomEvent('maritalStaysContentUpdated'));
       toast.success("Sekcia tematických pobytov bola úspešne uložená do databázy");
@@ -152,7 +154,20 @@ export const useMaritalStaysContent = () => {
   };
 
   useEffect(() => {
-    forceCorrectContent();
+    loadContent();
+  }, []);
+
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      console.log('Received update event, reloading...');
+      loadContent();
+    };
+
+    window.addEventListener('maritalStaysContentUpdated', handleContentUpdate);
+    
+    return () => {
+      window.removeEventListener('maritalStaysContentUpdated', handleContentUpdate);
+    };
   }, []);
 
   return {
