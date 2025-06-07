@@ -28,7 +28,7 @@ export const MaritalStaysEditor = () => {
     images: [
       {
         id: 1,
-        src: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+        src: "/lovable-uploads/bca50a53-13e8-4ca3-b4ba-502f35579c65.png",
         alt: "Manželský pobyt",
         description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
       },
