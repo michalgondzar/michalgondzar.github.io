@@ -58,7 +58,16 @@ const Description = () => {
 
       if (data) {
         console.log('Description: Successfully loaded content from Supabase:', data);
-        setContent(data);
+        // Konvertujeme Json typy na správne typy
+        const convertedContent = {
+          title: data.title,
+          subtitle: data.subtitle,
+          paragraph1: data.paragraph1,
+          paragraph2: data.paragraph2,
+          features: Array.isArray(data.features) ? data.features as string[] : apartmentDescription.features,
+          images: Array.isArray(data.images) ? data.images as {src: string, alt: string}[] : apartmentDescription.images
+        };
+        setContent(convertedContent);
       } else {
         console.log('Description: No content found in Supabase, using defaults');
         setContent(apartmentDescription);

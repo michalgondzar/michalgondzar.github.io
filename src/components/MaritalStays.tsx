@@ -47,7 +47,16 @@ const MaritalStays = () => {
 
       if (data) {
         console.log('MaritalStays: Successfully loaded content from Supabase:', data);
-        setContent(data);
+        // Konvertujeme Json typ na správny typ
+        const convertedContent = {
+          title: data.title,
+          description: data.description,
+          external_link: data.external_link,
+          images: Array.isArray(data.images) ? 
+            data.images as {id: number, src: string, alt: string, description: string}[] : 
+            maritalStaysData.images
+        };
+        setContent(convertedContent);
       } else {
         console.log('MaritalStays: No content found in Supabase, using defaults');
         setContent(maritalStaysData);
