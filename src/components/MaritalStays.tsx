@@ -4,23 +4,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah zážitkových pobytov
+// Predvolený obsah tematických pobytov
 export const maritalStaysData = {
-  title: "Zážitkové pobyty",
+  title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
   external_link: "https://www.manzelkepobyty.sk",
   images: [
     {
       id: 1,
       src: "/lovable-uploads/2c593486-67fc-4e6f-9a4c-827cde9f1af7.png",
-      alt: "Romantický pobyt",
+      alt: "Manželský pobyt",
       description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
     },
     {
       id: 2,
       src: "/lovable-uploads/e0d6e731-19cb-4f27-b266-77fa22211eb6.png",
-      alt: "Rodinný dobrodružný pobyt",
+      alt: "Rodinný pobyt",
       description: "Akčný rodinný pobyt plný dobrodružstv pre celú rodinu. Obsahuje 3 noci v apartmáne, raňajky, vstupy do aquaparku, rafting na Váhu, návštevu Bojnického zámku a interaktívne workshopy pre deti. Program je prispôsobený rodinám s deťmi od 6 rokov."
+    },
+    {
+      id: 3,
+      src: "/lovable-uploads/ac2ea6ce-fc8b-4aa8-9d34-c826f7f57310.png",
+      alt: "Pobyt v komôrke",
+      description: "Jedinečný pobyt v štýlovej komôrke pre tých, ktorí hľadajú niečo výnimočné. Obsahuje 1 noc v autenticky zariadenom priestore, raňajky, degustáciu miestnych špecialít a sprievodcu po historických miestach. Ideálne pre páry hľadajúce nekonvenčný zážitok."
     }
   ]
 };
@@ -103,7 +109,7 @@ const MaritalStays = () => {
           </a>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           {content.images.map((image) => (
             <Card key={image.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
               <CardContent className="p-0">

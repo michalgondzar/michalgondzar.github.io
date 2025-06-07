@@ -86,7 +86,7 @@ export const MaritalStaysEditor = () => {
       window.dispatchEvent(event);
       console.log('MaritalStaysEditor: Dispatched content update event');
       
-      toast.success("Sekcia zážitkových pobytov bola úspešne uložená do databázy");
+      toast.success("Sekcia tematických pobytov bola úspešne uložená do databázy");
     } catch (error) {
       console.error('MaritalStaysEditor: Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");
@@ -108,14 +108,14 @@ export const MaritalStaysEditor = () => {
       setNewImageUrl("");
       setNewImageAlt("");
       setNewImageDescription("");
-      toast.success("Obrázok bol pridaný");
+      toast.success("Tematický pobyt bol pridaný");
     }
   };
   
   const removeImage = (imageId: number) => {
     const updatedImages = content.images.filter(img => img.id !== imageId);
     setContent({...content, images: updatedImages});
-    toast.success("Obrázok bol odstránený");
+    toast.success("Tematický pobyt bol odstránený");
   };
 
   const updateImage = (imageId: number, field: 'src' | 'alt' | 'description', value: string) => {
@@ -127,7 +127,7 @@ export const MaritalStaysEditor = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-6">Upraviť sekciu zážitkových pobytov</h2>
+      <h2 className="text-xl font-semibold mb-6">Upraviť sekciu tematických pobytov</h2>
       
       <div className="space-y-6">
         <div>
@@ -160,7 +160,7 @@ export const MaritalStaysEditor = () => {
         </div>
         
         <div>
-          <Label>Obrázky pobytových balíčkov</Label>
+          <Label>Tematické pobyty</Label>
           <div className="space-y-4 mt-2">
             {content.images.map((image) => (
               <div key={image.id} className="border rounded-lg p-4">
@@ -173,7 +173,7 @@ export const MaritalStaysEditor = () => {
                     />
                   </div>
                   <div>
-                    <Label>Názov pobytového balíčka</Label>
+                    <Label>Názov tematického pobytu</Label>
                     <Input 
                       value={image.alt}
                       onChange={(e) => updateImage(image.id, 'alt', e.target.value)}
@@ -181,12 +181,12 @@ export const MaritalStaysEditor = () => {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <Label>Popis pobytového programu (cca 500 znakov)</Label>
+                  <Label>Popis tematického programu (cca 500 znakov)</Label>
                   <Textarea 
                     value={image.description}
                     onChange={(e) => updateImage(image.id, 'description', e.target.value)}
                     rows={6}
-                    placeholder="Detailný popis zážitkového programu - približne 500 znakov..."
+                    placeholder="Detailný popis tematického programu - približne 500 znakov..."
                   />
                   <div className="text-xs text-gray-500 mt-1">
                     Znakov: {image.description?.length || 0}
@@ -210,7 +210,7 @@ export const MaritalStaysEditor = () => {
             ))}
             
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-              <h4 className="font-medium mb-4">Pridať nový pobytový balíček</h4>
+              <h4 className="font-medium mb-4">Pridať nový tematický pobyt</h4>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -222,18 +222,18 @@ export const MaritalStaysEditor = () => {
                     />
                   </div>
                   <div>
-                    <Label>Názov pobytového balíčka</Label>
+                    <Label>Názov tematického pobytu</Label>
                     <Input 
-                      placeholder="Názov balíčka..."
+                      placeholder="Názov pobytu..."
                       value={newImageAlt}
                       onChange={(e) => setNewImageAlt(e.target.value)}
                     />
                   </div>
                 </div>
                 <div>
-                  <Label>Popis pobytového programu (cca 500 znakov)</Label>
+                  <Label>Popis tematického programu (cca 500 znakov)</Label>
                   <Textarea 
-                    placeholder="Detailný popis zážitkového programu - približne 500 znakov..."
+                    placeholder="Detailný popis tematického programu - približne 500 znakov..."
                     value={newImageDescription}
                     onChange={(e) => setNewImageDescription(e.target.value)}
                     rows={6}
@@ -249,7 +249,7 @@ export const MaritalStaysEditor = () => {
                 disabled={!newImageUrl.trim() || !newImageAlt.trim() || !newImageDescription.trim()}
               >
                 <Plus size={16} className="mr-2" />
-                Pridať pobytový balíček
+                Pridať tematický pobyt
               </Button>
             </div>
           </div>
@@ -260,7 +260,7 @@ export const MaritalStaysEditor = () => {
           className="bg-booking-primary hover:bg-booking-secondary flex gap-2"
         >
           <Save size={16} />
-          Uložiť zmeny zážitkových pobytov
+          Uložiť zmeny tematických pobytov
         </Button>
       </div>
     </div>
