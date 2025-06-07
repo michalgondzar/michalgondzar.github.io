@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { maritalStaysData } from "@/components/MaritalStays";
 import { Save, Trash, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,9 +29,9 @@ export const MaritalStaysEditor = () => {
     images: [
       {
         id: 1,
-        src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
+        src: "/lovable-uploads/13d27d76-6e04-41a4-b669-8a6fd4ed09be.png",
         alt: "Manželský pobyt",
-        description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
+        description: "Romantický pobyt pre dvoch. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
       },
       {
         id: 2,
@@ -60,7 +58,7 @@ export const MaritalStaysEditor = () => {
 
   const initializeContent = async () => {
     try {
-      console.log('MaritalStaysEditor: Initializing content with correct image');
+      console.log('MaritalStaysEditor: Forcing correct content with new photo');
       setIsLoading(true);
       
       // Definícia správneho obsahu s novou fotkou
@@ -71,9 +69,9 @@ export const MaritalStaysEditor = () => {
         images: [
           {
             id: 1,
-            src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
+            src: "/lovable-uploads/13d27d76-6e04-41a4-b669-8a6fd4ed09be.png",
             alt: "Manželský pobyt",
-            description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
+            description: "Romantický pobyt pre dvoch. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
           },
           {
             id: 2,
@@ -90,9 +88,7 @@ export const MaritalStaysEditor = () => {
         ]
       };
 
-      // Najprv vymazať existujúce dáta a uložiť nové
-      console.log('MaritalStaysEditor: Deleting old content and saving new');
-      
+      // Vymazať existujúci záznam a uložiť nový s novou fotkou
       await supabase
         .from('marital_stays_content')
         .delete()
@@ -112,18 +108,18 @@ export const MaritalStaysEditor = () => {
 
       if (insertError) {
         console.error('MaritalStaysEditor: Error inserting content:', insertError);
-        setContent(correctContent);
       } else {
-        console.log('MaritalStaysEditor: Successfully saved correct content');
-        setContent(correctContent);
+        console.log('MaritalStaysEditor: Successfully forced correct content with new photo');
         
         // Odoslanie udalosti pre obnovenie
         const event = new CustomEvent('maritalStaysContentUpdated');
         window.dispatchEvent(event);
       }
+
+      setContent(correctContent);
       
     } catch (error) {
-      console.error('MaritalStaysEditor: Error initializing content:', error);
+      console.error('MaritalStaysEditor: Error forcing content:', error);
       // Použiť správny obsah aj v prípade chyby
       setContent({
         title: "Tematické pobyty",
@@ -132,9 +128,9 @@ export const MaritalStaysEditor = () => {
         images: [
           {
             id: 1,
-            src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
+            src: "/lovable-uploads/13d27d76-6e04-41a4-b669-8a6fd4ed09be.png",
             alt: "Manželský pobyt",
-            description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
+            description: "Romantický pobyt pre dvoch. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
           },
           {
             id: 2,
@@ -178,7 +174,6 @@ export const MaritalStaysEditor = () => {
 
       console.log('MaritalStaysEditor: Successfully saved content to Supabase');
       
-      // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
       const event = new CustomEvent('maritalStaysContentUpdated');
       window.dispatchEvent(event);
       console.log('MaritalStaysEditor: Dispatched content update event');
