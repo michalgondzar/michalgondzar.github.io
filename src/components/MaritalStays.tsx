@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Predvolený obsah zážitkových pobytov
 export const maritalStaysData = {
   title: "Zážitkové pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
-  externalLink: "https://www.manzelkepobyty.sk",
+  external_link: "https://www.manzelkepobyty.sk",
   images: [
     {
       id: 1,
@@ -27,27 +28,37 @@ export const maritalStaysData = {
 const MaritalStays = () => {
   const [content, setContent] = useState(maritalStaysData);
 
-  // Funkcia na načítanie obsahu z localStorage
-  const loadContent = () => {
+  // Funkcia na načítanie obsahu z Supabase
+  const loadContent = async () => {
     try {
-      const savedContent = localStorage.getItem('maritalStaysContent');
-      console.log('MaritalStays: Attempting to load content from localStorage');
+      console.log('MaritalStays: Attempting to load content from Supabase');
       
-      if (savedContent) {
-        const parsedContent = JSON.parse(savedContent);
-        console.log('MaritalStays: Successfully loaded content:', parsedContent);
-        setContent(parsedContent);
+      const { data, error } = await supabase
+        .from('marital_stays_content')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('MaritalStays: Error loading content from Supabase:', error);
+        setContent(maritalStaysData);
+        return;
+      }
+
+      if (data) {
+        console.log('MaritalStays: Successfully loaded content from Supabase:', data);
+        setContent(data);
       } else {
-        console.log('MaritalStays: No saved content found, using defaults');
+        console.log('MaritalStays: No content found in Supabase, using defaults');
         setContent(maritalStaysData);
       }
     } catch (error) {
-      console.error('MaritalStays: Error parsing saved content:', error);
+      console.error('MaritalStays: Error loading content:', error);
       setContent(maritalStaysData);
     }
   };
 
-  // Load content from localStorage on component mount
+  // Load content from Supabase on component mount
   useEffect(() => {
     loadContent();
 
@@ -73,7 +84,7 @@ const MaritalStays = () => {
             {content.description}
           </p>
           <a 
-            href={content.externalLink}
+            href={content.external_link}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-booking-primary text-white rounded-lg hover:bg-booking-secondary transition-colors"

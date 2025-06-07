@@ -7,44 +7,77 @@ import { FormLabel } from "@/components/ui/form";
 import { toast } from "sonner";
 import { apartmentDescription } from "@/components/Description";
 import { Save, Trash } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ContentEditor = () => {
   const [content, setContent] = useState({...apartmentDescription});
   const [feature, setFeature] = useState("");
 
-  // Load content from localStorage on component mount
+  // Load content from Supabase on component mount
   useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
     try {
-      const savedContent = localStorage.getItem('apartmentContent');
-      console.log('ContentEditor: Attempting to load content from localStorage');
+      console.log('ContentEditor: Attempting to load content from Supabase');
       
-      if (savedContent) {
-        const parsedContent = JSON.parse(savedContent);
-        console.log('ContentEditor: Successfully loaded content:', parsedContent);
-        setContent(parsedContent);
+      const { data, error } = await supabase
+        .from('apartment_content')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('ContentEditor: Error loading content from Supabase:', error);
+        setContent({...apartmentDescription});
+        return;
+      }
+
+      if (data) {
+        console.log('ContentEditor: Successfully loaded content from Supabase:', data);
+        setContent(data);
       } else {
-        console.log('ContentEditor: No saved content found, using defaults');
+        console.log('ContentEditor: No content found in Supabase, using defaults');
         setContent({...apartmentDescription});
       }
     } catch (error) {
-      console.error('ContentEditor: Error parsing saved content:', error);
+      console.error('ContentEditor: Error loading content:', error);
       setContent({...apartmentDescription});
     }
-  }, []);
+  };
 
-  const saveContentChanges = () => {
+  const saveContentChanges = async () => {
     try {
-      // Save to localStorage
-      const contentToSave = JSON.stringify(content);
-      localStorage.setItem('apartmentContent', contentToSave);
-      console.log('ContentEditor: Successfully saved content to localStorage:', content);
+      console.log('ContentEditor: Saving content to Supabase:', content);
+      
+      const { error } = await supabase
+        .from('apartment_content')
+        .upsert({
+          id: 1,
+          title: content.title,
+          subtitle: content.subtitle,
+          paragraph1: content.paragraph1,
+          paragraph2: content.paragraph2,
+          features: content.features,
+          images: content.images,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('ContentEditor: Error saving content to Supabase:', error);
+        toast.error("Chyba pri ukladaní obsahu do databázy");
+        return;
+      }
+
+      console.log('ContentEditor: Successfully saved content to Supabase');
       
       // Dispatch custom event to notify other components
       const event = new CustomEvent('apartmentContentUpdated');
       window.dispatchEvent(event);
       console.log('ContentEditor: Dispatched content update event');
       
-      toast.success("Zmeny obsahu boli úspešne uložené");
+      toast.success("Zmeny obsahu boli úspešne uložené do databázy");
     } catch (error) {
       console.error('ContentEditor: Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");

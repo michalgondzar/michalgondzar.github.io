@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { maritalStaysData } from "@/components/MaritalStays";
 import { Save, Trash, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const MaritalStaysEditor = () => {
   const [content, setContent] = useState({...maritalStaysData});
@@ -14,39 +15,69 @@ export const MaritalStaysEditor = () => {
   const [newImageAlt, setNewImageAlt] = useState("");
   const [newImageDescription, setNewImageDescription] = useState("");
 
-  // Načítanie obsahu z localStorage pri načítaní komponenty
+  // Načítanie obsahu z Supabase pri načítaní komponenty
   useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
     try {
-      const savedContent = localStorage.getItem('maritalStaysContent');
-      console.log('MaritalStaysEditor: Attempting to load content from localStorage');
+      console.log('MaritalStaysEditor: Attempting to load content from Supabase');
       
-      if (savedContent) {
-        const parsedContent = JSON.parse(savedContent);
-        console.log('MaritalStaysEditor: Successfully loaded content:', parsedContent);
-        setContent(parsedContent);
+      const { data, error } = await supabase
+        .from('marital_stays_content')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('MaritalStaysEditor: Error loading content from Supabase:', error);
+        setContent({...maritalStaysData});
+        return;
+      }
+
+      if (data) {
+        console.log('MaritalStaysEditor: Successfully loaded content from Supabase:', data);
+        setContent(data);
       } else {
-        console.log('MaritalStaysEditor: No saved content found, using defaults');
+        console.log('MaritalStaysEditor: No content found in Supabase, using defaults');
         setContent({...maritalStaysData});
       }
     } catch (error) {
-      console.error('MaritalStaysEditor: Error parsing saved content:', error);
+      console.error('MaritalStaysEditor: Error loading content:', error);
       setContent({...maritalStaysData});
     }
-  }, []);
+  };
 
-  const saveMaritalStaysChanges = () => {
+  const saveMaritalStaysChanges = async () => {
     try {
-      // Uloženie do localStorage
-      const contentToSave = JSON.stringify(content);
-      localStorage.setItem('maritalStaysContent', contentToSave);
-      console.log('MaritalStaysEditor: Successfully saved content to localStorage:', content);
+      console.log('MaritalStaysEditor: Saving content to Supabase:', content);
+      
+      const { error } = await supabase
+        .from('marital_stays_content')
+        .upsert({
+          id: 1,
+          title: content.title,
+          description: content.description,
+          external_link: content.external_link,
+          images: content.images,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('MaritalStaysEditor: Error saving content to Supabase:', error);
+        toast.error("Chyba pri ukladaní obsahu do databázy");
+        return;
+      }
+
+      console.log('MaritalStaysEditor: Successfully saved content to Supabase');
       
       // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
       const event = new CustomEvent('maritalStaysContentUpdated');
       window.dispatchEvent(event);
       console.log('MaritalStaysEditor: Dispatched content update event');
       
-      toast.success("Sekcia zážitkových pobytov bola úspešne uložená");
+      toast.success("Sekcia zážitkových pobytov bola úspešne uložená do databázy");
     } catch (error) {
       console.error('MaritalStaysEditor: Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");
@@ -113,8 +144,8 @@ export const MaritalStaysEditor = () => {
           <Label htmlFor="externalLink">Externý odkaz</Label>
           <Input 
             id="externalLink"
-            value={content.externalLink}
-            onChange={(e) => setContent({...content, externalLink: e.target.value})}
+            value={content.external_link}
+            onChange={(e) => setContent({...content, external_link: e.target.value})}
             placeholder="https://www.manzelkepobyty.sk"
           />
         </div>

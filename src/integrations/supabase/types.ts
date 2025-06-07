@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      apartment_content: {
+        Row: {
+          created_at: string | null
+          features: Json
+          id: number
+          images: Json
+          paragraph1: string
+          paragraph2: string
+          subtitle: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          features?: Json
+          id?: number
+          images?: Json
+          paragraph1: string
+          paragraph2: string
+          subtitle: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          features?: Json
+          id?: number
+          images?: Json
+          paragraph1?: string
+          paragraph2?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contact_info: {
         Row: {
           address: string
@@ -92,6 +128,36 @@ export type Database = {
           created_at?: string | null
           id?: number
           images?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      marital_stays_content: {
+        Row: {
+          created_at: string | null
+          description: string
+          external_link: string
+          id: number
+          images: Json
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          external_link: string
+          id?: number
+          images?: Json
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          external_link?: string
+          id?: number
+          images?: Json
+          title?: string
           updated_at?: string | null
         }
         Relationships: []

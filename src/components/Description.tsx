@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 // Predvolený obsah apartmánu
 export const apartmentDescription = {
@@ -38,27 +39,37 @@ export const apartmentDescription = {
 const Description = () => {
   const [content, setContent] = useState(apartmentDescription);
 
-  // Funkcia na načítanie obsahu z localStorage
-  const loadContent = () => {
+  // Funkcia na načítanie obsahu z Supabase
+  const loadContent = async () => {
     try {
-      const savedContent = localStorage.getItem('apartmentContent');
-      console.log('Description: Attempting to load content from localStorage');
+      console.log('Description: Attempting to load content from Supabase');
       
-      if (savedContent) {
-        const parsedContent = JSON.parse(savedContent);
-        console.log('Description: Successfully loaded content:', parsedContent);
-        setContent(parsedContent);
+      const { data, error } = await supabase
+        .from('apartment_content')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Description: Error loading content from Supabase:', error);
+        setContent(apartmentDescription);
+        return;
+      }
+
+      if (data) {
+        console.log('Description: Successfully loaded content from Supabase:', data);
+        setContent(data);
       } else {
-        console.log('Description: No saved content found, using defaults');
+        console.log('Description: No content found in Supabase, using defaults');
         setContent(apartmentDescription);
       }
     } catch (error) {
-      console.error('Description: Error parsing saved content:', error);
+      console.error('Description: Error loading content:', error);
       setContent(apartmentDescription);
     }
   };
 
-  // Load content from localStorage on component mount
+  // Load content from Supabase on component mount
   useEffect(() => {
     loadContent();
 
