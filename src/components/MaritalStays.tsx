@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah tematických pobytov
+// Predvolený obsah tematických pobytov s aktualizovanou fotkou
 export const maritalStaysData = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
