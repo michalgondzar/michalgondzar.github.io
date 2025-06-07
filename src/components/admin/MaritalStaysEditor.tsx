@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,9 +55,9 @@ export const MaritalStaysEditor = () => {
 
       if (data) {
         console.log('MaritalStaysEditor: Successfully loaded content from Supabase:', data);
-        // Proper type casting for images from Json to our interface
+        // Safe type casting for images from Json to our interface
         const images = Array.isArray(data.images) 
-          ? (data.images as MaritalStayImage[])
+          ? (data.images as unknown as MaritalStayImage[])
           : maritalStaysData.images;
         
         const convertedContent: MaritalStayContent = {
@@ -93,7 +92,7 @@ export const MaritalStaysEditor = () => {
           title: maritalStaysData.title,
           description: maritalStaysData.description,
           external_link: maritalStaysData.external_link,
-          images: maritalStaysData.images,
+          images: maritalStaysData.images as any,
           updated_at: new Date().toISOString()
         });
 
@@ -118,7 +117,7 @@ export const MaritalStaysEditor = () => {
           title: content.title,
           description: content.description,
           external_link: content.external_link,
-          images: content.images,
+          images: content.images as any,
           updated_at: new Date().toISOString()
         });
 
