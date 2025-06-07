@@ -33,11 +33,13 @@ export const maritalStaysData = {
 
 const MaritalStays = () => {
   const [content, setContent] = useState(maritalStaysData);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Funkcia na načítanie obsahu z Supabase
   const loadContent = async () => {
     try {
       console.log('MaritalStays: Attempting to load content from Supabase');
+      setIsLoading(true);
       
       const { data, error } = await supabase
         .from('marital_stays_content')
@@ -47,20 +49,22 @@ const MaritalStays = () => {
 
       if (error) {
         console.error('MaritalStays: Error loading content from Supabase:', error);
+        console.log('MaritalStays: Using default content due to error');
         setContent(maritalStaysData);
+        setIsLoading(false);
         return;
       }
 
       if (data) {
         console.log('MaritalStays: Successfully loaded content from Supabase:', data);
-        // Konvertujeme Json typ na správny typ
+        // Konvertujeme Json typ na správny typ a zabezpečíme, že máme tri pobyty
+        const images = Array.isArray(data.images) ? data.images : maritalStaysData.images;
+        
         const convertedContent = {
-          title: data.title,
-          description: data.description,
-          external_link: data.external_link,
-          images: Array.isArray(data.images) ? 
-            data.images as {id: number, src: string, alt: string, description: string}[] : 
-            maritalStaysData.images
+          title: data.title || maritalStaysData.title,
+          description: data.description || maritalStaysData.description,
+          external_link: data.external_link || maritalStaysData.external_link,
+          images: images.length >= 3 ? images : maritalStaysData.images
         };
         setContent(convertedContent);
       } else {
@@ -70,6 +74,8 @@ const MaritalStays = () => {
     } catch (error) {
       console.error('MaritalStays: Error loading content:', error);
       setContent(maritalStaysData);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +95,18 @@ const MaritalStays = () => {
       window.removeEventListener('maritalStaysContentUpdated', handleContentUpdate);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <section id="pobyty" className="section-container bg-gradient-to-br from-booking-primary/5 to-booking-secondary/10">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-sm p-6 md:p-8">
+          <div className="text-center">
+            <p>Načítavam tematické pobyty...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="pobyty" className="section-container bg-gradient-to-br from-booking-primary/5 to-booking-secondary/10">

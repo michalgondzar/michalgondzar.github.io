@@ -14,6 +14,7 @@ export const MaritalStaysEditor = () => {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newImageAlt, setNewImageAlt] = useState("");
   const [newImageDescription, setNewImageDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Načítanie obsahu z Supabase pri načítaní komponenty
   useEffect(() => {
@@ -23,6 +24,7 @@ export const MaritalStaysEditor = () => {
   const loadContent = async () => {
     try {
       console.log('MaritalStaysEditor: Attempting to load content from Supabase');
+      setIsLoading(true);
       
       const { data, error } = await supabase
         .from('marital_stays_content')
@@ -32,29 +34,60 @@ export const MaritalStaysEditor = () => {
 
       if (error) {
         console.error('MaritalStaysEditor: Error loading content from Supabase:', error);
+        console.log('MaritalStaysEditor: Using default content due to error');
         setContent({...maritalStaysData});
+        setIsLoading(false);
         return;
       }
 
       if (data) {
         console.log('MaritalStaysEditor: Successfully loaded content from Supabase:', data);
-        // Konvertujeme Json typ na správny typ
+        // Konvertujeme Json typ na správny typ a zabezpečíme, že máme tri pobyty
+        const images = Array.isArray(data.images) ? data.images : maritalStaysData.images;
+        
         const convertedContent = {
-          title: data.title,
-          description: data.description,
-          external_link: data.external_link,
-          images: Array.isArray(data.images) ? 
-            data.images as {id: number, src: string, alt: string, description: string}[] : 
-            maritalStaysData.images
+          title: data.title || maritalStaysData.title,
+          description: data.description || maritalStaysData.description,
+          external_link: data.external_link || maritalStaysData.external_link,
+          images: images.length >= 3 ? images : maritalStaysData.images
         };
         setContent(convertedContent);
       } else {
-        console.log('MaritalStaysEditor: No content found in Supabase, using defaults');
+        console.log('MaritalStaysEditor: No content found in Supabase, initializing with defaults');
         setContent({...maritalStaysData});
+        // Automaticky uložíme predvolený obsah do databázy
+        await saveDefaultContent();
       }
     } catch (error) {
       console.error('MaritalStaysEditor: Error loading content:', error);
       setContent({...maritalStaysData});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveDefaultContent = async () => {
+    try {
+      console.log('MaritalStaysEditor: Saving default content to Supabase');
+      
+      const { error } = await supabase
+        .from('marital_stays_content')
+        .upsert({
+          id: 1,
+          title: maritalStaysData.title,
+          description: maritalStaysData.description,
+          external_link: maritalStaysData.external_link,
+          images: maritalStaysData.images,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('MaritalStaysEditor: Error saving default content:', error);
+      } else {
+        console.log('MaritalStaysEditor: Default content saved successfully');
+      }
+    } catch (error) {
+      console.error('MaritalStaysEditor: Error in saveDefaultContent:', error);
     }
   };
 
@@ -124,6 +157,14 @@ export const MaritalStaysEditor = () => {
     );
     setContent({...content, images: updatedImages});
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <p>Načítavam editor tematických pobytov...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
