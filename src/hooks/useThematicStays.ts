@@ -37,217 +37,151 @@ const DEFAULT_STAYS: ThematicStay[] = [
   }
 ];
 
-const STORAGE_KEY = 'apartmentThematicStays';
-const VERSION_KEY = 'apartmentThematicStaysVersion';
+const STORAGE_KEY = 'thematicStays';
+const TIMESTAMP_KEY = 'thematicStaysTimestamp';
 
-// Global state management with versioning
+// Global state for cross-component synchronization
 let globalStays: ThematicStay[] = DEFAULT_STAYS;
-let globalVersion = 0;
-let listeners: (() => void)[] = [];
+let globalTimestamp = Date.now();
+let updateListeners: (() => void)[] = [];
 
-const generateVersion = () => Date.now();
+const saveData = (stays: ThematicStay[]) => {
+  const timestamp = Date.now();
+  const dataToSave = {
+    stays,
+    timestamp,
+    version: timestamp
+  };
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+  localStorage.setItem(TIMESTAMP_KEY, timestamp.toString());
+  
+  globalStays = stays;
+  globalTimestamp = timestamp;
+  
+  // Notify all listeners
+  updateListeners.forEach(listener => {
+    try {
+      listener();
+    } catch (error) {
+      console.error('Error in update listener:', error);
+    }
+  });
+  
+  // Trigger storage event for cross-tab communication
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: STORAGE_KEY,
+    newValue: JSON.stringify(dataToSave),
+    storageArea: localStorage
+  }));
+  
+  console.log('Thematic stays saved with timestamp:', timestamp);
+};
 
-const loadFromStorage = (): { stays: ThematicStay[], version: number } => {
+const loadData = (): { stays: ThematicStay[], timestamp: number } => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    const savedVersion = localStorage.getItem(VERSION_KEY);
-    
-    if (saved && savedVersion) {
+    if (saved) {
       const parsed = JSON.parse(saved);
-      const version = parseInt(savedVersion, 10);
-      console.log('Loaded thematic stays from storage:', parsed, 'version:', version);
-      globalStays = parsed;
-      globalVersion = version;
-      return { stays: parsed, version };
+      if (parsed.stays && parsed.timestamp) {
+        globalStays = parsed.stays;
+        globalTimestamp = parsed.timestamp;
+        console.log('Loaded thematic stays:', parsed);
+        return { stays: parsed.stays, timestamp: parsed.timestamp };
+      }
     }
   } catch (error) {
     console.error('Error loading thematic stays:', error);
   }
   
-  // Initialize with default data and version
-  const version = generateVersion();
+  // Return defaults
+  const timestamp = Date.now();
   globalStays = DEFAULT_STAYS;
-  globalVersion = version;
-  saveToStorage(DEFAULT_STAYS, version);
-  return { stays: DEFAULT_STAYS, version };
-};
-
-const saveToStorage = (stays: ThematicStay[], version?: number) => {
-  try {
-    const newVersion = version || generateVersion();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stays));
-    localStorage.setItem(VERSION_KEY, newVersion.toString());
-    
-    globalStays = stays;
-    globalVersion = newVersion;
-    
-    // Broadcast changes with multiple methods for cross-device support
-    const updateData = { stays, version: newVersion, timestamp: Date.now() };
-    
-    // Method 1: Storage events
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: STORAGE_KEY,
-      newValue: JSON.stringify(stays),
-      storageArea: localStorage
-    }));
-    
-    // Method 2: Custom events
-    window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updateData }));
-    
-    // Method 3: BroadcastChannel for cross-tab communication
-    if (typeof BroadcastChannel !== 'undefined') {
-      const channel = new BroadcastChannel('thematic-stays-updates');
-      channel.postMessage(updateData);
-      channel.close();
-    }
-    
-    // Method 4: Notify all listeners
-    listeners.forEach(listener => {
-      try {
-        listener();
-      } catch (error) {
-        console.error('Error in listener:', error);
-      }
-    });
-    
-    console.log('Saved thematic stays with version:', newVersion, stays);
-  } catch (error) {
-    console.error('Error saving thematic stays:', error);
-  }
+  globalTimestamp = timestamp;
+  return { stays: DEFAULT_STAYS, timestamp };
 };
 
 export const useThematicStays = () => {
   const [stays, setStays] = useState<ThematicStay[]>(() => {
-    const { stays: loadedStays } = loadFromStorage();
+    const { stays: loadedStays } = loadData();
     return [...loadedStays];
   });
   const [updateCounter, setUpdateCounter] = useState(0);
-  const [currentVersion, setCurrentVersion] = useState(() => globalVersion);
-
-  const forceUpdate = useCallback(() => {
-    const { stays: newStays, version } = loadFromStorage();
-    
-    // Only update if version has changed
-    if (version !== currentVersion || JSON.stringify(newStays) !== JSON.stringify(stays)) {
-      console.log('Force updating thematic stays - old version:', currentVersion, 'new version:', version);
-      setStays([...newStays]);
-      setCurrentVersion(version);
-      setUpdateCounter(prev => prev + 1);
-    }
-  }, [currentVersion, stays]);
+  const [lastTimestamp, setLastTimestamp] = useState(() => globalTimestamp);
 
   const checkForUpdates = useCallback(() => {
-    try {
-      const savedVersion = localStorage.getItem(VERSION_KEY);
-      if (savedVersion) {
-        const version = parseInt(savedVersion, 10);
-        if (version > currentVersion) {
-          console.log('Detected version change, updating...', currentVersion, '->', version);
-          forceUpdate();
-        }
-      }
-    } catch (error) {
-      console.error('Error checking for updates:', error);
+    const { stays: newStays, timestamp } = loadData();
+    
+    if (timestamp > lastTimestamp) {
+      console.log('Update detected:', timestamp, '>', lastTimestamp);
+      setStays([...newStays]);
+      setLastTimestamp(timestamp);
+      setUpdateCounter(prev => prev + 1);
+      return true;
     }
-  }, [currentVersion, forceUpdate]);
+    return false;
+  }, [lastTimestamp]);
+
+  const forceUpdate = useCallback(() => {
+    const { stays: newStays, timestamp } = loadData();
+    console.log('Force update triggered');
+    setStays([...newStays]);
+    setLastTimestamp(timestamp);
+    setUpdateCounter(prev => prev + 1);
+  }, []);
 
   useEffect(() => {
-    // Add this component to listeners
-    listeners.push(forceUpdate);
+    // Add to update listeners
+    updateListeners.push(forceUpdate);
     
-    // Load initial data
-    forceUpdate();
-
-    // Multiple event listeners for robust cross-device updates
+    // Storage event listener
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY || event.key === VERSION_KEY) {
-        console.log('Storage change detected:', event.key);
-        setTimeout(forceUpdate, 100);
+      if (event.key === STORAGE_KEY) {
+        console.log('Storage change detected for thematic stays');
+        setTimeout(checkForUpdates, 100);
       }
     };
-
-    const handleCustomEvent = (event: CustomEvent) => {
-      console.log('Custom thematic stays event received:', event.detail);
-      setTimeout(forceUpdate, 100);
-    };
-
-    const handleBroadcastMessage = (event: MessageEvent) => {
-      console.log('Broadcast message received:', event.data);
-      if (event.data.version > currentVersion) {
-        setTimeout(forceUpdate, 100);
-      }
-    };
-
+    
+    // Page visibility change listener
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('Page visible, checking for updates');
+        console.log('Page became visible, checking for updates');
         setTimeout(checkForUpdates, 200);
       }
     };
-
+    
+    // Window focus listener
     const handleFocus = () => {
       console.log('Window focused, checking for updates');
       setTimeout(checkForUpdates, 200);
     };
-
-    const handlePageShow = () => {
-      console.log('Page show event, checking for updates');
-      setTimeout(checkForUpdates, 200);
+    
+    // Mobile-specific touch listener
+    const handleTouch = () => {
+      setTimeout(checkForUpdates, 300);
     };
-
-    // Set up event listeners
+    
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('thematicStaysUpdated', handleCustomEvent as EventListener);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
-    window.addEventListener('pageshow', handlePageShow);
-
-    // BroadcastChannel for cross-tab communication
-    let broadcastChannel: BroadcastChannel | null = null;
-    if (typeof BroadcastChannel !== 'undefined') {
-      broadcastChannel = new BroadcastChannel('thematic-stays-updates');
-      broadcastChannel.addEventListener('message', handleBroadcastMessage);
-    }
-
-    // Aggressive polling for mobile devices (every 2 seconds)
-    const intervalId = setInterval(() => {
-      checkForUpdates();
-    }, 2000);
-
-    // Additional mobile-specific checks
-    const touchStartHandler = () => setTimeout(checkForUpdates, 300);
-    const scrollHandler = () => setTimeout(checkForUpdates, 500);
+    window.addEventListener('touchstart', handleTouch, { passive: true });
     
-    window.addEventListener('touchstart', touchStartHandler, { passive: true });
-    window.addEventListener('scroll', scrollHandler, { passive: true });
-
+    // Aggressive polling for mobile
+    const interval = setInterval(checkForUpdates, 3000);
+    
     return () => {
-      // Remove from listeners
-      listeners = listeners.filter(listener => listener !== forceUpdate);
-      
-      // Cleanup event listeners
+      updateListeners = updateListeners.filter(listener => listener !== forceUpdate);
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('thematicStaysUpdated', handleCustomEvent as EventListener);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('pageshow', handlePageShow);
-      window.removeEventListener('touchstart', touchStartHandler);
-      window.removeEventListener('scroll', scrollHandler);
-      
-      if (broadcastChannel) {
-        broadcastChannel.removeEventListener('message', handleBroadcastMessage);
-        broadcastChannel.close();
-      }
-      
-      clearInterval(intervalId);
+      window.removeEventListener('touchstart', handleTouch);
+      clearInterval(interval);
     };
-  }, [forceUpdate, checkForUpdates, currentVersion]);
+  }, [forceUpdate, checkForUpdates]);
 
   const updateStays = useCallback((newStays: ThematicStay[]) => {
-    const newVersion = generateVersion();
-    saveToStorage(newStays, newVersion);
+    saveData(newStays);
     setStays([...newStays]);
-    setCurrentVersion(newVersion);
     setUpdateCounter(prev => prev + 1);
   }, []);
 

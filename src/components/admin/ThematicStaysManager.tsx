@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,7 +57,6 @@ const ThematicStaysManager = () => {
     try {
       const success = await uploadImage(file, `Obrázok pre ${stays.find(s => s.id === stayId)?.title}`);
       if (success) {
-        // Get the uploaded image URL and update the stay
         const savedImages = JSON.parse(localStorage.getItem('apartmentOtherImages') || '[]');
         const latestImage = savedImages[savedImages.length - 1];
         if (latestImage) {
@@ -74,61 +73,40 @@ const ThematicStaysManager = () => {
   };
 
   const handleSave = () => {
-    // Generate new version and save with timestamp
+    // Force a complete save and reload
     const timestamp = Date.now();
-    const versionedData = {
-      data: stays,
-      version: timestamp,
-      lastUpdated: new Date().toISOString()
+    const dataToSave = {
+      stays,
+      timestamp,
+      version: timestamp
     };
     
-    // Save to localStorage with versioning
-    localStorage.setItem('apartmentThematicStays', JSON.stringify(stays));
-    localStorage.setItem('apartmentThematicStaysVersion', timestamp.toString());
-    localStorage.setItem('apartmentThematicStaysLastUpdate', new Date().toISOString());
+    localStorage.setItem('thematicStays', JSON.stringify(dataToSave));
+    localStorage.setItem('thematicStaysTimestamp', timestamp.toString());
     
-    // Multiple broadcast methods for cross-device sync
-    const updateData = { stays, version: timestamp, timestamp };
-    
-    // Method 1: Storage events
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'apartmentThematicStays',
-      newValue: JSON.stringify(stays),
-      storageArea: localStorage
-    }));
-    
-    // Method 2: Custom events
-    window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updateData }));
-    
-    // Method 3: BroadcastChannel
-    if (typeof BroadcastChannel !== 'undefined') {
-      const channel = new BroadcastChannel('thematic-stays-updates');
-      channel.postMessage(updateData);
-      channel.close();
-    }
-    
-    // Method 4: Force page refresh on mobile after delay
+    // Force page reload on mobile after showing success message
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-      // Show success message first
-      toast.success("Tematické pobyty boli uložené - stránka sa obnoví");
+      toast.success("Tematické pobyty boli uložené - stránka sa obnoví", {
+        duration: 2000
+      });
       
-      // Force refresh after short delay
       setTimeout(() => {
-        console.log('Mobile device detected, forcing page refresh...');
         window.location.reload();
-      }, 1500);
+      }, 2000);
     } else {
       toast.success("Tematické pobyty boli uložené");
       
-      // For desktop, trigger multiple update events
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('thematicStaysUpdated', { detail: updateData }));
-      }, 500);
+      // Trigger storage event for immediate update
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'thematicStays',
+        newValue: JSON.stringify(dataToSave),
+        storageArea: localStorage
+      }));
     }
     
-    console.log('Saved thematic stays with enhanced sync:', updateData);
+    console.log('Saved thematic stays with forced sync:', dataToSave);
   };
 
   const getIconComponent = (iconName: string) => {
