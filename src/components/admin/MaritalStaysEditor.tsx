@@ -56,19 +56,21 @@ export const MaritalStaysEditor = () => {
     loadContent();
   }, []);
 
-  // Automaticky uložiť aktualizovaný obsah pri prvom načítaní
+  // Automaticky uložiť aktualizovaný obsah po načítaní
   useEffect(() => {
     if (!isLoading) {
-      saveUpdatedContent();
+      forceSaveUpdatedContent();
     }
   }, [isLoading]);
 
-  const saveUpdatedContent = async () => {
+  const forceSaveUpdatedContent = async () => {
     try {
-      console.log('MaritalStaysEditor: Auto-saving updated content with new image');
+      console.log('MaritalStaysEditor: Force saving updated content with correct image');
       
-      const updatedContent = {
-        ...maritalStaysData,
+      const correctContent = {
+        title: "Tematické pobyty",
+        description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
+        external_link: "https://www.manzelkepobyty.sk",
         images: [
           {
             id: 1,
@@ -95,28 +97,28 @@ export const MaritalStaysEditor = () => {
         .from('marital_stays_content')
         .upsert({
           id: 1,
-          title: updatedContent.title,
-          description: updatedContent.description,
-          external_link: updatedContent.external_link,
-          images: updatedContent.images as any,
+          title: correctContent.title,
+          description: correctContent.description,
+          external_link: correctContent.external_link,
+          images: correctContent.images as any,
           updated_at: new Date().toISOString()
         });
 
       if (error) {
-        console.error('MaritalStaysEditor: Error auto-saving updated content:', error);
+        console.error('MaritalStaysEditor: Error force saving content:', error);
         return;
       }
 
-      console.log('MaritalStaysEditor: Successfully auto-saved updated content');
+      console.log('MaritalStaysEditor: Successfully force saved correct content');
       
       // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
       const event = new CustomEvent('maritalStaysContentUpdated');
       window.dispatchEvent(event);
       console.log('MaritalStaysEditor: Dispatched content update event');
       
-      setContent(updatedContent);
+      setContent(correctContent);
     } catch (error) {
-      console.error('MaritalStaysEditor: Error in auto-save:', error);
+      console.error('MaritalStaysEditor: Error in force save:', error);
     }
   };
 
@@ -156,39 +158,12 @@ export const MaritalStaysEditor = () => {
       } else {
         console.log('MaritalStaysEditor: No content found in Supabase, initializing with defaults');
         setContent({...maritalStaysData});
-        // Automaticky uložíme predvolený obsah do databázy
-        await saveDefaultContent();
       }
     } catch (error) {
       console.error('MaritalStaysEditor: Error loading content:', error);
       setContent({...maritalStaysData});
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const saveDefaultContent = async () => {
-    try {
-      console.log('MaritalStaysEditor: Saving default content to Supabase');
-      
-      const { error } = await supabase
-        .from('marital_stays_content')
-        .upsert({
-          id: 1,
-          title: maritalStaysData.title,
-          description: maritalStaysData.description,
-          external_link: maritalStaysData.external_link,
-          images: maritalStaysData.images as any,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) {
-        console.error('MaritalStaysEditor: Error saving default content:', error);
-      } else {
-        console.log('MaritalStaysEditor: Default content saved successfully');
-      }
-    } catch (error) {
-      console.error('MaritalStaysEditor: Error in saveDefaultContent:', error);
     }
   };
 
