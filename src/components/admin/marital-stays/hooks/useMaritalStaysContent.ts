@@ -17,14 +17,14 @@ interface MaritalStayContent {
   images: MaritalStayImage[];
 }
 
-const DEFAULT_CONTENT: MaritalStayContent = {
+const FORCE_NEW_CONTENT: MaritalStayContent = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
   external_link: "https://www.manzelkepobyty.sk",
   images: [
     {
       id: 1,
-      src: "/lovable-uploads/13d27d76-6e04-41a4-b669-8a6fd4ed09be.png",
+      src: "/lovable-uploads/6dcee98c-9685-4fd8-94e6-6b9e4a7b2f5c.png",
       alt: "Manželský pobyt",
       description: "Romantický pobyt pre dvoch. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
     },
@@ -44,47 +44,44 @@ const DEFAULT_CONTENT: MaritalStayContent = {
 };
 
 export const useMaritalStaysContent = () => {
-  const [content, setContent] = useState<MaritalStayContent>(DEFAULT_CONTENT);
+  const [content, setContent] = useState<MaritalStayContent>(FORCE_NEW_CONTENT);
   const [isLoading, setIsLoading] = useState(true);
 
-  const initializeContent = async () => {
+  const forceCorrectContent = async () => {
     try {
-      console.log('useMaritalStaysContent: Forcing correct content with new photo');
+      console.log('FORCED UPDATE: Using new photo for Manželský pobyt');
       setIsLoading(true);
 
-      // Delete existing record and save new one with correct photo
-      await supabase
-        .from('marital_stays_content')
-        .delete()
-        .eq('id', 1);
-
+      // Delete all existing records
+      await supabase.from('marital_stays_content').delete().neq('id', 0);
+      
+      // Insert the correct content with new photo
       const { error: insertError } = await supabase
         .from('marital_stays_content')
         .insert({
           id: 1,
-          title: DEFAULT_CONTENT.title,
-          description: DEFAULT_CONTENT.description,
-          external_link: DEFAULT_CONTENT.external_link,
-          images: DEFAULT_CONTENT.images as any,
+          title: FORCE_NEW_CONTENT.title,
+          description: FORCE_NEW_CONTENT.description,
+          external_link: FORCE_NEW_CONTENT.external_link,
+          images: FORCE_NEW_CONTENT.images as any,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
 
       if (insertError) {
-        console.error('useMaritalStaysContent: Error inserting content:', insertError);
+        console.error('Error forcing correct content:', insertError);
       } else {
-        console.log('useMaritalStaysContent: Successfully forced correct content with new photo');
+        console.log('SUCCESS: Forced correct content with new photo');
         
-        // Dispatch event for refresh
-        const event = new CustomEvent('maritalStaysContentUpdated');
-        window.dispatchEvent(event);
+        // Trigger refresh
+        window.dispatchEvent(new CustomEvent('maritalStaysContentUpdated'));
       }
 
-      setContent(DEFAULT_CONTENT);
+      setContent(FORCE_NEW_CONTENT);
       
     } catch (error) {
-      console.error('useMaritalStaysContent: Error forcing content:', error);
-      setContent(DEFAULT_CONTENT);
+      console.error('Error in forceCorrectContent:', error);
+      setContent(FORCE_NEW_CONTENT);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +89,7 @@ export const useMaritalStaysContent = () => {
 
   const saveContent = async () => {
     try {
-      console.log('useMaritalStaysContent: Saving content to Supabase:', content);
+      console.log('Saving content with new photo:', content);
       
       const { error } = await supabase
         .from('marital_stays_content')
@@ -106,20 +103,17 @@ export const useMaritalStaysContent = () => {
         });
 
       if (error) {
-        console.error('useMaritalStaysContent: Error saving content to Supabase:', error);
+        console.error('Error saving content:', error);
         toast.error("Chyba pri ukladaní obsahu do databázy");
         return;
       }
 
-      console.log('useMaritalStaysContent: Successfully saved content to Supabase');
+      console.log('Successfully saved content with new photo');
       
-      const event = new CustomEvent('maritalStaysContentUpdated');
-      window.dispatchEvent(event);
-      console.log('useMaritalStaysContent: Dispatched content update event');
-      
+      window.dispatchEvent(new CustomEvent('maritalStaysContentUpdated'));
       toast.success("Sekcia tematických pobytov bola úspešne uložená do databázy");
     } catch (error) {
-      console.error('useMaritalStaysContent: Error saving content:', error);
+      console.error('Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");
     }
   };
@@ -158,7 +152,7 @@ export const useMaritalStaysContent = () => {
   };
 
   useEffect(() => {
-    initializeContent();
+    forceCorrectContent();
   }, []);
 
   return {

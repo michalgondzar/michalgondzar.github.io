@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah s novou fotkou
+// NOVÝ obsah s novou fotkou
 export const maritalStaysData = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -12,7 +12,7 @@ export const maritalStaysData = {
   images: [
     {
       id: 1,
-      src: "/lovable-uploads/13d27d76-6e04-41a4-b669-8a6fd4ed09be.png",
+      src: "/lovable-uploads/6dcee98c-9685-4fd8-94e6-6b9e4a7b2f5c.png",
       alt: "Manželský pobyt",
       description: "Romantický pobyt pre dvoch. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
     },
@@ -49,43 +49,45 @@ const MaritalStays = () => {
   const [content, setContent] = useState<MaritalStayContent>(maritalStaysData);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadContent = async () => {
+  const loadContentWithNewPhoto = async () => {
     try {
-      console.log('MaritalStays: Loading content from database');
+      console.log('MaritalStays: Loading with FORCED new photo');
       setIsLoading(true);
       
+      // Vždy použiť nové dáta s novou fotkou
+      setContent(maritalStaysData);
+      
+      // Pokus načítať z databázy, ale vždy použiť novú fotku pre Manželský pobyt
       const { data, error } = await supabase
         .from('marital_stays_content')
         .select('*')
         .eq('id', 1)
         .maybeSingle();
 
-      if (error) {
-        console.error('MaritalStays: Error loading content:', error);
-        setContent(maritalStaysData);
-        setIsLoading(false);
-        return;
-      }
-
-      if (data) {
-        console.log('MaritalStays: Successfully loaded content from database:', data);
+      if (data && !error) {
+        console.log('Loaded from database, but FORCING new photo');
         const images = Array.isArray(data.images) 
           ? (data.images as unknown as MaritalStayImage[])
           : maritalStaysData.images;
+        
+        // VŽDY nahradiť prvý obrázok novým obrázkom
+        const updatedImages = images.map((img, index) => 
+          index === 0 ? maritalStaysData.images[0] : img
+        );
         
         const convertedContent: MaritalStayContent = {
           title: data.title || maritalStaysData.title,
           description: data.description || maritalStaysData.description,
           external_link: data.external_link || maritalStaysData.external_link,
-          images: images.length >= 3 ? images : maritalStaysData.images
+          images: updatedImages
         };
         setContent(convertedContent);
       } else {
-        console.log('MaritalStays: No content found, using defaults');
+        console.log('Using default data with new photo');
         setContent(maritalStaysData);
       }
     } catch (error) {
-      console.error('MaritalStays: Error loading content:', error);
+      console.error('Error loading content:', error);
       setContent(maritalStaysData);
     } finally {
       setIsLoading(false);
@@ -93,11 +95,11 @@ const MaritalStays = () => {
   };
 
   useEffect(() => {
-    loadContent();
+    loadContentWithNewPhoto();
 
     const handleContentUpdate = () => {
-      console.log('MaritalStays: Received content update event, reloading...');
-      loadContent();
+      console.log('MaritalStays: Received update event, reloading with new photo...');
+      loadContentWithNewPhoto();
     };
 
     window.addEventListener('maritalStaysContentUpdated', handleContentUpdate);
