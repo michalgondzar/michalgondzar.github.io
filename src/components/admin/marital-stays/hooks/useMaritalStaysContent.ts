@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -47,15 +46,28 @@ export const useMaritalStaysContent = () => {
   const [content, setContent] = useState<MaritalStayContent>(CORRECT_CONTENT);
   const [isLoading, setIsLoading] = useState(true);
 
+  const forceCorrectImage = (images: MaritalStayImage[]) => {
+    return images.map((img, index) => {
+      if (index === 0 || img.alt === "Manželský pobyt") {
+        return {
+          ...img,
+          id: 1,
+          src: "/lovable-uploads/6dcee98c-9685-4fd8-94e6-6b9e4a7b2f5c.png",
+          alt: "Manželský pobyt"
+        };
+      }
+      return img;
+    });
+  };
+
   const loadContent = async () => {
     try {
       console.log('Loading marital stays content...');
       setIsLoading(true);
       
-      // Vždy použiť správny obsah
+      // Vždy začať so správnym obsahom
       setContent(CORRECT_CONTENT);
       
-      // Pokús načítať z databázy, ale vždy použiť správnu fotku
       const { data, error } = await supabase
         .from('marital_stays_content')
         .select('*')
@@ -63,15 +75,13 @@ export const useMaritalStaysContent = () => {
         .maybeSingle();
 
       if (data && !error) {
-        console.log('Loaded from database, applying correct photo');
+        console.log('Loaded from database, forcing correct image');
         const images = Array.isArray(data.images) 
           ? (data.images as unknown as MaritalStayImage[])
           : CORRECT_CONTENT.images;
         
-        // Vždy nahradiť prvý obrázok správnou fotkou
-        const correctedImages = images.map((img, index) => 
-          index === 0 ? CORRECT_CONTENT.images[0] : img
-        );
+        // Vždy vynútiť správnu fotku
+        const correctedImages = forceCorrectImage(images);
         
         const correctedContent: MaritalStayContent = {
           title: data.title || CORRECT_CONTENT.title,
@@ -91,16 +101,22 @@ export const useMaritalStaysContent = () => {
 
   const saveContent = async () => {
     try {
-      console.log('Saving content with correct photo:', content);
+      console.log('Saving content with forced correct image:', content);
+      
+      // Pred uložením vynútiť správnu fotku
+      const contentToSave = {
+        ...content,
+        images: forceCorrectImage(content.images)
+      };
       
       const { error } = await supabase
         .from('marital_stays_content')
         .upsert({
           id: 1,
-          title: content.title,
-          description: content.description,
-          external_link: content.external_link,
-          images: content.images as any,
+          title: contentToSave.title,
+          description: contentToSave.description,
+          external_link: contentToSave.external_link,
+          images: contentToSave.images as any,
           updated_at: new Date().toISOString()
         });
 
@@ -110,10 +126,13 @@ export const useMaritalStaysContent = () => {
         return;
       }
 
-      console.log('Successfully saved content with correct photo');
+      console.log('Successfully saved content with forced correct image');
+      
+      // Aktualizovať aj lokálny stav so správnou fotkou
+      setContent(contentToSave);
       
       window.dispatchEvent(new CustomEvent('maritalStaysContentUpdated'));
-      toast.success("Sekcia tematických pobytov bola úspešne uložená do databázy");
+      toast.success("Sekcia tematických pobytov bola úspešne uložená s opravenou fotkou");
     } catch (error) {
       console.error('Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");
@@ -121,7 +140,12 @@ export const useMaritalStaysContent = () => {
   };
 
   const updateContent = (updates: Partial<MaritalStayContent>) => {
-    setContent(prev => ({ ...prev, ...updates }));
+    const updatedContent = { ...content, ...updates };
+    // Ak sa aktualizujú obrázky, vynútiť správnu fotku
+    if (updates.images) {
+      updatedContent.images = forceCorrectImage(updates.images);
+    }
+    setContent(updatedContent);
   };
 
   const addImage = (newImage: Omit<MaritalStayImage, 'id'>) => {
@@ -131,7 +155,7 @@ export const useMaritalStaysContent = () => {
     };
     setContent(prev => ({
       ...prev,
-      images: [...prev.images, newImageWithId]
+      images: forceCorrectImage([...prev.images, newImageWithId])
     }));
     toast.success("Tematický pobyt bol pridaný");
   };
@@ -139,18 +163,21 @@ export const useMaritalStaysContent = () => {
   const removeImage = (imageId: number) => {
     setContent(prev => ({
       ...prev,
-      images: prev.images.filter(img => img.id !== imageId)
+      images: forceCorrectImage(prev.images.filter(img => img.id !== imageId))
     }));
     toast.success("Tematický pobyt bol odstránený");
   };
 
   const updateImage = (imageId: number, field: 'src' | 'alt' | 'description', value: string) => {
-    setContent(prev => ({
-      ...prev,
-      images: prev.images.map(img => 
+    setContent(prev => {
+      const updatedImages = prev.images.map(img => 
         img.id === imageId ? { ...img, [field]: value } : img
-      )
-    }));
+      );
+      return {
+        ...prev,
+        images: forceCorrectImage(updatedImages)
+      };
+    });
   };
 
   useEffect(() => {
