@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +8,27 @@ import { Calendar, Euro, Users, Clock, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useContact } from "@/contexts/ContactContext";
 
+interface ThematicStay {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  icon: string;
+  features: string[];
+}
+
+const DEFAULT_STAY_OPTIONS = [
+  { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
+  { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
+  { id: "komorka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
+];
+
 const Booking = () => {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("2");
   const [selectedStay, setSelectedStay] = useState("");
+  const [stayOptions, setStayOptions] = useState(DEFAULT_STAY_OPTIONS);
   const { contactData } = useContact();
   const [pricing, setPricing] = useState({
     lowSeason: {
@@ -42,11 +57,45 @@ const Booking = () => {
     }
   }, []);
 
-  const stayOptions = [
-    { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
-    { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
-    { id: "komorka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
-  ];
+  // Load thematic stays data
+  useEffect(() => {
+    loadStayOptions();
+    
+    // Listen for updates from admin panel
+    const handleStorageChange = () => {
+      loadStayOptions();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('thematicStaysUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('thematicStaysUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const loadStayOptions = () => {
+    try {
+      const savedStays = localStorage.getItem('apartmentThematicStays');
+      if (savedStays) {
+        const parsedStays: ThematicStay[] = JSON.parse(savedStays);
+        const options = parsedStays.map(stay => ({
+          id: stay.id,
+          label: stay.title,
+          description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
+        }));
+        setStayOptions(options);
+        console.log('Loaded stay options from localStorage:', options);
+      } else {
+        console.log('No saved thematic stays, using defaults');
+        setStayOptions(DEFAULT_STAY_OPTIONS);
+      }
+    } catch (error) {
+      console.error('Error loading stay options:', error);
+      setStayOptions(DEFAULT_STAY_OPTIONS);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
