@@ -43,9 +43,8 @@ const Booking = () => {
   }, []);
 
   const stayOptions = [
-    { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
     { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
-    { id: "komôrka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
+    { id: "komorka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
