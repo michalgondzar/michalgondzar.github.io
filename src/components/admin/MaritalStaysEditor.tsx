@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ export const MaritalStaysEditor = () => {
     images: [
       {
         id: 1,
-        src: "/lovable-uploads/bca50a53-13e8-4ca3-b4ba-502f35579c65.png",
+        src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
         alt: "Manželský pobyt",
         description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
       },
@@ -65,7 +66,7 @@ export const MaritalStaysEditor = () => {
 
   const forceSaveUpdatedContent = async () => {
     try {
-      console.log('MaritalStaysEditor: Force saving updated content with correct image');
+      console.log('MaritalStaysEditor: Force saving updated content with new uploaded image');
       
       const correctContent = {
         title: "Tematické pobyty",
@@ -74,7 +75,7 @@ export const MaritalStaysEditor = () => {
         images: [
           {
             id: 1,
-            src: "/lovable-uploads/bca50a53-13e8-4ca3-b4ba-502f35579c65.png",
+            src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
             alt: "Manželský pobyt",
             description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
           },
@@ -109,7 +110,7 @@ export const MaritalStaysEditor = () => {
         return;
       }
 
-      console.log('MaritalStaysEditor: Successfully force saved correct content');
+      console.log('MaritalStaysEditor: Successfully force saved correct content with new image');
       
       // Odoslanie vlastnej udalosti na informovanie ostatných komponentov
       const event = new CustomEvent('maritalStaysContentUpdated');

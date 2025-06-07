@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah tematických pobytov s aktualizovanou fotkou
+// Predvolený obsah tematických pobytov s novou fotkou páru
 export const maritalStaysData = {
   title: "Tematické pobyty",
   description: "Objavte naše špeciálne balíčky pobytov vytvorené pre páry a rodiny. Každý balíček obsahuje ubytovanie v našom apartmáne plus jedinečné zážitky v regióne Liptov.",
@@ -12,7 +12,7 @@ export const maritalStaysData = {
   images: [
     {
       id: 1,
-      src: "/lovable-uploads/bca50a53-13e8-4ca3-b4ba-502f35579c65.png",
+      src: "/lovable-uploads/073bfebd-c6ca-4da1-9efb-2a1080dff951.png",
       alt: "Manželský pobyt",
       description: "Romantický pobyt pre dvoch s wellness procedúrami, večerou pri sviečkach a privátnym využitím vírivky. Balíček obsahuje 2 noci v apartmáne, raňajky, romantickú večeru, masáže pre dvoch a vstupy do aquaparku. Ideálny pre mladomanželov alebo páry oslavujúce výročie."
     },
