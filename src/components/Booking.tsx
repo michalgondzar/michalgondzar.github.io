@@ -43,6 +43,7 @@ const Booking = () => {
   }, []);
 
   const stayOptions = [
+    { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
     { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
     { id: "komorka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
   ];

@@ -8,7 +8,7 @@ const ThematicStays = () => {
       id: "manzelsky",
       title: "Manželský pobyt",
       description: "Romantický pobyt pre páry s možnosťou relaxu a súkromia. Ideálny na oslavu výročia alebo jednoducho na strávenie kvalitného času spolu.",
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop",
+      image: "/lovable-uploads/0b235c75-170d-4c29-b94b-ea1fc022003f.png",
       icon: Heart,
       features: ["Romantická atmosféra", "Súkromie", "Relaxácia pre dvoch"]
     },
