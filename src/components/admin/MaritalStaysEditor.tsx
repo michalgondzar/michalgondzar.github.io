@@ -9,8 +9,22 @@ import { maritalStaysData } from "@/components/MaritalStays";
 import { Save, Trash, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+interface MaritalStayImage {
+  id: number;
+  src: string;
+  alt: string;
+  description: string;
+}
+
+interface MaritalStayContent {
+  title: string;
+  description: string;
+  external_link: string;
+  images: MaritalStayImage[];
+}
+
 export const MaritalStaysEditor = () => {
-  const [content, setContent] = useState({...maritalStaysData});
+  const [content, setContent] = useState<MaritalStayContent>({...maritalStaysData});
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newImageAlt, setNewImageAlt] = useState("");
   const [newImageDescription, setNewImageDescription] = useState("");
@@ -42,10 +56,12 @@ export const MaritalStaysEditor = () => {
 
       if (data) {
         console.log('MaritalStaysEditor: Successfully loaded content from Supabase:', data);
-        // Konvertujeme Json typ na správny typ a zabezpečíme, že máme tri pobyty
-        const images = Array.isArray(data.images) ? data.images : maritalStaysData.images;
+        // Proper type casting for images from Json to our interface
+        const images = Array.isArray(data.images) 
+          ? (data.images as MaritalStayImage[])
+          : maritalStaysData.images;
         
-        const convertedContent = {
+        const convertedContent: MaritalStayContent = {
           title: data.title || maritalStaysData.title,
           description: data.description || maritalStaysData.description,
           external_link: data.external_link || maritalStaysData.external_link,
@@ -128,7 +144,7 @@ export const MaritalStaysEditor = () => {
   
   const addImage = () => {
     if (newImageUrl.trim() !== "" && newImageAlt.trim() !== "" && newImageDescription.trim() !== "") {
-      const newImage = {
+      const newImage: MaritalStayImage = {
         id: Math.max(...content.images.map(img => img.id)) + 1,
         src: newImageUrl.trim(),
         alt: newImageAlt.trim(),
