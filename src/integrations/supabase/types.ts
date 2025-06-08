@@ -189,6 +189,42 @@ export type Database = {
         }
         Relationships: []
       }
+      thematic_stays: {
+        Row: {
+          created_at: string
+          description: string
+          features: Json
+          icon: string
+          id: string
+          image: string
+          stay_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          features?: Json
+          icon: string
+          id?: string
+          image: string
+          stay_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          features?: Json
+          icon?: string
+          id?: string
+          image?: string
+          stay_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       visit_counters: {
         Row: {
           id: number

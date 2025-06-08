@@ -1,10 +1,10 @@
 
 import { Heart, Users, Coffee } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useThematicStaysSync } from "@/hooks/useThematicStaysSync";
+import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
 
 const ThematicStays = () => {
-  const { stays, updateCounter, version } = useThematicStaysSync();
+  const { stays, loading, error } = useThematicStaysDatabase();
 
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
@@ -14,6 +14,40 @@ const ThematicStays = () => {
       default: return Heart;
     }
   };
+
+  if (loading) {
+    return (
+      <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              Tematické pobyty
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Načítavam pobyty...
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              Tematické pobyty
+            </h2>
+            <p className="text-lg text-red-600 max-w-2xl mx-auto">
+              Chyba pri načítavaní pobytov. Skúste obnoviť stránku.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
@@ -28,12 +62,11 @@ const ThematicStays = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {stays.map((stay, index) => {
+          {stays.map((stay) => {
             const IconComponent = getIconComponent(stay.icon);
-            const uniqueKey = `${stay.id}-${version}-${updateCounter}-${index}`;
             
             return (
-              <Card key={uniqueKey} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <Card key={stay.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <div className="relative h-48 overflow-hidden">
                   <img 
                     src={stay.image} 
@@ -57,7 +90,7 @@ const ThematicStays = () => {
                     <h4 className="font-semibold text-sm text-gray-700 mb-2">Čo vás čaká:</h4>
                     <ul className="space-y-1">
                       {stay.features.map((feature, featureIndex) => (
-                        <li key={`${uniqueKey}-feature-${featureIndex}`} className="text-sm text-gray-600 flex items-center gap-2">
+                        <li key={featureIndex} className="text-sm text-gray-600 flex items-center gap-2">
                           <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0"></div>
                           {feature}
                         </li>
