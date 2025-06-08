@@ -35,10 +35,10 @@ export const useThematicStaysDatabase = () => {
 
       console.log('Fetched thematic stays from database:', data);
       
-      // Transform the data to match our interface
+      // Transform the data to match our interface and handle the Json type properly
       const transformedStays = data?.map(stay => ({
         ...stay,
-        features: Array.isArray(stay.features) ? stay.features : []
+        features: Array.isArray(stay.features) ? stay.features as string[] : []
       })) || [];
       
       setStays(transformedStays);
