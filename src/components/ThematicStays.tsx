@@ -1,10 +1,10 @@
 
 import { Heart, Users, Coffee } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useThematicStays } from "@/hooks/useThematicStays";
+import { useThematicStaysSync } from "@/hooks/useThematicStaysSync";
 
 const ThematicStays = () => {
-  const { stays, updateCounter } = useThematicStays();
+  const { stays, updateCounter, version } = useThematicStaysSync();
 
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
@@ -30,7 +30,7 @@ const ThematicStays = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {stays.map((stay, index) => {
             const IconComponent = getIconComponent(stay.icon);
-            const uniqueKey = `${stay.id}-${updateCounter}-${index}`;
+            const uniqueKey = `${stay.id}-${version}-${updateCounter}-${index}`;
             
             return (
               <Card key={uniqueKey} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">

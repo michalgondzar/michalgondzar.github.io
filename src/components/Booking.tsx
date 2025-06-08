@@ -1,11 +1,11 @@
 
-import { useThematicStays } from "@/hooks/useThematicStays";
+import { useThematicStaysSync } from "@/hooks/useThematicStaysSync";
 import BookingForm from "@/components/booking/BookingForm";
 import PricingCard from "@/components/booking/PricingCard";
 
 const Booking = () => {
-  const { updateCounter } = useThematicStays();
-  const renderKey = `booking-${updateCounter}-${Date.now()}`;
+  const { updateCounter, version } = useThematicStaysSync();
+  const renderKey = `booking-${updateCounter}-${version}-${Date.now()}`;
 
   return (
     <section id="rezervacia" className="py-16 bg-gradient-to-br from-blue-50 to-white" key={renderKey}>

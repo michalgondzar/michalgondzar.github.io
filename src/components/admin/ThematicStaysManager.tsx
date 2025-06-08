@@ -1,16 +1,17 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Heart, Users, Coffee, Upload, Save } from "lucide-react";
 import { useOtherImagesManager } from "@/hooks/useOtherImagesManager";
-import { useThematicStays } from "@/hooks/useThematicStays";
+import { useThematicStaysSync } from "@/hooks/useThematicStaysSync";
 
 const ThematicStaysManager = () => {
-  const { stays, updateStays } = useThematicStays();
+  const { stays, updateStays } = useThematicStaysSync();
   const [editingStay, setEditingStay] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   const { uploadImage } = useOtherImagesManager();
@@ -62,7 +63,7 @@ const ThematicStaysManager = () => {
         if (latestImage) {
           updateStayField(stayId, 'image', latestImage.src);
         }
-        toast.success("Obrázok bol nahraný");
+        toast.success("Obrázok bol nahraný a zmeny sa synchronizujú na všetky zariadenia");
       }
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -73,40 +74,10 @@ const ThematicStaysManager = () => {
   };
 
   const handleSave = () => {
-    // Force a complete save and reload
-    const timestamp = Date.now();
-    const dataToSave = {
-      stays,
-      timestamp,
-      version: timestamp
-    };
-    
-    localStorage.setItem('thematicStays', JSON.stringify(dataToSave));
-    localStorage.setItem('thematicStaysTimestamp', timestamp.toString());
-    
-    // Force page reload on mobile after showing success message
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      toast.success("Tematické pobyty boli uložené - stránka sa obnoví", {
-        duration: 2000
-      });
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else {
-      toast.success("Tematické pobyty boli uložené");
-      
-      // Trigger storage event for immediate update
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'thematicStays',
-        newValue: JSON.stringify(dataToSave),
-        storageArea: localStorage
-      }));
-    }
-    
-    console.log('Saved thematic stays with forced sync:', dataToSave);
+    // Uloženie s automatickou synchronizáciou
+    updateStays(stays);
+    toast.success("Tematické pobyty boli uložené a synchronizované na všetky zariadenia");
+    console.log('Saved thematic stays with sync:', stays);
   };
 
   const getIconComponent = (iconName: string) => {
@@ -123,7 +94,7 @@ const ThematicStaysManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Tematické pobyty</h2>
-          <p className="text-gray-600">Upravte texty a obrázky pre jednotlivé typy pobytov</p>
+          <p className="text-gray-600">Upravte texty a obrázky pre jednotlivé typy pobytov - zmeny sa synchronizujú na všetky zariadenia</p>
         </div>
         <Button onClick={handleSave} className="flex items-center gap-2">
           <Save className="h-4 w-4" />
