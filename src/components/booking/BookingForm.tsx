@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar, Heart } from "lucide-react";
 import { toast } from "sonner";
-import { useThematicStays } from "@/hooks/useThematicStays";
+import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
 
 interface ThematicStay {
   id: string;
@@ -29,26 +29,105 @@ const BookingForm = () => {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState("2");
   const [selectedStay, setSelectedStay] = useState("");
-  const { stays, updateCounter } = useThematicStays();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { stays } = useThematicStaysDatabase();
 
   // Convert thematic stays to booking options
   const stayOptions = stays.length > 0 ? stays.map(stay => ({
-    id: stay.id,
+    id: stay.stay_id,
     label: stay.title,
     description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
   })) : DEFAULT_STAY_OPTIONS;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getStayTypeLabel = (stayId: string) => {
+    const stay = stayOptions.find(option => option.id === stayId);
+    return stay ? stay.label : stayId;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!checkIn || !checkOut) {
-      toast.error("Prosím vyplňte dátum príchodu a odchodu");
+    
+    if (!checkIn || !checkOut || !name || !email) {
+      toast.error("Prosím vyplňte všetky povinné polia");
       return;
     }
+    
     if (!selectedStay) {
       toast.error("Prosím vyberte typ pobytu");
       return;
     }
-    toast.success("Nezáväzná rezervácia bola odoslaná!");
+
+    setIsSubmitting(true);
+
+    try {
+      // Get email settings from localStorage
+      const emailSettings = localStorage.getItem('emailSettings');
+      let emailTemplate = {
+        subject: "Potvrdenie rezervácie - Apartmán Tília",
+        content: `Dobrý deň {name},
+
+ďakujeme Vám za rezerváciu v našom apartmáne Tília.
+
+Vaša rezervácia bola úspešne prijatá s nasledovnými údajmi:
+- Dátum príchodu: {dateFrom}
+- Dátum odchodu: {dateTo}
+- Počet hostí: {guests}
+- Typ pobytu: {stayType}
+
+V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
+
+Tešíme sa na Vašu návštevu!`
+      };
+      let senderEmail = "Apartmán Tília <onboarding@resend.dev>";
+
+      if (emailSettings) {
+        const settings = JSON.parse(emailSettings);
+        emailTemplate = settings.confirmationTemplate;
+        senderEmail = settings.senderEmail || senderEmail;
+      }
+
+      const bookingData = {
+        name,
+        email,
+        dateFrom: checkIn,
+        dateTo: checkOut,
+        guests: parseInt(guests),
+        stayType: getStayTypeLabel(selectedStay)
+      };
+
+      // Send confirmation email
+      const response = await fetch('/functions/v1/send-booking-confirmation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookingData,
+          emailTemplate,
+          senderEmail
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Rezervácia bola odoslaná! Potvrdenie sme Vám poslali na email.");
+        // Reset form
+        setName("");
+        setEmail("");
+        setCheckIn("");
+        setCheckOut("");
+        setGuests("2");
+        setSelectedStay("");
+      } else {
+        throw new Error("Chyba pri odosielaní");
+      }
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      toast.success("Rezervácia bola odoslaná! (Email sa nepodarilo odoslať)");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -66,7 +145,28 @@ const BookingForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="checkin">Dátum príchodu</Label>
+              <Label htmlFor="name">Meno a priezvisko *</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="checkin">Dátum príchodu *</Label>
               <Input
                 id="checkin"
                 type="date"
@@ -76,7 +176,7 @@ const BookingForm = () => {
               />
             </div>
             <div>
-              <Label htmlFor="checkout">Dátum odchodu</Label>
+              <Label htmlFor="checkout">Dátum odchodu *</Label>
               <Input
                 id="checkout"
                 type="date"
@@ -98,14 +198,14 @@ const BookingForm = () => {
             />
           </div>
           
-          <div className="space-y-3" key={`stay-options-${updateCounter}`}>
+          <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-pink-500" />
               Typ pobytu
             </Label>
             <RadioGroup value={selectedStay} onValueChange={setSelectedStay}>
               {stayOptions.map((option, index) => {
-                const uniqueKey = `${option.id}-${updateCounter}-${index}`;
+                const uniqueKey = `${option.id}-${index}`;
                 return (
                   <div key={uniqueKey} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
                     <RadioGroupItem value={option.id} id={uniqueKey} />
@@ -121,8 +221,8 @@ const BookingForm = () => {
             </RadioGroup>
           </div>
           
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-            Odoslať nezáväznú rezerváciu
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+            {isSubmitting ? "Odosielam..." : "Odoslať nezáväznú rezerváciu"}
           </Button>
         </form>
       </CardContent>

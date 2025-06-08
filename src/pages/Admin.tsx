@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { FileText, CalendarIcon, Image, MapPin, Euro, MessageSquare, BarChart3, Heart } from "lucide-react";
+import { FileText, CalendarIcon, Image, MapPin, Euro, MessageSquare, BarChart3, Heart, Mail } from "lucide-react";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthForm } from "@/components/admin/AuthForm";
@@ -15,6 +15,7 @@ import { PricingEditor } from "@/components/admin/PricingEditor";
 import { ContactMessagesManager } from "@/components/admin/ContactMessagesManager";
 import { VisitStatistics } from "@/components/admin/VisitStatistics";
 import ThematicStaysManager from "@/components/admin/ThematicStaysManager";
+import EmailSettings from "@/components/admin/EmailSettings";
 import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
@@ -77,6 +78,10 @@ const Admin = () => {
               <MapPin size={16} />
               Kontakt
             </TabsTrigger>
+            <TabsTrigger value="email" className="flex items-center gap-2">
+              <Mail size={16} />
+              Emaily
+            </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageSquare size={16} />
               Správy
@@ -114,6 +119,11 @@ const Admin = () => {
           {/* Kontakt */}
           <TabsContent value="contact" className="space-y-6">
             <ContactEditor />
+          </TabsContent>
+          
+          {/* Emaily */}
+          <TabsContent value="email" className="space-y-6">
+            <EmailSettings />
           </TabsContent>
           
           {/* Správy */}

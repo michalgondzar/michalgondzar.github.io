@@ -34,7 +34,14 @@ export const useThematicStaysDatabase = () => {
       }
 
       console.log('Fetched thematic stays from database:', data);
-      setStays(data || []);
+      
+      // Transform the data to match our interface
+      const transformedStays = data?.map(stay => ({
+        ...stay,
+        features: Array.isArray(stay.features) ? stay.features : []
+      })) || [];
+      
+      setStays(transformedStays);
       setError(null);
     } catch (err: any) {
       console.error('Error in fetchStays:', err);
