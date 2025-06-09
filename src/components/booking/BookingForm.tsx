@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ThematicStay {
   id: string;
@@ -80,7 +80,7 @@ V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
 
 Tešíme sa na Vašu návštevu!`
       };
-      let senderEmail = "Apartmán Tília <onboarding@resend.dev>";
+      let senderEmail = "onboarding@resend.dev";
 
       if (emailSettings) {
         const settings = JSON.parse(emailSettings);
@@ -97,34 +97,36 @@ Tešíme sa na Vašu návštevu!`
         stayType: getStayTypeLabel(selectedStay)
       };
 
-      // Send confirmation email
-      const response = await fetch('/functions/v1/send-booking-confirmation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      console.log('Sending booking confirmation email...', { bookingData, emailTemplate, senderEmail });
+
+      // Use Supabase client to call the edge function
+      const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
+        body: {
           bookingData,
           emailTemplate,
           senderEmail
-        }),
+        }
       });
 
-      if (response.ok) {
-        toast.success("Rezervácia bola odoslaná! Potvrdenie sme Vám poslali na email.");
-        // Reset form
-        setName("");
-        setEmail("");
-        setCheckIn("");
-        setCheckOut("");
-        setGuests("2");
-        setSelectedStay("");
-      } else {
-        throw new Error("Chyba pri odosielaní");
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
       }
+
+      console.log('Email sent successfully:', data);
+      toast.success("Rezervácia bola odoslaná! Potvrdenie sme Vám poslali na email.");
+      
+      // Reset form
+      setName("");
+      setEmail("");
+      setCheckIn("");
+      setCheckOut("");
+      setGuests("2");
+      setSelectedStay("");
+
     } catch (error) {
       console.error("Error submitting booking:", error);
-      toast.success("Rezervácia bola odoslaná! (Email sa nepodarilo odoslať)");
+      toast.error("Chyba pri odosielaní rezervácie. Skúste to prosím znovu.");
     } finally {
       setIsSubmitting(false);
     }

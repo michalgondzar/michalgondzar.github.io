@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Mail, Settings, Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EmailTemplate {
   subject: string;
@@ -22,7 +22,7 @@ interface EmailSettings {
 
 const EmailSettings = () => {
   const [settings, setSettings] = useState<EmailSettings>({
-    senderEmail: "",
+    senderEmail: "onboarding@resend.dev",
     senderName: "Apartmán Tília",
     confirmationTemplate: {
       subject: "Potvrdenie rezervácie - Apartmán Tília",
@@ -75,26 +75,26 @@ Tešíme sa na Vašu návštevu!`
         stayType: "Manželský pobyt"
       };
 
-      const response = await fetch('/functions/v1/send-booking-confirmation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      console.log('Sending test email...', { testBookingData, settings });
+
+      const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
+        body: {
           bookingData: testBookingData,
           emailTemplate: settings.confirmationTemplate,
           senderEmail: settings.senderEmail
-        }),
+        }
       });
 
-      if (response.ok) {
-        toast.success("Testovací email bol odoslaný");
-      } else {
-        throw new Error("Chyba pri odosielaní emailu");
+      if (error) {
+        console.error('Test email error:', error);
+        throw error;
       }
+
+      console.log('Test email sent successfully:', data);
+      toast.success("Testovací email bol odoslaný");
     } catch (error) {
       console.error("Error sending test email:", error);
-      toast.error("Chyba pri odosielaní testovacieho emailu");
+      toast.error("Chyba pri odosielaní testovacieho emailu: " + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -129,10 +129,10 @@ Tešíme sa na Vašu návštevu!`
                     type="email"
                     value={settings.senderEmail}
                     onChange={(e) => setSettings(prev => ({ ...prev, senderEmail: e.target.value }))}
-                    placeholder="apartman@gmail.com"
+                    placeholder="onboarding@resend.dev"
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Použite Váš Gmail účet alebo Resend doménu
+                    Použite onboarding@resend.dev alebo vlastnú validovanú doménu
                   </p>
                 </div>
                 <div>
