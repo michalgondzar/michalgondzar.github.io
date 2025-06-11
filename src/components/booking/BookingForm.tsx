@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Calendar, Heart } from "lucide-react";
+import { Calendar, Heart, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,7 @@ const BookingForm = () => {
   const [selectedStay, setSelectedStay] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { stays } = useThematicStaysDatabase();
 
@@ -74,7 +76,7 @@ Vaša rezervácia bola úspešne prijatá s nasledovnými údajmi:
 - Dátum príchodu: {dateFrom}
 - Dátum odchodu: {dateTo}
 - Počet hostí: {guests}
-- Typ pobytu: {stayType}
+- Typ pobytu: {stayType}${couponCode ? '\n- Zľavový kupón: {coupon}' : ''}
 
 V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
 
@@ -94,7 +96,8 @@ Tešíme sa na Vašu návštevu!`
         dateFrom: checkIn,
         dateTo: checkOut,
         guests: parseInt(guests),
-        stayType: getStayTypeLabel(selectedStay)
+        stayType: getStayTypeLabel(selectedStay),
+        coupon: couponCode || null
       };
 
       console.log('Sending booking confirmation email...', { bookingData, emailTemplate, senderEmail });
@@ -123,6 +126,7 @@ Tešíme sa na Vašu návštevu!`
       setCheckOut("");
       setGuests("2");
       setSelectedStay("");
+      setCouponCode("");
 
     } catch (error) {
       console.error("Error submitting booking:", error);
@@ -188,16 +192,30 @@ Tešíme sa na Vašu návštevu!`
               />
             </div>
           </div>
-          <div>
-            <Label htmlFor="guests">Počet hostí</Label>
-            <Input
-              id="guests"
-              type="number"
-              min="1"
-              max="4"
-              value={guests}
-              onChange={(e) => setGuests(e.target.value)}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="guests">Počet hostí</Label>
+              <Input
+                id="guests"
+                type="number"
+                min="1"
+                max="4"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="coupon" className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-green-500" />
+                Zľavový kupón
+              </Label>
+              <Input
+                id="coupon"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Zadajte kód kupónu"
+              />
+            </div>
           </div>
           
           <div className="space-y-3">

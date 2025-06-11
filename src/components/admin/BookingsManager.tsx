@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CalendarIcon, Edit, Trash, Plus, Heart } from "lucide-react";
+import { CalendarIcon, Edit, Trash, Plus, Heart, Tag } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
@@ -20,14 +20,15 @@ interface Booking {
   guests: number;
   status: string;
   stayType?: string;
+  coupon?: string;
 }
 
 export const BookingsManager = () => {
   // Dáta pre kalendár rezervácií
   const [bookings, setBookings] = useState<Booking[]>([
-    { id: 1, name: "Ján Novák", email: "jan@example.com", dateFrom: "2025-06-01", dateTo: "2025-06-05", guests: 2, status: "Potvrdené", stayType: "manzelsky" },
+    { id: 1, name: "Ján Novák", email: "jan@example.com", dateFrom: "2025-06-01", dateTo: "2025-06-05", guests: 2, status: "Potvrdené", stayType: "manzelsky", coupon: "LETO2025" },
     { id: 2, name: "Anna Kováčová", email: "anna@example.com", dateFrom: "2025-06-10", dateTo: "2025-06-15", guests: 3, status: "Čaká na potvrdenie", stayType: "rodinny" },
-    { id: 3, name: "Peter Malý", email: "peter@example.com", dateFrom: "2025-06-20", dateTo: "2025-06-22", guests: 2, status: "Potvrdené", stayType: "komôrka" }
+    { id: 3, name: "Peter Malý", email: "peter@example.com", dateFrom: "2025-06-20", dateTo: "2025-06-22", guests: 2, status: "Potvrdené", stayType: "komôrka", coupon: "ZLAVA10" }
   ]);
 
   // Správa dialógov
@@ -48,7 +49,8 @@ export const BookingsManager = () => {
       dateTo: "",
       guests: 2,
       status: "Čaká na potvrdenie",
-      stayType: ""
+      stayType: "",
+      coupon: ""
     }
   });
 
@@ -69,7 +71,8 @@ export const BookingsManager = () => {
       dateTo: "",
       guests: 2,
       status: "Čaká na potvrdenie",
-      stayType: ""
+      stayType: "",
+      coupon: ""
     });
     setIsAddDialogOpen(true);
   };
@@ -83,7 +86,8 @@ export const BookingsManager = () => {
       dateTo: booking.dateTo,
       guests: booking.guests,
       status: booking.status,
-      stayType: booking.stayType || ""
+      stayType: booking.stayType || "",
+      coupon: booking.coupon || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -158,6 +162,7 @@ export const BookingsManager = () => {
                 <TableHead>Do</TableHead>
                 <TableHead>Hostia</TableHead>
                 <TableHead>Typ pobytu</TableHead>
+                <TableHead>Kupón</TableHead>
                 <TableHead>Stav</TableHead>
                 <TableHead className="text-right">Akcie</TableHead>
               </TableRow>
@@ -175,6 +180,16 @@ export const BookingsManager = () => {
                       <Heart size={14} className="text-pink-500" />
                       <span className="text-sm">{getStayTypeLabel(booking.stayType)}</span>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {booking.coupon ? (
+                      <div className="flex items-center gap-1">
+                        <Tag size={14} className="text-green-500" />
+                        <span className="text-sm font-mono bg-green-50 px-2 py-1 rounded">{booking.coupon}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${

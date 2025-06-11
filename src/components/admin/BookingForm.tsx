@@ -5,6 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, Form } from "@/components/
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Tag } from "lucide-react";
 
 interface BookingFormProps {
   form: any;
@@ -105,6 +106,22 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
             )}
           />
         </div>
+        
+        <FormField
+          control={form.control}
+          name="coupon"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-green-500" />
+                Zľavový kupón
+              </FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Zadajte kód kupónu" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}
