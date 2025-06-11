@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +63,41 @@ const BookingForm = () => {
     setIsSubmitting(true);
 
     try {
+      const bookingData = {
+        name,
+        email,
+        dateFrom: checkIn,
+        dateTo: checkOut,
+        guests: parseInt(guests),
+        stayType: getStayTypeLabel(selectedStay),
+        coupon: couponCode || null
+      };
+
+      console.log('Creating booking...', bookingData);
+
+      // Save booking to database
+      const { data: savedBooking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          name,
+          email,
+          date_from: checkIn,
+          date_to: checkOut,
+          guests: parseInt(guests),
+          stay_type: getStayTypeLabel(selectedStay),
+          coupon: couponCode || null,
+          status: 'Čaká na potvrdenie'
+        })
+        .select()
+        .single();
+
+      if (bookingError) {
+        console.error('Error saving booking:', bookingError);
+        throw new Error('Chyba pri ukladaní rezervácie do databázy');
+      }
+
+      console.log('Booking saved successfully:', savedBooking);
+
       // Get email settings from localStorage
       const emailSettings = localStorage.getItem('emailSettings');
       let emailTemplate = {
@@ -99,16 +133,6 @@ Tešíme sa na Vašu návštevu!`
         }
       }
 
-      const bookingData = {
-        name,
-        email,
-        dateFrom: checkIn,
-        dateTo: checkOut,
-        guests: parseInt(guests),
-        stayType: getStayTypeLabel(selectedStay),
-        coupon: couponCode || null
-      };
-
       console.log('Sending booking confirmation email...', { 
         bookingData, 
         emailTemplate, 
@@ -116,7 +140,7 @@ Tešíme sa na Vašu návštevu!`
         adminNotificationSettings 
       });
 
-      // Use Supabase client to call the edge function
+      // Send email confirmation
       const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
         body: {
           bookingData,
@@ -128,11 +152,13 @@ Tešíme sa na Vašu návštevu!`
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        // Don't throw error for email failure, booking is already saved
+        console.warn('Email sending failed, but booking was saved successfully');
+      } else {
+        console.log('Email sent successfully:', data);
       }
 
-      console.log('Email sent successfully:', data);
-      toast.success("Rezervácia bola odoslaná! Potvrdenie sme Vám poslali na email.");
+      toast.success("Rezervácia bola úspešne vytvorená! Potvrdenie sme Vám poslali na email.");
       
       // Reset form
       setName("");
@@ -145,7 +171,7 @@ Tešíme sa na Vašu návštevu!`
 
     } catch (error) {
       console.error("Error submitting booking:", error);
-      toast.error("Chyba pri odosielaní rezervácie. Skúste to prosím znovu.");
+      toast.error("Chyba pri vytváraní rezervácie. Skúste to prosím znovu.");
     } finally {
       setIsSubmitting(false);
     }

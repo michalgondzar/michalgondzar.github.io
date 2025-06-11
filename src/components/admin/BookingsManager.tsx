@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,37 +10,31 @@ import { CalendarIcon, Edit, Trash, Plus, Heart, Tag } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Booking {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  dateFrom: string;
-  dateTo: string;
+  date_from: string;
+  date_to: string;
   guests: number;
   status: string;
-  stayType?: string;
+  stay_type?: string;
   coupon?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const BookingsManager = () => {
-  // Dáta pre kalendár rezervácií
-  const [bookings, setBookings] = useState<Booking[]>([
-    { id: 1, name: "Ján Novák", email: "jan@example.com", dateFrom: "2025-06-01", dateTo: "2025-06-05", guests: 2, status: "Potvrdené", stayType: "manzelsky", coupon: "LETO2025" },
-    { id: 2, name: "Anna Kováčová", email: "anna@example.com", dateFrom: "2025-06-10", dateTo: "2025-06-15", guests: 3, status: "Čaká na potvrdenie", stayType: "rodinny" },
-    { id: 3, name: "Peter Malý", email: "peter@example.com", dateFrom: "2025-06-20", dateTo: "2025-06-22", guests: 2, status: "Potvrdené", stayType: "komôrka", coupon: "ZLAVA10" }
-  ]);
-
-  // Správa dialógov
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoogleCalendarDialogOpen, setIsGoogleCalendarDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
-  
-  // Kalendár - dátum a vybrané dátumy
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
-  // Form pre bookings
   const form = useForm({
     defaultValues: {
       name: "",
@@ -53,6 +47,33 @@ export const BookingsManager = () => {
       coupon: ""
     }
   });
+
+  // Load bookings from database
+  const loadBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading bookings:', error);
+        toast.error('Chyba pri načítavaní rezervácií');
+        return;
+      }
+
+      setBookings(data || []);
+    } catch (error) {
+      console.error('Error loading bookings:', error);
+      toast.error('Chyba pri načítavaní rezervácií');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBookings();
+  }, []);
 
   const getStayTypeLabel = (stayType?: string) => {
     const stayTypes = {
@@ -82,52 +103,113 @@ export const BookingsManager = () => {
     form.reset({
       name: booking.name,
       email: booking.email,
-      dateFrom: booking.dateFrom,
-      dateTo: booking.dateTo,
+      dateFrom: booking.date_from,
+      dateTo: booking.date_to,
       guests: booking.guests,
       status: booking.status,
-      stayType: booking.stayType || "",
+      stayType: booking.stay_type || "",
       coupon: booking.coupon || ""
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleAddBooking = (data: any) => {
-    const newBooking = {
-      id: bookings.length + 1,
-      ...data
-    };
-    setBookings([...bookings, newBooking]);
-    setIsAddDialogOpen(false);
-    toast.success("Rezervácia bola pridaná");
-  };
+  const handleAddBooking = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .insert({
+          name: data.name,
+          email: data.email,
+          date_from: data.dateFrom,
+          date_to: data.dateTo,
+          guests: data.guests,
+          stay_type: data.stayType,
+          coupon: data.coupon || null,
+          status: data.status
+        });
 
-  const handleEditBooking = (data: any) => {
-    if (!currentBooking) return;
-    
-    const updatedBookings = bookings.map(booking => 
-      booking.id === currentBooking.id ? { ...booking, ...data } : booking
-    );
-    setBookings(updatedBookings);
-    setIsEditDialogOpen(false);
-    toast.success("Rezervácia bola upravená");
-  };
+      if (error) {
+        console.error('Error adding booking:', error);
+        toast.error('Chyba pri pridávaní rezervácie');
+        return;
+      }
 
-  const handleDeleteBooking = (id: number) => {
-    if (confirm("Naozaj chcete odstrániť túto rezerváciu?")) {
-      const updatedBookings = bookings.filter(booking => booking.id !== id);
-      setBookings(updatedBookings);
-      toast.success("Rezervácia bola odstránená");
+      toast.success("Rezervácia bola pridaná");
+      setIsAddDialogOpen(false);
+      loadBookings(); // Reload bookings
+    } catch (error) {
+      console.error('Error adding booking:', error);
+      toast.error('Chyba pri pridávaní rezervácie');
     }
   };
 
-  // Integrácia s Google kalendárom - tu by bola skutočná implementácia
+  const handleEditBooking = async (data: any) => {
+    if (!currentBooking) return;
+    
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({
+          name: data.name,
+          email: data.email,
+          date_from: data.dateFrom,
+          date_to: data.dateTo,
+          guests: data.guests,
+          stay_type: data.stayType,
+          coupon: data.coupon || null,
+          status: data.status
+        })
+        .eq('id', currentBooking.id);
+
+      if (error) {
+        console.error('Error updating booking:', error);
+        toast.error('Chyba pri úprave rezervácie');
+        return;
+      }
+
+      toast.success("Rezervácia bola upravená");
+      setIsEditDialogOpen(false);
+      loadBookings(); // Reload bookings
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      toast.error('Chyba pri úprave rezervácie');
+    }
+  };
+
+  const handleDeleteBooking = async (id: string) => {
+    if (!confirm("Naozaj chcete odstrániť túto rezerváciu?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting booking:', error);
+        toast.error('Chyba pri odstraňovaní rezervácie');
+        return;
+      }
+
+      toast.success("Rezervácia bola odstránená");
+      loadBookings(); // Reload bookings
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      toast.error('Chyba pri odstraňovaní rezervácie');
+    }
+  };
+
   const connectGoogleCalendar = () => {
-    // V skutočnej aplikácii by sme tu implementovali OAuth 2.0 autorizačný flow pre Google Calendar API
     toast.success("Pripojené k Google Kalendáru", {
       description: "Teraz môžete synchronizovať rezervácie"
     });
   };
+
+  if (loading) {
+    return <div className="flex justify-center items-center p-8">Načítavam rezervácie...</div>;
+  }
 
   return (
     <>
@@ -172,13 +254,13 @@ export const BookingsManager = () => {
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.name}</TableCell>
                   <TableCell>{booking.email}</TableCell>
-                  <TableCell>{booking.dateFrom}</TableCell>
-                  <TableCell>{booking.dateTo}</TableCell>
+                  <TableCell>{booking.date_from}</TableCell>
+                  <TableCell>{booking.date_to}</TableCell>
                   <TableCell>{booking.guests}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Heart size={14} className="text-pink-500" />
-                      <span className="text-sm">{getStayTypeLabel(booking.stayType)}</span>
+                      <span className="text-sm">{getStayTypeLabel(booking.stay_type)}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -212,6 +294,13 @@ export const BookingsManager = () => {
                   </TableCell>
                 </TableRow>
               ))}
+              {bookings.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                    Žiadne rezervácie
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

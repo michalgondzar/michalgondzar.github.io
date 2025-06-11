@@ -45,6 +45,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          coupon: string | null
+          created_at: string
+          date_from: string
+          date_to: string
+          email: string
+          guests: number
+          id: string
+          name: string
+          status: string
+          stay_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          coupon?: string | null
+          created_at?: string
+          date_from: string
+          date_to: string
+          email: string
+          guests?: number
+          id?: string
+          name: string
+          status?: string
+          stay_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coupon?: string | null
+          created_at?: string
+          date_from?: string
+          date_to?: string
+          email?: string
+          guests?: number
+          id?: string
+          name?: string
+          status?: string
+          stay_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_info: {
         Row: {
           address: string

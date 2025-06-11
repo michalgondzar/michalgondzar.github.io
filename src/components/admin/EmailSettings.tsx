@@ -70,15 +70,29 @@ Prosím potvrďte rezerváciu v admin paneli.`
 
   // Load settings from localStorage on component mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem('emailSettings');
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+    try {
+      const savedSettings = localStorage.getItem('emailSettings');
+      if (savedSettings) {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(prevSettings => ({
+          ...prevSettings,
+          ...parsedSettings
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading email settings:', error);
+      // Continue with default settings if localStorage is corrupted
     }
   }, []);
 
   const handleSaveSettings = () => {
-    localStorage.setItem('emailSettings', JSON.stringify(settings));
-    toast.success("Emailové nastavenia boli uložené");
+    try {
+      localStorage.setItem('emailSettings', JSON.stringify(settings));
+      toast.success("Emailové nastavenia boli uložené");
+    } catch (error) {
+      console.error('Error saving email settings:', error);
+      toast.error("Chyba pri ukladaní nastavení");
+    }
   };
 
   const handleSendTestEmail = async () => {
@@ -123,6 +137,23 @@ Prosím potvrďte rezerváciu v admin paneli.`
     }
   };
 
+  const handleSettingsChange = (field: keyof EmailSettings, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleTemplateChange = (template: 'confirmationTemplate' | 'adminNotificationTemplate', field: keyof EmailTemplate, value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      [template]: {
+        ...prev[template],
+        [field]: value
+      }
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -152,7 +183,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                     id="senderEmail"
                     type="email"
                     value={settings.senderEmail}
-                    onChange={(e) => setSettings(prev => ({ ...prev, senderEmail: e.target.value }))}
+                    onChange={(e) => handleSettingsChange('senderEmail', e.target.value)}
                     placeholder="onboarding@resend.dev"
                   />
                   <p className="text-sm text-gray-500 mt-1">
@@ -164,7 +195,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                   <Input
                     id="senderName"
                     value={settings.senderName}
-                    onChange={(e) => setSettings(prev => ({ ...prev, senderName: e.target.value }))}
+                    onChange={(e) => handleSettingsChange('senderName', e.target.value)}
                     placeholder="Apartmán Tília"
                   />
                 </div>
@@ -182,7 +213,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                   type="checkbox"
                   id="adminNotificationsEnabled"
                   checked={settings.adminNotificationsEnabled}
-                  onChange={(e) => setSettings(prev => ({ ...prev, adminNotificationsEnabled: e.target.checked }))}
+                  onChange={(e) => handleSettingsChange('adminNotificationsEnabled', e.target.checked)}
                   className="rounded border-gray-300"
                 />
                 <Label htmlFor="adminNotificationsEnabled">Povoliť admin notifikácie</Label>
@@ -194,7 +225,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                   id="adminEmail"
                   type="email"
                   value={settings.adminEmail}
-                  onChange={(e) => setSettings(prev => ({ ...prev, adminEmail: e.target.value }))}
+                  onChange={(e) => handleSettingsChange('adminEmail', e.target.value)}
                   placeholder="admin@vasadomena.sk"
                 />
                 <p className="text-sm text-gray-500 mt-1">
@@ -207,10 +238,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                 <Input
                   id="adminSubject"
                   value={settings.adminNotificationTemplate.subject}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    adminNotificationTemplate: { ...prev.adminNotificationTemplate, subject: e.target.value }
-                  }))}
+                  onChange={(e) => handleTemplateChange('adminNotificationTemplate', 'subject', e.target.value)}
                   placeholder="Nová rezervácia"
                 />
               </div>
@@ -221,10 +249,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                   id="adminContent"
                   rows={8}
                   value={settings.adminNotificationTemplate.content}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    adminNotificationTemplate: { ...prev.adminNotificationTemplate, content: e.target.value }
-                  }))}
+                  onChange={(e) => handleTemplateChange('adminNotificationTemplate', 'content', e.target.value)}
                   placeholder="Obsah notifikácie pre admina..."
                 />
                 <p className="text-sm text-gray-500 mt-2">
@@ -239,10 +264,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                 <Input
                   id="subject"
                   value={settings.confirmationTemplate.subject}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    confirmationTemplate: { ...prev.confirmationTemplate, subject: e.target.value }
-                  }))}
+                  onChange={(e) => handleTemplateChange('confirmationTemplate', 'subject', e.target.value)}
                   placeholder="Potvrdenie rezervácie"
                 />
               </div>
@@ -252,10 +274,7 @@ Prosím potvrďte rezerváciu v admin paneli.`
                   id="content"
                   rows={12}
                   value={settings.confirmationTemplate.content}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    confirmationTemplate: { ...prev.confirmationTemplate, content: e.target.value }
-                  }))}
+                  onChange={(e) => handleTemplateChange('confirmationTemplate', 'content', e.target.value)}
                   placeholder="Obsah potvrdzovacieho emailu..."
                 />
                 <p className="text-sm text-gray-500 mt-2">
