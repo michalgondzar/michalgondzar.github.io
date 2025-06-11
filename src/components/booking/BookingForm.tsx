@@ -83,11 +83,20 @@ V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
 Tešíme sa na Vašu návštevu!`
       };
       let senderEmail = "onboarding@resend.dev";
+      let adminNotificationSettings = null;
 
       if (emailSettings) {
         const settings = JSON.parse(emailSettings);
         emailTemplate = settings.confirmationTemplate;
         senderEmail = settings.senderEmail || senderEmail;
+        
+        // Prepare admin notification settings
+        if (settings.adminNotificationsEnabled && settings.adminEmail) {
+          adminNotificationSettings = {
+            adminEmail: settings.adminEmail,
+            adminTemplate: settings.adminNotificationTemplate
+          };
+        }
       }
 
       const bookingData = {
@@ -100,14 +109,20 @@ Tešíme sa na Vašu návštevu!`
         coupon: couponCode || null
       };
 
-      console.log('Sending booking confirmation email...', { bookingData, emailTemplate, senderEmail });
+      console.log('Sending booking confirmation email...', { 
+        bookingData, 
+        emailTemplate, 
+        senderEmail, 
+        adminNotificationSettings 
+      });
 
       // Use Supabase client to call the edge function
       const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
         body: {
           bookingData,
           emailTemplate,
-          senderEmail
+          senderEmail,
+          adminNotificationSettings
         }
       });
 

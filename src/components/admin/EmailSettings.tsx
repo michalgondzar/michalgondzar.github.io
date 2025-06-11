@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Mail, Settings, Send } from "lucide-react";
+import { Mail, Settings, Send, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface EmailTemplate {
@@ -17,13 +18,18 @@ interface EmailTemplate {
 interface EmailSettings {
   senderEmail: string;
   senderName: string;
+  adminEmail: string;
+  adminNotificationsEnabled: boolean;
   confirmationTemplate: EmailTemplate;
+  adminNotificationTemplate: EmailTemplate;
 }
 
 const EmailSettings = () => {
   const [settings, setSettings] = useState<EmailSettings>({
     senderEmail: "onboarding@resend.dev",
     senderName: "Apartmán Tília",
+    adminEmail: "",
+    adminNotificationsEnabled: true,
     confirmationTemplate: {
       subject: "Potvrdenie rezervácie - Apartmán Tília",
       content: `Dobrý den {name},
@@ -39,6 +45,23 @@ Vaša rezervácia bola úspešne prijatá s nasledovnými údajmi:
 V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
 
 Tešíme sa na Vašu návštevu!`
+    },
+    adminNotificationTemplate: {
+      subject: "Nová rezervácia - Apartmán Tília",
+      content: `Nová rezervácia bola vytvorená:
+
+Údaje hosťa:
+- Meno: {name}
+- Email: {email}
+
+Údaje rezervácie:
+- Dátum príchodu: {dateFrom}
+- Dátum odchodu: {dateTo}
+- Počet hostí: {guests}
+- Typ pobytu: {stayType}
+{coupon}
+
+Prosím potvrďte rezerváciu v admin paneli.`
     }
   });
 
@@ -114,8 +137,9 @@ Tešíme sa na Vašu návštevu!`
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="sender" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="sender">Odosielateľ</TabsTrigger>
+              <TabsTrigger value="admin">Admin notifikácie</TabsTrigger>
               <TabsTrigger value="template">Šablóna</TabsTrigger>
               <TabsTrigger value="test">Test</TabsTrigger>
             </TabsList>
@@ -144,6 +168,68 @@ Tešíme sa na Vašu návštevu!`
                     placeholder="Apartmán Tília"
                   />
                 </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="admin" className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Bell className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-medium">Admin notifikácie</h3>
+              </div>
+              
+              <div className="flex items-center space-x-2 mb-4">
+                <input
+                  type="checkbox"
+                  id="adminNotificationsEnabled"
+                  checked={settings.adminNotificationsEnabled}
+                  onChange={(e) => setSettings(prev => ({ ...prev, adminNotificationsEnabled: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="adminNotificationsEnabled">Povoliť admin notifikácie</Label>
+              </div>
+
+              <div>
+                <Label htmlFor="adminEmail">Admin email adresa</Label>
+                <Input
+                  id="adminEmail"
+                  type="email"
+                  value={settings.adminEmail}
+                  onChange={(e) => setSettings(prev => ({ ...prev, adminEmail: e.target.value }))}
+                  placeholder="admin@vasadomena.sk"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Na túto adresu budú chodiť notifikácie o nových rezerváciách
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="adminSubject">Predmet admin notifikácie</Label>
+                <Input
+                  id="adminSubject"
+                  value={settings.adminNotificationTemplate.subject}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    adminNotificationTemplate: { ...prev.adminNotificationTemplate, subject: e.target.value }
+                  }))}
+                  placeholder="Nová rezervácia"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="adminContent">Obsah admin notifikácie</Label>
+                <Textarea
+                  id="adminContent"
+                  rows={8}
+                  value={settings.adminNotificationTemplate.content}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    adminNotificationTemplate: { ...prev.adminNotificationTemplate, content: e.target.value }
+                  }))}
+                  placeholder="Obsah notifikácie pre admina..."
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  Môžete použiť premenné: {"{name}"}, {"{email}"}, {"{dateFrom}"}, {"{dateTo}"}, {"{guests}"}, {"{stayType}"}, {"{coupon}"}
+                </p>
               </div>
             </TabsContent>
 
