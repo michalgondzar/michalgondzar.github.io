@@ -262,9 +262,9 @@ Tešíme sa na Vašu návštevu!`
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-pink-500" />
-              Typ pobytu
+              Typ pobytu *
             </Label>
-            <RadioGroup value={selectedStay} onValueChange={setSelectedStay}>
+            <RadioGroup value={selectedStay} onValueChange={setSelectedStay} required>
               {stayOptions.map((option, index) => {
                 const uniqueKey = `${option.id}-${index}`;
                 return (
