@@ -10,9 +10,7 @@ export const validateBookingForm = (
     return "Prosím vyplňte všetky povinné polia";
   }
   
-  if (!selectedStay) {
-    return "Prosím vyberte typ pobytu";
-  }
+  // Remove stay type validation - it's no longer required
   
   return null;
 };

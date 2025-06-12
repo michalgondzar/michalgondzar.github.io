@@ -9,7 +9,7 @@ interface BookingData {
   dateFrom: string;
   dateTo: string;
   guests: number;
-  stayType: string;
+  stayType: string | null; // Allow null for optional stay type
   coupon: string | null;
 }
 
@@ -31,7 +31,7 @@ export const useBookingSubmission = () => {
           date_from: bookingData.dateFrom,
           date_to: bookingData.dateTo,
           guests: bookingData.guests,
-          stay_type: bookingData.stayType,
+          stay_type: bookingData.stayType, // This can now be null
           coupon: bookingData.coupon,
           status: 'Čaká na potvrdenie'
         })

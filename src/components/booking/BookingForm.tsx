@@ -36,6 +36,7 @@ const BookingForm = () => {
   })) : DEFAULT_STAY_OPTIONS;
 
   const getStayTypeLabel = (stayId: string) => {
+    if (!stayId) return null; // Allow empty stay type
     const stay = stayOptions.find(option => option.id === stayId);
     return stay ? stay.label : stayId;
   };
@@ -55,7 +56,7 @@ const BookingForm = () => {
       dateFrom: checkIn,
       dateTo: checkOut,
       guests: parseInt(guests),
-      stayType: getStayTypeLabel(selectedStay),
+      stayType: getStayTypeLabel(selectedStay), // This can now be null
       coupon: couponCode || null
     };
 
