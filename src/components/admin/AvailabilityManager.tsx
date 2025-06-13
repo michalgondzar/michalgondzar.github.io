@@ -43,11 +43,11 @@ const AvailabilityManager = () => {
     loadAvailabilityData();
   }, []);
 
-  // Function to determine if a date is available
+  // Function to determine if a date is available (default to available if not in database)
   const isDateAvailable = (date: Date) => {
     const dateString = date.toISOString().split('T')[0];
     const availability = availabilityData.find(item => item.date === dateString);
-    return availability ? availability.is_available : true; // Default to available if not in database
+    return availability ? availability.is_available : true; // Default to available
   };
 
   // Toggle availability for selected date
@@ -77,7 +77,7 @@ const AvailabilityManager = () => {
 
       // Refresh data
       await loadAvailabilityData();
-      toast.success(`Dátum ${dateString} označený ako ${available ? 'dostupný' : 'obsadený'}`);
+      toast.success(`Dátum ${dateString} označený ako ${available ? 'voľný' : 'obsadený'}`);
     } catch (error) {
       console.error('Error updating availability:', error);
       toast.error('Chyba pri aktualizácii dostupnosti');
@@ -131,7 +131,7 @@ const AvailabilityManager = () => {
           Správa kalendára dostupnosti
         </CardTitle>
         <CardDescription>
-          Označte termíny ako dostupné alebo obsadené
+          Označte termíny ako voľné alebo obsadené. Všetky termíny sú defaultne voľné.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -145,6 +145,7 @@ const AvailabilityManager = () => {
               modifiers={modifiers}
               modifiersClassNames={modifiersClassNames}
               showOutsideDays={false}
+              fromDate={new Date()}
             />
           </div>
           
@@ -164,7 +165,7 @@ const AvailabilityManager = () => {
               <div className="space-y-2">
                 <p className="text-sm">
                   Aktuálny stav: <span className={isDateAvailable(selectedDate) ? "text-green-600" : "text-red-600"}>
-                    {isDateAvailable(selectedDate) ? 'Dostupný' : 'Obsadený'}
+                    {isDateAvailable(selectedDate) ? 'Voľný' : 'Obsadený'}
                   </span>
                 </p>
                 
@@ -174,7 +175,7 @@ const AvailabilityManager = () => {
                     className="bg-green-600 hover:bg-green-700"
                     disabled={isDateAvailable(selectedDate)}
                   >
-                    Označiť ako dostupný
+                    Označiť ako voľný
                   </Button>
                   <Button 
                     onClick={() => toggleAvailability(false)}
@@ -192,11 +193,15 @@ const AvailabilityManager = () => {
         <div className="flex flex-col sm:flex-row gap-4 text-sm border-t pt-4">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-            <span>Dostupné termíny</span>
+            <span>Voľné termíny</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
             <span>Obsadené termíny</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
+            <span>Defaultne voľné (neoznačené)</span>
           </div>
         </div>
       </CardContent>

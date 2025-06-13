@@ -10,7 +10,7 @@ import AvailabilityManager from "@/components/admin/AvailabilityManager";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { ContactMessagesManager } from "@/components/admin/ContactMessagesManager";
 import { ContentEditor } from "@/components/admin/ContentEditor";
-import { ThematicStaysManager } from "@/components/admin/ThematicStaysManager";
+import ThematicStaysManager from "@/components/admin/ThematicStaysManager";
 import { VisitStatistics } from "@/components/admin/VisitStatistics";
 
 const Admin = () => {
