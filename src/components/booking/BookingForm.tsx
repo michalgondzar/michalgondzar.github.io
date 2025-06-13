@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useBookingSubmission } from "./hooks/useBookingSubmission";
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +18,8 @@ const BookingForm = () => {
     stayType: "",
     couponCode: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { submitBooking, isSubmitting } = useBookingSubmission();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -39,37 +39,19 @@ const BookingForm = () => {
       return;
     }
 
-    setIsSubmitting(true);
+    // Use the booking submission hook which handles both database saving and email sending
+    const success = await submitBooking({
+      name: formData.name,
+      email: formData.email,
+      dateFrom: formData.checkIn,
+      dateTo: formData.checkOut,
+      guests: parseInt(formData.guests),
+      stayType: formData.stayType || null,
+      coupon: formData.couponCode || null,
+    });
 
-    try {
-      console.log('Inserting booking into database...');
-      
-      // Now we can use the Supabase client directly since RLS is disabled
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          date_from: formData.checkIn,
-          date_to: formData.checkOut,
-          guests: parseInt(formData.guests),
-          stay_type: formData.stayType || null,
-          coupon: formData.couponCode || null,
-          status: 'Čaká na potvrdenie'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Database error:', error);
-        throw new Error('Chyba pri ukladaní rezervácie');
-      }
-
-      console.log('Booking saved successfully:', data);
-      
-      toast.success("Rezervácia bola úspešne vytvorená!");
-      
-      // Reset form
+    if (success) {
+      // Reset form on successful submission
       setFormData({
         name: "",
         email: "",
@@ -79,13 +61,6 @@ const BookingForm = () => {
         stayType: "",
         couponCode: ""
       });
-
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error("Chyba pri vytváraní rezervácie. Skúste to prosím znovu.");
-    } finally {
-      setIsSubmitting(false);
-      console.log('=== BOOKING FORM SUBMISSION END ===');
     }
   };
 
