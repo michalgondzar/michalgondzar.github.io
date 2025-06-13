@@ -49,15 +49,26 @@ const AvailabilityCalendar = () => {
   };
 
   // Custom day renderer with color coding
-  const dayClassName = (date: Date) => {
-    const isAvailable = isDateAvailable(date);
-    const baseClasses = "h-9 w-9 p-0 font-normal";
+  const getModifiers = () => {
+    const available: Date[] = [];
+    const unavailable: Date[] = [];
     
-    if (isAvailable) {
-      return `${baseClasses} bg-green-100 text-green-800 hover:bg-green-200`;
-    } else {
-      return `${baseClasses} bg-red-100 text-red-800 hover:bg-red-200`;
-    }
+    availabilityData.forEach(item => {
+      const date = new Date(item.date);
+      if (item.is_available) {
+        available.push(date);
+      } else {
+        unavailable.push(date);
+      }
+    });
+    
+    return { available, unavailable };
+  };
+
+  const modifiers = getModifiers();
+  const modifiersClassNames = {
+    available: "bg-green-100 text-green-800 hover:bg-green-200",
+    unavailable: "bg-red-100 text-red-800 hover:bg-red-200"
   };
 
   if (loading) {
@@ -92,9 +103,8 @@ const AvailabilityCalendar = () => {
           <Calendar
             mode="single"
             className="rounded-md border"
-            classNames={{
-              day: dayClassName,
-            }}
+            modifiers={modifiers}
+            modifiersClassNames={modifiersClassNames}
             fromDate={new Date()}
             showOutsideDays={false}
           />

@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -12,11 +12,10 @@ interface AvailabilityData {
   is_available: boolean;
 }
 
-export const AvailabilityManager = () => {
+const AvailabilityManager = () => {
   const [availabilityData, setAvailabilityData] = useState<AvailabilityData[]>([]);
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   // Load availability data from database
   const loadAvailabilityData = async () => {
@@ -32,10 +31,6 @@ export const AvailabilityManager = () => {
       }
 
       setAvailabilityData(data || []);
-      
-      // Set selected dates to unavailable dates
-      const unavailableDates = data?.filter(item => !item.is_available).map(item => new Date(item.date)) || [];
-      setSelectedDates(unavailableDates);
     } catch (error) {
       console.error('Error loading availability data:', error);
       toast.error('Chyba pri načítavaní kalendára obsadenosti');
@@ -52,76 +47,64 @@ export const AvailabilityManager = () => {
   const isDateAvailable = (date: Date) => {
     const dateString = date.toISOString().split('T')[0];
     const availability = availabilityData.find(item => item.date === dateString);
-    return availability ? availability.is_available : true;
+    return availability ? availability.is_available : true; // Default to available if not in database
+  };
+
+  // Toggle availability for selected date
+  const toggleAvailability = async (available: boolean) => {
+    if (!selectedDate) {
+      toast.error('Prosím vyberte dátum');
+      return;
+    }
+
+    const dateString = selectedDate.toISOString().split('T')[0];
+    
+    try {
+      const { error } = await supabase
+        .from('availability_calendar')
+        .upsert({
+          date: dateString,
+          is_available: available
+        }, {
+          onConflict: 'date'
+        });
+
+      if (error) {
+        console.error('Error updating availability:', error);
+        toast.error('Chyba pri aktualizácii dostupnosti');
+        return;
+      }
+
+      // Refresh data
+      await loadAvailabilityData();
+      toast.success(`Dátum ${dateString} označený ako ${available ? 'dostupný' : 'obsadený'}`);
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      toast.error('Chyba pri aktualizácii dostupnosti');
+    }
   };
 
   // Custom day renderer with color coding
-  const dayClassName = (date: Date) => {
-    const isAvailable = isDateAvailable(date);
-    const baseClasses = "h-9 w-9 p-0 font-normal";
+  const getModifiers = () => {
+    const available: Date[] = [];
+    const unavailable: Date[] = [];
     
-    if (isAvailable) {
-      return `${baseClasses} bg-green-100 text-green-800 hover:bg-green-200`;
-    } else {
-      return `${baseClasses} bg-red-100 text-red-800 hover:bg-red-200`;
-    }
+    availabilityData.forEach(item => {
+      const date = new Date(item.date);
+      if (item.is_available) {
+        available.push(date);
+      } else {
+        unavailable.push(date);
+      }
+    });
+    
+    return { available, unavailable };
   };
 
-  // Save availability changes
-  const saveAvailability = async () => {
-    setSaving(true);
-    try {
-      // Get all dates that should be marked as unavailable
-      const unavailableDates = selectedDates.map(date => ({
-        date: date.toISOString().split('T')[0],
-        is_available: false
-      }));
-
-      // Get existing unavailable dates that are no longer selected
-      const existingUnavailableDates = availabilityData
-        .filter(item => !item.is_available)
-        .map(item => item.date);
-
-      const newlySelectedDates = selectedDates.map(date => date.toISOString().split('T')[0]);
-      const datesToMakeAvailable = existingUnavailableDates.filter(date => !newlySelectedDates.includes(date));
-
-      // Update dates to available
-      for (const date of datesToMakeAvailable) {
-        const { error } = await supabase
-          .from('availability_calendar')
-          .upsert({
-            date,
-            is_available: true
-          });
-
-        if (error) {
-          console.error('Error updating availability:', error);
-          toast.error('Chyba pri aktualizácii dostupnosti');
-          return;
-        }
-      }
-
-      // Update dates to unavailable
-      for (const unavailableDate of unavailableDates) {
-        const { error } = await supabase
-          .from('availability_calendar')
-          .upsert(unavailableDate);
-
-        if (error) {
-          console.error('Error updating availability:', error);
-          toast.error('Chyba pri aktualizácii dostupnosti');
-          return;
-        }
-      }
-
-      toast.success('Kalendár obsadenosti bol aktualizovaný');
-      loadAvailabilityData(); // Reload to reflect changes
-    } catch (error) {
-      console.error('Error saving availability:', error);
-      toast.error('Chyba pri ukladaní kalendára obsadenosti');
-    } finally {
-      setSaving(false);
-    }
+  const modifiers = getModifiers();
+  const modifiersClassNames = {
+    available: "bg-green-100 text-green-800 hover:bg-green-200",
+    unavailable: "bg-red-100 text-red-800 hover:bg-red-200"
   };
 
   if (loading) {
@@ -129,8 +112,8 @@ export const AvailabilityManager = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="text-booking-primary" />
-            Kalendár obsadenosti
+            <CalendarIcon className="h-5 w-5 text-blue-600" />
+            Správa kalendára dostupnosti
           </CardTitle>
           <CardDescription>
             Načítavam kalendár...
@@ -144,48 +127,81 @@ export const AvailabilityManager = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CalendarIcon className="text-booking-primary" />
-          Správa kalendára obsadenosti
+          <CalendarIcon className="h-5 w-5 text-blue-600" />
+          Správa kalendára dostupnosti
         </CardTitle>
         <CardDescription>
-          Označte obsadené termíny kliknutím na dátumy. Červené = obsadené, zelené = voľné.
+          Označte termíny ako dostupné alebo obsadené
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center space-y-6">
-          <Calendar
-            mode="multiple"
-            selected={selectedDates}
-            onSelect={setSelectedDates}
-            className="rounded-md border"
-            classNames={{
-              day: dayClassName,
-            }}
-            fromDate={new Date()}
-            showOutsideDays={false}
-          />
-          
-          <div className="flex flex-col sm:flex-row gap-4 text-sm mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-              <span>Voľné termíny</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-              <span>Obsadené termíny (kliknite pre označenie)</span>
-            </div>
+      <CardContent className="space-y-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
+              showOutsideDays={false}
+            />
           </div>
-
-          <Button 
-            onClick={saveAvailability}
-            disabled={saving}
-            className="flex items-center gap-2"
-          >
-            <Save size={16} />
-            {saving ? "Ukladám..." : "Uložiť kalendár obsadenosti"}
-          </Button>
+          
+          <div className="lg:w-80 space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Vybraný dátum</h3>
+              {selectedDate ? (
+                <p className="text-sm text-gray-600">
+                  {selectedDate.toLocaleDateString('sk-SK')}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500">Žiadny dátum nevybraný</p>
+              )}
+            </div>
+            
+            {selectedDate && (
+              <div className="space-y-2">
+                <p className="text-sm">
+                  Aktuálny stav: <span className={isDateAvailable(selectedDate) ? "text-green-600" : "text-red-600"}>
+                    {isDateAvailable(selectedDate) ? 'Dostupný' : 'Obsadený'}
+                  </span>
+                </p>
+                
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    onClick={() => toggleAvailability(true)}
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={isDateAvailable(selectedDate)}
+                  >
+                    Označiť ako dostupný
+                  </Button>
+                  <Button 
+                    onClick={() => toggleAvailability(false)}
+                    variant="destructive"
+                    disabled={!isDateAvailable(selectedDate)}
+                  >
+                    Označiť ako obsadený
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4 text-sm border-t pt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+            <span>Dostupné termíny</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+            <span>Obsadené termíny</span>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
+
+export default AvailabilityManager;
