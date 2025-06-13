@@ -143,7 +143,7 @@ const BookingForm = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stayType">Typ pobytu</Label>
+              <Label htmlFor="stayType">Typ pobytu (nepovinné)</Label>
               <Select value={formData.stayType} onValueChange={(value) => handleInputChange('stayType', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Vyberte typ pobytu" />
