@@ -45,6 +45,30 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_calendar: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          is_available: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          is_available?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          is_available?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           coupon: string | null
