@@ -2,75 +2,90 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
-import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
-import { BookingFormFields } from "./components/BookingFormFields";
-import { StayTypeSelector } from "./components/StayTypeSelector";
-import { useBookingSubmission } from "./hooks/useBookingSubmission";
-import { validateBookingForm } from "./utils/bookingValidation";
 import { toast } from "sonner";
-
-const DEFAULT_STAY_OPTIONS = [
-  { id: "manzelsky", label: "Manželský pobyt", description: "Romantický pobyt pre páry" },
-  { id: "rodinny", label: "Rodinný pobyt", description: "Pobyt vhodný pre celú rodinu" },
-  { id: "komorka", label: "Pobyt v komôrke", description: "Exkluzívny a pokojný pobyt" }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const BookingForm = () => {
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
-  const [selectedStay, setSelectedStay] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  
-  const { stays } = useThematicStaysDatabase();
-  const { submitBooking, isSubmitting } = useBookingSubmission();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    checkIn: "",
+    checkOut: "",
+    guests: "2",
+    stayType: "",
+    couponCode: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Convert thematic stays to booking options
-  const stayOptions = stays.length > 0 ? stays.map(stay => ({
-    id: stay.stay_id,
-    label: stay.title,
-    description: stay.description.length > 50 ? stay.description.substring(0, 50) + '...' : stay.description
-  })) : DEFAULT_STAY_OPTIONS;
-
-  const getStayTypeLabel = (stayId: string) => {
-    if (!stayId) return null; // Allow empty stay type
-    const stay = stayOptions.find(option => option.id === stayId);
-    return stay ? stay.label : stayId;
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== BOOKING FORM SUBMISSION START ===');
+    console.log('Form data:', formData);
     
-    const validationError = validateBookingForm(checkIn, checkOut, name, email, selectedStay);
-    if (validationError) {
-      toast.error(validationError);
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.checkIn || !formData.checkOut) {
+      toast.error("Prosím vyplňte všetky povinné polia");
       return;
     }
 
-    const bookingData = {
-      name,
-      email,
-      dateFrom: checkIn,
-      dateTo: checkOut,
-      guests: parseInt(guests),
-      stayType: getStayTypeLabel(selectedStay), // This can now be null
-      coupon: couponCode || null
-    };
+    setIsSubmitting(true);
 
-    const success = await submitBooking(bookingData);
-    
-    if (success) {
+    try {
+      console.log('Inserting booking into database...');
+      
+      // Simple direct insert
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          date_from: formData.checkIn,
+          date_to: formData.checkOut,
+          guests: parseInt(formData.guests),
+          stay_type: formData.stayType || null,
+          coupon: formData.couponCode || null,
+          status: 'Čaká na potvrdenie'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error('Chyba pri ukladaní rezervácie');
+      }
+
+      console.log('Booking saved successfully:', data);
+      
+      toast.success("Rezervácia bola úspešne vytvorená!");
+      
       // Reset form
-      setName("");
-      setEmail("");
-      setCheckIn("");
-      setCheckOut("");
-      setGuests("2");
-      setSelectedStay("");
-      setCouponCode("");
+      setFormData({
+        name: "",
+        email: "",
+        checkIn: "",
+        checkOut: "",
+        guests: "2",
+        stayType: "",
+        couponCode: ""
+      });
+
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("Chyba pri vytváraní rezervácie. Skúste to prosím znovu.");
+    } finally {
+      setIsSubmitting(false);
+      console.log('=== BOOKING FORM SUBMISSION END ===');
     }
   };
 
@@ -87,28 +102,102 @@ const BookingForm = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <BookingFormFields
-            name={name}
-            setName={setName}
-            email={email}
-            setEmail={setEmail}
-            checkIn={checkIn}
-            setCheckIn={setCheckIn}
-            checkOut={checkOut}
-            setCheckOut={setCheckOut}
-            guests={guests}
-            setGuests={setGuests}
-            couponCode={couponCode}
-            setCouponCode={setCouponCode}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Meno a priezvisko *</Label>
+              <Input
+                id="name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Vaše meno"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="vas@email.sk"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="checkIn">Dátum príchodu *</Label>
+              <Input
+                id="checkIn"
+                type="date"
+                value={formData.checkIn}
+                onChange={(e) => handleInputChange('checkIn', e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="checkOut">Dátum odchodu *</Label>
+              <Input
+                id="checkOut"
+                type="date"
+                value={formData.checkOut}
+                onChange={(e) => handleInputChange('checkOut', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="guests">Počet hostí</Label>
+              <Select value={formData.guests} onValueChange={(value) => handleInputChange('guests', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 osoba</SelectItem>
+                  <SelectItem value="2">2 osoby</SelectItem>
+                  <SelectItem value="3">3 osoby</SelectItem>
+                  <SelectItem value="4">4 osoby</SelectItem>
+                  <SelectItem value="5">5 osôb</SelectItem>
+                  <SelectItem value="6">6 osôb</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stayType">Typ pobytu</Label>
+              <Select value={formData.stayType} onValueChange={(value) => handleInputChange('stayType', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Vyberte typ pobytu" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manzelsky">Manželský pobyt</SelectItem>
+                  <SelectItem value="rodinny">Rodinný pobyt</SelectItem>
+                  <SelectItem value="komorka">Pobyt v komôrke</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="coupon">Zľavový kupón</Label>
+            <Input
+              id="coupon"
+              type="text"
+              value={formData.couponCode}
+              onChange={(e) => handleInputChange('couponCode', e.target.value)}
+              placeholder="Zadajte kód kupónu (voliteľné)"
+            />
+          </div>
           
-          <StayTypeSelector
-            selectedStay={selectedStay}
-            setSelectedStay={setSelectedStay}
-            stayOptions={stayOptions}
-          />
-          
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700" 
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Odosielam..." : "Odoslať nezáväznú rezerváciu"}
           </Button>
         </form>
