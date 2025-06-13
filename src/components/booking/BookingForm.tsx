@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
@@ -41,18 +42,12 @@ const BookingForm = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Sending booking data via fetch to avoid RLS...');
+      console.log('Inserting booking into database...');
       
-      // Use fetch to bypass RLS issues
-      const response = await fetch('https://chifftwhhzklnauykhcg.supabase.co/rest/v1/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaWZmdHdoaHprbG5hdXlraGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MDMwODYsImV4cCI6MjA2NDE3OTA4Nn0.VE38ZjxAf9H4fGR2Ot1WIz13zbvEg4C0aaL74AtT5bA',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaWZmdHdoaHprbG5hdXlraGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MDMwODYsImV4cCI6MjA2NDE3OTA4Nn0.VE38ZjxAf9H4fGR2Ot1WIz13zbvEg4C0aaL74AtT5bA',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify({
+      // Now we can use the Supabase client directly since RLS is disabled
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
           name: formData.name,
           email: formData.email,
           date_from: formData.checkIn,
@@ -62,15 +57,14 @@ const BookingForm = () => {
           coupon: formData.couponCode || null,
           status: 'Čaká na potvrdenie'
         })
-      });
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('API Error:', response.status, errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error('Chyba pri ukladaní rezervácie');
       }
 
-      const data = await response.json();
       console.log('Booking saved successfully:', data);
       
       toast.success("Rezervácia bola úspešne vytvorená!");
