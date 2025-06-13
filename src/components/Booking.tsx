@@ -13,14 +13,15 @@ const Booking = () => {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-7xl mx-auto">
-        <div className="lg:col-span-2">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Booking Form - Full Width */}
+        <div className="max-w-4xl mx-auto">
           <BookingForm />
         </div>
-        <div className="lg:col-span-2">
+        
+        {/* Availability Calendar and Pricing Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <AvailabilityCalendar />
-        </div>
-        <div className="lg:col-span-1">
           <PricingCard />
         </div>
       </div>
