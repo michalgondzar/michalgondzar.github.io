@@ -1,16 +1,17 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3 } from "lucide-react";
-import AuthForm from "@/components/admin/AuthForm";
-import BookingsManager from "@/components/admin/BookingsManager";
+import { AuthForm } from "@/components/admin/AuthForm";
+import { BookingsManager } from "@/components/admin/BookingsManager";
 import AvailabilityManager from "@/components/admin/AvailabilityManager";
-import GalleryManager from "@/components/admin/GalleryManager";
-import ContactMessagesManager from "@/components/admin/ContactMessagesManager";
-import ContentEditor from "@/components/admin/ContentEditor";
-import ThematicStaysManager from "@/components/admin/ThematicStaysManager";
-import VisitStatistics from "@/components/admin/VisitStatistics";
+import { GalleryManager } from "@/components/admin/GalleryManager";
+import { ContactMessagesManager } from "@/components/admin/ContactMessagesManager";
+import { ContentEditor } from "@/components/admin/ContentEditor";
+import { ThematicStaysManager } from "@/components/admin/ThematicStaysManager";
+import { VisitStatistics } from "@/components/admin/VisitStatistics";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
