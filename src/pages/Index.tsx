@@ -5,6 +5,7 @@ import Description from "@/components/Description";
 import ThematicStays from "@/components/ThematicStays";
 import Gallery from "@/components/Gallery";
 import Booking from "@/components/Booking";
+import AvailabilitySection from "@/components/AvailabilitySection";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import { useVisitTracker } from "@/hooks/useVisitTracker";
@@ -22,6 +23,7 @@ const Index = () => {
         <ThematicStays />
         <Gallery />
         <Booking />
+        <AvailabilitySection />
         <Contact />
       </main>
       <Footer />

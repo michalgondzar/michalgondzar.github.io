@@ -84,26 +84,22 @@ const AvailabilityManager = () => {
     }
   };
 
-  // Custom day renderer with color coding
+  // Custom day renderer with color coding - only show unavailable dates in red
   const getModifiers = () => {
-    const available: Date[] = [];
     const unavailable: Date[] = [];
     
     availabilityData.forEach(item => {
-      const date = new Date(item.date);
-      if (item.is_available) {
-        available.push(date);
-      } else {
+      if (!item.is_available) {
+        const date = new Date(item.date);
         unavailable.push(date);
       }
     });
     
-    return { available, unavailable };
+    return { unavailable };
   };
 
   const modifiers = getModifiers();
   const modifiersClassNames = {
-    available: "bg-green-100 text-green-800 hover:bg-green-200",
     unavailable: "bg-red-100 text-red-800 hover:bg-red-200"
   };
 
@@ -192,16 +188,12 @@ const AvailabilityManager = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 text-sm border-t pt-4">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-            <span>Voľné termíny</span>
-          </div>
-          <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
             <span>Obsadené termíny</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
-            <span>Defaultne voľné (neoznačené)</span>
+            <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
+            <span>Voľné termíny (neoznačené)</span>
           </div>
         </div>
       </CardContent>
