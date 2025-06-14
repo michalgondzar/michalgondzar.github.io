@@ -26,8 +26,8 @@ export const apartmentDescription = {
       alt: "Aquapark v Bešeňovej"
     },
     {
-      src: "/lovable-uploads/c41e31f7-9a72-463b-9f42-a0747f94423f.png",
-      alt: "Apartmán spálňa"
+      src: "",
+      alt: "Nový obrázok"
     },
     {
       src: "/lovable-uploads/bf25f9e7-e8ac-494c-9414-ac0e6da43c64.png",
