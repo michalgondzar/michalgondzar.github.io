@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { CalendarIcon, Edit, Trash, Plus, Heart, Tag } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +33,6 @@ export const BookingsManager = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoogleCalendarDialogOpen, setIsGoogleCalendarDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   const form = useForm({
     defaultValues: {
@@ -74,6 +73,39 @@ export const BookingsManager = () => {
   useEffect(() => {
     loadBookings();
   }, []);
+
+  // Function to update availability calendar when booking status changes
+  const updateAvailabilityCalendar = async (booking: Booking, isConfirmed: boolean) => {
+    try {
+      const startDate = new Date(booking.date_from);
+      const endDate = new Date(booking.date_to);
+      
+      // Generate all dates between start and end
+      const dates = [];
+      const currentDate = new Date(startDate);
+      
+      while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      // Update availability for each date
+      for (const date of dates) {
+        await supabase
+          .from('availability_calendar')
+          .upsert({
+            date: date,
+            is_available: !isConfirmed // If confirmed, mark as unavailable
+          }, {
+            onConflict: 'date'
+          });
+      }
+
+      console.log(`Updated availability calendar for booking ${booking.id}, confirmed: ${isConfirmed}`);
+    } catch (error) {
+      console.error('Error updating availability calendar:', error);
+    }
+  };
 
   const getStayTypeLabel = (stayType?: string) => {
     const stayTypes = {
@@ -134,6 +166,23 @@ export const BookingsManager = () => {
         return;
       }
 
+      // Update availability calendar if booking is confirmed
+      if (data.status === "Potvrdené") {
+        await updateAvailabilityCalendar({
+          id: '',
+          name: data.name,
+          email: data.email,
+          date_from: data.dateFrom,
+          date_to: data.dateTo,
+          guests: data.guests,
+          status: data.status,
+          stay_type: data.stayType,
+          coupon: data.coupon,
+          created_at: '',
+          updated_at: ''
+        }, true);
+      }
+
       toast.success("Rezervácia bola pridaná");
       setIsAddDialogOpen(false);
       loadBookings(); // Reload bookings
@@ -167,6 +216,14 @@ export const BookingsManager = () => {
         return;
       }
 
+      // Update availability calendar based on status change
+      const wasConfirmed = currentBooking.status === "Potvrdené";
+      const isNowConfirmed = data.status === "Potvrdené";
+      
+      if (wasConfirmed !== isNowConfirmed) {
+        await updateAvailabilityCalendar(currentBooking, isNowConfirmed);
+      }
+
       toast.success("Rezervácia bola upravená");
       setIsEditDialogOpen(false);
       loadBookings(); // Reload bookings
@@ -182,6 +239,9 @@ export const BookingsManager = () => {
     }
 
     try {
+      // Get booking details before deleting to update availability
+      const bookingToDelete = bookings.find(b => b.id === id);
+      
       const { error } = await supabase
         .from('bookings')
         .delete()
@@ -191,6 +251,11 @@ export const BookingsManager = () => {
         console.error('Error deleting booking:', error);
         toast.error('Chyba pri odstraňovaní rezervácie');
         return;
+      }
+
+      // If booking was confirmed, free up the dates in availability calendar
+      if (bookingToDelete && bookingToDelete.status === "Potvrdené") {
+        await updateAvailabilityCalendar(bookingToDelete, false);
       }
 
       toast.success("Rezervácia bola odstránená");
@@ -303,33 +368,6 @@ export const BookingsManager = () => {
               )}
             </TableBody>
           </Table>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <CalendarIcon className="text-booking-primary" />
-          <h2 className="text-xl font-semibold">Kalendár obsadenosti</h2>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="pointer-events-auto">
-            <Calendar
-              mode="multiple"
-              selected={selectedDates}
-              onSelect={setSelectedDates}
-              className="rounded border"
-            />
-          </div>
-          <div className="mt-4 text-center text-sm text-gray-500">
-            Kliknite na dátumy v kalendári pre označenie obsadených dní
-          </div>
-          <Button 
-            onClick={() => toast.success("Obsadenosť aktualizovaná")}
-            className="mt-4"
-          >
-            Uložiť obsadenosť
-          </Button>
         </div>
       </div>
 
