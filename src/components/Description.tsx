@@ -22,15 +22,15 @@ export const apartmentDescription = {
   ],
   images: [
     {
-      src: "/lovable-uploads/3f225527-0827-4edd-870a-1d7428d75fc0.png",
+      src: "/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png",
       alt: "Interiér apartmánu s obývacou časťou a spálňou"
     },
     {
-      src: "/lovable-uploads/9b16e763-1abc-46dc-a3be-31a6d48e680a.png",
+      src: "/lovable-uploads/e0d6e731-19cb-4f27-b266-77fa22211eb6.png",
       alt: "Termálne kúpaliště v Bešeňovej - vnútorné bazény"
     },
     {
-      src: "/lovable-uploads/926541a0-eee0-4ba3-975d-9de05f634875.png",
+      src: "/lovable-uploads/c41e31f7-9a72-463b-9f42-a0747f94423f.png",
       alt: "Aquapark Bešeňová s vonkajšími bazénmi a tobogánmi"
     }
   ]
