@@ -4,7 +4,7 @@ import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
-// Predvolený obsah apartmánu
+// Predvolený obsah apartmánu s novými obrázkami
 export const apartmentDescription = {
   title: "Opis apartmánu",
   subtitle: "Komfortné ubytovanie pre vašu relaxačnú dovolenku",
@@ -22,15 +22,15 @@ export const apartmentDescription = {
   ],
   images: [
     {
-      src: "/lovable-uploads/d06dc388-6dfa-46a9-8263-6df056d17698.png",
+      src: "/lovable-uploads/3f225527-0827-4edd-870a-1d7428d75fc0.png",
       alt: "Interiér apartmánu s obývacou časťou a spálňou"
     },
     {
-      src: "/lovable-uploads/e0d6e731-19cb-4f27-b266-77fa22211eb6.png",
+      src: "/lovable-uploads/9b16e763-1abc-46dc-a3be-31a6d48e680a.png",
       alt: "Termálne kúpaliště v Bešeňovej - vnútorné bazény"
     },
     {
-      src: "/lovable-uploads/c41e31f7-9a72-463b-9f42-a0747f94423f.png",
+      src: "/lovable-uploads/926541a0-eee0-4ba3-975d-9de05f634875.png",
       alt: "Aquapark Bešeňová s vonkajšími bazénmi a tobogánmi"
     }
   ]
@@ -78,9 +78,40 @@ const Description = () => {
     }
   };
 
+  // Funkcia na aktualizáciu obsahu v databáze s novými obrázkami
+  const updateContentWithNewImages = async () => {
+    try {
+      console.log('Description: Updating content with new images');
+      
+      const { error } = await supabase
+        .from('apartment_content')
+        .upsert({
+          id: 1,
+          title: apartmentDescription.title,
+          subtitle: apartmentDescription.subtitle,
+          paragraph1: apartmentDescription.paragraph1,
+          paragraph2: apartmentDescription.paragraph2,
+          features: apartmentDescription.features,
+          images: apartmentDescription.images
+        });
+
+      if (error) {
+        console.error('Description: Error updating content:', error);
+      } else {
+        console.log('Description: Content updated successfully with new images');
+        setContent(apartmentDescription);
+      }
+    } catch (error) {
+      console.error('Description: Error updating content:', error);
+    }
+  };
+
   // Load content from Supabase on component mount
   useEffect(() => {
-    loadContent();
+    // First update the database with new images, then load content
+    updateContentWithNewImages().then(() => {
+      loadContent();
+    });
 
     // Listen for content updates from admin panel
     const handleContentUpdate = () => {
