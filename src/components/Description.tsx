@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +20,20 @@ export const apartmentDescription = {
     "Detská postieľka na vyžiadanie",
     "Terasa s posedením"
   ],
-  images: []
+  images: [
+    {
+      src: "/lovable-uploads/3f225527-0827-4edd-870a-1d7428d75fc0.png",
+      alt: "Interiér apartmánu s obývacou časťou a spálňou"
+    },
+    {
+      src: "/lovable-uploads/9b16e763-1abc-46dc-a3be-31a6d48e680a.png",
+      alt: "Termálne kúpaliště v Bešeňovej - vnútorné bazény"
+    },
+    {
+      src: "/lovable-uploads/926541a0-eee0-4ba3-975d-9de05f634875.png",
+      alt: "Aquapark Bešeňová s vonkajšími bazénmi a tobogánmi"
+    }
+  ]
 };
 
 const Description = () => {
@@ -87,23 +101,61 @@ const Description = () => {
         <h2 className="section-title">{content.title}</h2>
         <p className="section-subtitle">{content.subtitle}</p>
         
-        <div className="space-y-6">
-          <p className="text-lg text-gray-700">
-            {content.paragraph1}
-          </p>
-          
-          <p className="text-lg text-gray-700">
-            {content.paragraph2}
-          </p>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
-            {content.features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-booking-primary" />
-                <span className="text-gray-700">{feature}</span>
-              </div>
-            ))}
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div className="space-y-6">
+            <p className="text-lg text-gray-700">
+              {content.paragraph1}
+            </p>
+            
+            <p className="text-lg text-gray-700">
+              {content.paragraph2}
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+              {content.features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-booking-primary" />
+                  <span className="text-gray-700">{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
+          
+          {content.images.length > 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="col-span-2">
+                <CardContent className="p-0">
+                  <img 
+                    src={content.images[0].src}
+                    alt={content.images[0].alt}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                </CardContent>
+              </Card>
+              {content.images[1] && (
+                <Card>
+                  <CardContent className="p-0">
+                    <img 
+                      src={content.images[1].src}
+                      alt={content.images[1].alt}
+                      className="w-full h-40 object-cover rounded-lg"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+              {content.images[2] && (
+                <Card>
+                  <CardContent className="p-0">
+                    <img 
+                      src={content.images[2].src}
+                      alt={content.images[2].alt}
+                      className="w-full h-40 object-cover rounded-lg"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>
