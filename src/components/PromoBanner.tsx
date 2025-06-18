@@ -4,7 +4,7 @@ const PromoBanner = () => {
   return <section className="py-4 bg-gradient-to-r from-blue-100 to-purple-100">
       <div className="container mx-auto px-4">
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-0 max-w-4xl mx-auto">
-          <CardContent className="p-4 md:p-6 bg-green-300">
+          <CardContent className="p-4 md:p-6 bg-yellow-200">
             <div className="text-center space-y-3">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Tag className="h-5 w-5 text-blue-600" />
