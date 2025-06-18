@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const ContentEditor = () => {
   const [content, setContent] = useState({...apartmentDescription});
   const [feature, setFeature] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load content from Supabase on component mount
   useEffect(() => {
@@ -57,6 +58,7 @@ export const ContentEditor = () => {
   };
 
   const saveContentChanges = async () => {
+    setIsLoading(true);
     try {
       console.log('ContentEditor: Saving content to Supabase:', content);
       
@@ -81,15 +83,17 @@ export const ContentEditor = () => {
 
       console.log('ContentEditor: Successfully saved content to Supabase');
       
-      // Dispatch custom event to notify other components
-      const event = new CustomEvent('apartmentContentUpdated');
-      window.dispatchEvent(event);
-      console.log('ContentEditor: Dispatched content update event');
+      // Refresh the page content by triggering a reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       
-      toast.success("Zmeny obsahu boli úspešne uložené do databázy");
+      toast.success("Zmeny obsahu boli úspešne uložené a stránka sa obnoví");
     } catch (error) {
       console.error('ContentEditor: Error saving content:', error);
       toast.error("Chyba pri ukladaní obsahu");
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -179,10 +183,11 @@ export const ContentEditor = () => {
         
         <Button 
           onClick={saveContentChanges}
+          disabled={isLoading}
           className="mt-6 bg-booking-primary hover:bg-booking-secondary flex gap-2"
         >
           <Save size={16} />
-          Uložiť zmeny obsahu
+          {isLoading ? "Ukladám..." : "Uložiť zmeny obsahu"}
         </Button>
       </div>
     </div>

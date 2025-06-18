@@ -42,7 +42,7 @@ const Description = () => {
   // Funkcia na načítanie obsahu z Supabase
   const loadContent = async () => {
     try {
-      console.log('Description: Attempting to load content from Supabase');
+      console.log('Description: Loading content from Supabase');
       
       const { data, error } = await supabase
         .from('apartment_content')
@@ -78,52 +78,14 @@ const Description = () => {
     }
   };
 
-  // Funkcia na aktualizáciu obsahu v databáze s novými obrázkami
-  const updateContentWithNewImages = async () => {
-    try {
-      console.log('Description: Updating content with new images');
-      
-      const { error } = await supabase
-        .from('apartment_content')
-        .upsert({
-          id: 1,
-          title: apartmentDescription.title,
-          subtitle: apartmentDescription.subtitle,
-          paragraph1: apartmentDescription.paragraph1,
-          paragraph2: apartmentDescription.paragraph2,
-          features: apartmentDescription.features,
-          images: apartmentDescription.images
-        });
-
-      if (error) {
-        console.error('Description: Error updating content:', error);
-      } else {
-        console.log('Description: Content updated successfully with new images');
-        setContent(apartmentDescription);
-      }
-    } catch (error) {
-      console.error('Description: Error updating content:', error);
-    }
-  };
-
-  // Load content from Supabase on component mount
+  // Load content from Supabase on component mount and set up periodic refresh
   useEffect(() => {
-    // First update the database with new images, then load content
-    updateContentWithNewImages().then(() => {
-      loadContent();
-    });
-
-    // Listen for content updates from admin panel
-    const handleContentUpdate = () => {
-      console.log('Description: Received content update event');
-      loadContent();
-    };
-
-    window.addEventListener('apartmentContentUpdated', handleContentUpdate);
+    loadContent();
     
-    return () => {
-      window.removeEventListener('apartmentContentUpdated', handleContentUpdate);
-    };
+    // Refresh content every 30 seconds to catch updates
+    const interval = setInterval(loadContent, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return (
