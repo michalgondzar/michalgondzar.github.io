@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Euro, Clock } from "lucide-react";
 import { useContact } from "@/contexts/ContactContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const PricingCard = () => {
   const { contactData } = useContact();
@@ -19,19 +20,66 @@ const PricingCard = () => {
     touristTax: "1.50"
   });
 
-  // Load pricing data from localStorage
+  // Load pricing data from Supabase
   useEffect(() => {
-    const savedPricing = localStorage.getItem('apartmentPricing');
-    if (savedPricing) {
-      try {
-        const parsedPricing = JSON.parse(savedPricing);
-        setPricing(parsedPricing);
-        console.log('Loaded pricing data for booking:', parsedPricing);
-      } catch (error) {
-        console.error('Error parsing saved pricing for booking:', error);
-      }
-    }
+    loadPricingFromDatabase();
+    
+    // Set up real-time subscription for pricing changes
+    const channel = supabase
+      .channel('pricing-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pricing'
+        },
+        () => {
+          console.log('PricingCard: Pricing updated, reloading data');
+          loadPricingFromDatabase();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  const loadPricingFromDatabase = async () => {
+    try {
+      console.log('PricingCard: Loading pricing from Supabase');
+      
+      const { data, error } = await supabase
+        .from('pricing')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (error) {
+        console.error('PricingCard: Error loading pricing from Supabase:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('PricingCard: Successfully loaded pricing from Supabase:', data);
+        setPricing({
+          lowSeason: {
+            weekday: data.low_season_weekday,
+            weekend: data.low_season_weekend
+          },
+          highSeason: {
+            weekday: data.high_season_weekday,
+            weekend: data.high_season_weekend
+          },
+          cleaningFee: data.cleaning_fee,
+          touristTax: data.tourist_tax
+        });
+      }
+    } catch (error) {
+      console.error('PricingCard: Error loading pricing:', error);
+    }
+  };
 
   return (
     <Card className="h-fit">

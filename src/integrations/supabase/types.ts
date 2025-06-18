@@ -255,6 +255,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing: {
+        Row: {
+          cleaning_fee: string
+          created_at: string
+          high_season_weekday: string
+          high_season_weekend: string
+          id: number
+          low_season_weekday: string
+          low_season_weekend: string
+          tourist_tax: string
+          updated_at: string
+        }
+        Insert: {
+          cleaning_fee?: string
+          created_at?: string
+          high_season_weekday?: string
+          high_season_weekend?: string
+          id?: number
+          low_season_weekday?: string
+          low_season_weekend?: string
+          tourist_tax?: string
+          updated_at?: string
+        }
+        Update: {
+          cleaning_fee?: string
+          created_at?: string
+          high_season_weekday?: string
+          high_season_weekend?: string
+          id?: number
+          low_season_weekday?: string
+          low_season_weekend?: string
+          tourist_tax?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       thematic_stays: {
         Row: {
           created_at: string

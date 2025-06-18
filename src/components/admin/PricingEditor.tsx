@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Euro, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const PricingEditor = () => {
   const [pricing, setPricing] = useState({
@@ -21,25 +22,80 @@ export const PricingEditor = () => {
     touristTax: "1.50"
   });
 
-  // Load pricing data from localStorage on component mount
+  const [loading, setLoading] = useState(false);
+
+  // Load pricing data from Supabase on component mount
   useEffect(() => {
-    const savedPricing = localStorage.getItem('apartmentPricing');
-    if (savedPricing) {
-      try {
-        const parsedPricing = JSON.parse(savedPricing);
-        setPricing(parsedPricing);
-        console.log('Loaded pricing from localStorage:', parsedPricing);
-      } catch (error) {
-        console.error('Error parsing saved pricing:', error);
-      }
-    }
+    loadPricingFromDatabase();
   }, []);
 
-  const handleSave = () => {
-    // Save to localStorage
-    localStorage.setItem('apartmentPricing', JSON.stringify(pricing));
-    console.log('Saving pricing to localStorage:', pricing);
-    toast.success("Cenník bol úspešne uložený");
+  const loadPricingFromDatabase = async () => {
+    try {
+      console.log('PricingEditor: Loading pricing from Supabase');
+      
+      const { data, error } = await supabase
+        .from('pricing')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (error) {
+        console.error('PricingEditor: Error loading pricing from Supabase:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('PricingEditor: Successfully loaded pricing from Supabase:', data);
+        setPricing({
+          lowSeason: {
+            weekday: data.low_season_weekday,
+            weekend: data.low_season_weekend
+          },
+          highSeason: {
+            weekday: data.high_season_weekday,
+            weekend: data.high_season_weekend
+          },
+          cleaningFee: data.cleaning_fee,
+          touristTax: data.tourist_tax
+        });
+      }
+    } catch (error) {
+      console.error('PricingEditor: Error loading pricing:', error);
+      toast.error("Chyba pri načítavaní cenníka");
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      console.log('PricingEditor: Saving pricing to Supabase:', pricing);
+      
+      const { error } = await supabase
+        .from('pricing')
+        .update({
+          low_season_weekday: pricing.lowSeason.weekday,
+          low_season_weekend: pricing.lowSeason.weekend,
+          high_season_weekday: pricing.highSeason.weekday,
+          high_season_weekend: pricing.highSeason.weekend,
+          cleaning_fee: pricing.cleaningFee,
+          tourist_tax: pricing.touristTax
+        })
+        .eq('id', 1);
+
+      if (error) {
+        console.error('PricingEditor: Error saving pricing to Supabase:', error);
+        toast.error("Chyba pri ukladaní cenníka");
+        return;
+      }
+
+      console.log('PricingEditor: Successfully saved pricing to Supabase');
+      toast.success("Cenník bol úspešne uložený");
+    } catch (error) {
+      console.error('PricingEditor: Error saving pricing:', error);
+      toast.error("Chyba pri ukladaní cenníka");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updatePrice = (season: 'lowSeason' | 'highSeason', type: 'weekday' | 'weekend', value: string) => {
@@ -151,9 +207,13 @@ export const PricingEditor = () => {
 
       {/* Uložiť */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+        <Button 
+          onClick={handleSave} 
+          className="bg-green-600 hover:bg-green-700"
+          disabled={loading}
+        >
           <Save className="h-4 w-4 mr-2" />
-          Uložiť cenník
+          {loading ? "Ukladám..." : "Uložiť cenník"}
         </Button>
       </div>
     </div>
