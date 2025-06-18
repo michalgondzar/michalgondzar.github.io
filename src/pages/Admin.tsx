@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3 } from "lucide-react";
+import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3, Euro } from "lucide-react";
 import { AuthForm } from "@/components/admin/AuthForm";
 import { BookingsManager } from "@/components/admin/BookingsManager";
 import AvailabilityManager from "@/components/admin/AvailabilityManager";
@@ -12,6 +12,7 @@ import { ContactMessagesManager } from "@/components/admin/ContactMessagesManage
 import { ContentEditor } from "@/components/admin/ContentEditor";
 import ThematicStaysManager from "@/components/admin/ThematicStaysManager";
 import { VisitStatistics } from "@/components/admin/VisitStatistics";
+import { PricingEditor } from "@/components/admin/PricingEditor";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -51,6 +52,10 @@ const Admin = () => {
                 <Calendar className="mr-2 h-4 w-4" />
                 Dostupnosť
               </TabsTrigger>
+              <TabsTrigger value="pricing">
+                <Euro className="mr-2 h-4 w-4" />
+                Cenník
+              </TabsTrigger>
               <TabsTrigger value="gallery">
                 <Image className="mr-2 h-4 w-4" />
                 Galéria
@@ -77,6 +82,9 @@ const Admin = () => {
             </TabsContent>
             <TabsContent value="availability" className="mt-6">
               <AvailabilityManager />
+            </TabsContent>
+            <TabsContent value="pricing" className="mt-6">
+              <PricingEditor />
             </TabsContent>
             <TabsContent value="gallery" className="mt-6">
               <GalleryManager />
