@@ -1,4 +1,3 @@
-
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,42 +6,41 @@ import { useToast } from "@/components/ui/use-toast";
 import { useContact } from "@/contexts/ContactContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-
 const Contact = () => {
-  const { toast } = useToast();
-  const { contactData } = useContact();
+  const {
+    toast
+  } = useToast();
+  const {
+    contactData
+  } = useContact();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
     const formData = new FormData(e.currentTarget);
     const contactMessage = {
       name: formData.get('contactName') as string,
       email: formData.get('contactEmail') as string,
       subject: formData.get('contactSubject') as string,
-      message: formData.get('contactMessage') as string,
+      message: formData.get('contactMessage') as string
     };
-
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([contactMessage]);
-
+      const {
+        error
+      } = await supabase.from('contact_messages').insert([contactMessage]);
       if (error) {
         console.error('Error saving contact message:', error);
         toast({
           title: "Chyba pri odosielaní",
           description: "Vyskytla sa chyba pri odosielaní správy. Skúste to znovu.",
-          variant: "destructive",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "Správa odoslaná",
-          description: "Ďakujeme za váš záujem. Budeme vás kontaktovať čo najskôr.",
+          description: "Ďakujeme za váš záujem. Budeme vás kontaktovať čo najskôr."
         });
-        
+
         // Reset form
         (e.target as HTMLFormElement).reset();
       }
@@ -51,15 +49,13 @@ const Contact = () => {
       toast({
         title: "Chyba pri odosielaní",
         description: "Vyskytla sa chyba pri odosielaní správy. Skúste to znovu.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <section id="kontakt" className="bg-booking-gray">
+  return <section id="kontakt" className="bg-booking-gray">
       <div className="section-container">
         <h2 className="section-title">Kontakt</h2>
         <p className="section-subtitle">Kontaktujte nás s akýmikoľvek otázkami</p>
@@ -117,20 +113,11 @@ const Contact = () => {
             
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <h3 className="text-xl font-semibold mb-4">Ako sa k nám dostanete</h3>
-              <p className="text-gray-600 mb-4">
-                Apartmán sa nachádza len 15 minút pešo od aquaparku Bešeňová. Z diaľnice D1 
-                použite zjazd Ružomberok a pokračujte smerom na Liptovský Mikuláš po ceste I/18.
-              </p>
+              <p className="text-gray-600 mb-4">Apartmán sa nachádza len 10 minút pešo od aquaparku Bešeňová. Z diaľnice D1 použite zjazd Ružomberok a pokračujte smerom na Liptovský Mikuláš po ceste I/18.</p>
               <div className="aspect-video w-full bg-gray-200 rounded-lg overflow-hidden">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10463.988141273428!2d19.413608041796878!3d49.10291900000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4715a10e6231665b%3A0xbbe748383852d04f!2zQmXFoWXFiW92w6E!5e0!3m2!1ssk!2ssk!4v1716389790057!5m2!1ssk!2ssk" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10463.988141273428!2d19.413608041796878!3d49.10291900000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4715a10e6231665b%3A0xbbe748383852d04f!2zQmXFoWXFiW92w6E!5e0!3m2!1ssk!2ssk!4v1716389790057!5m2!1ssk!2ssk" width="100%" height="100%" style={{
+                border: 0
+              }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
               </div>
             </div>
           </div>
@@ -156,28 +143,16 @@ const Contact = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="contactMessage">Správa</Label>
-                <textarea 
-                  id="contactMessage" 
-                  name="contactMessage"
-                  className="flex min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Vaša správa..."
-                  required
-                ></textarea>
+                <textarea id="contactMessage" name="contactMessage" className="flex min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder="Vaša správa..." required></textarea>
               </div>
               
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-booking-primary hover:bg-booking-secondary"
-              >
+              <Button type="submit" disabled={isSubmitting} className="w-full bg-booking-primary hover:bg-booking-secondary">
                 {isSubmitting ? "Odosielam..." : "Odoslať správu"}
               </Button>
             </form>
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Contact;
