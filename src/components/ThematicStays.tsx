@@ -1,6 +1,7 @@
 
 import { Heart, Users, Coffee } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useThematicStaysDatabase } from "@/hooks/useThematicStaysDatabase";
 
 const ThematicStays = () => {
@@ -20,6 +21,11 @@ const ThematicStays = () => {
       <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
+            <div className="flex justify-center mb-4">
+              <Badge variant="secondary" className="text-sm font-medium px-4 py-2">
+                Pripravujeme od septembra 2025
+              </Badge>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Tematické pobyty
             </h2>
@@ -37,6 +43,11 @@ const ThematicStays = () => {
       <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
+            <div className="flex justify-center mb-4">
+              <Badge variant="secondary" className="text-sm font-medium px-4 py-2">
+                Pripravujeme od septembra 2025
+              </Badge>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Tematické pobyty
             </h2>
@@ -53,6 +64,11 @@ const ThematicStays = () => {
     <section id="tematicke-pobyty" className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
+          <div className="flex justify-center mb-4">
+            <Badge variant="secondary" className="text-sm font-medium px-4 py-2">
+              Pripravujeme od septembra 2025
+            </Badge>
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Tematické pobyty
           </h2>
