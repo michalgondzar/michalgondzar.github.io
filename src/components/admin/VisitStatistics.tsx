@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Calendar, Globe, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { sk } from 'date-fns/locale';
+import { CountryStatistics } from './CountryStatistics';
 
 type PageVisit = Tables<'page_visits'>;
 type VisitCounter = Tables<'visit_counters'>;
@@ -165,40 +167,57 @@ export const VisitStatistics = () => {
         </Card>
       </div>
 
-      {/* Tabuľka posledných návštev */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Posledné návštevy</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dátum a čas</TableHead>
-                <TableHead>Stránka</TableHead>
-                <TableHead>Referrer</TableHead>
-                <TableHead>User Agent</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentVisits.map((visit) => (
-                <TableRow key={visit.id}>
-                  <TableCell>
-                    {format(new Date(visit.visited_at), 'dd.MM.yyyy HH:mm', { locale: sk })}
-                  </TableCell>
-                  <TableCell>{visit.page_url}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {visit.referrer || 'Priama návšteva'}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {visit.user_agent?.substring(0, 50)}...
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Taby pre rôzne typy štatistík */}
+      <Tabs defaultValue="recent" className="w-full">
+        <TabsList>
+          <TabsTrigger value="recent">Posledné návštevy</TabsTrigger>
+          <TabsTrigger value="countries">Krajiny</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="recent" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Posledné návštevy</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Dátum a čas</TableHead>
+                    <TableHead>Stránka</TableHead>
+                    <TableHead>Krajina</TableHead>
+                    <TableHead>Referrer</TableHead>
+                    <TableHead>User Agent</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentVisits.map((visit) => (
+                    <TableRow key={visit.id}>
+                      <TableCell>
+                        {format(new Date(visit.visited_at), 'dd.MM.yyyy HH:mm', { locale: sk })}
+                      </TableCell>
+                      <TableCell>{visit.page_url}</TableCell>
+                      <TableCell>
+                        {visit.country || 'Neznáma'}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {visit.referrer || 'Priama návšteva'}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {visit.user_agent?.substring(0, 50)}...
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="countries" className="mt-6">
+          <CountryStatistics />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

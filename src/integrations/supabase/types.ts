@@ -230,6 +230,7 @@ export type Database = {
       }
       page_visits: {
         Row: {
+          country: string | null
           id: string
           page_url: string
           referrer: string | null
@@ -238,6 +239,7 @@ export type Database = {
           visitor_ip: string | null
         }
         Insert: {
+          country?: string | null
           id?: string
           page_url: string
           referrer?: string | null
@@ -246,6 +248,7 @@ export type Database = {
           visitor_ip?: string | null
         }
         Update: {
+          country?: string | null
           id?: string
           page_url?: string
           referrer?: string | null
