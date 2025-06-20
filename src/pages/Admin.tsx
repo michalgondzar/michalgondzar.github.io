@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3, Euro } from "lucide-react";
+import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3, Euro, Home } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AuthForm } from "@/components/admin/AuthForm";
 import { BookingsManager } from "@/components/admin/BookingsManager";
 import AvailabilityManager from "@/components/admin/AvailabilityManager";
@@ -37,9 +38,17 @@ const Admin = () => {
         <>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-semibold">Admin Panel</h1>
-            <Button variant="destructive" onClick={handleLogout}>
-              Odhlásiť sa
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild variant="outline">
+                <Link to="/">
+                  <Home className="mr-2 h-4 w-4" />
+                  Prejsť na hlavnú stránku
+                </Link>
+              </Button>
+              <Button variant="destructive" onClick={handleLogout}>
+                Odhlásiť sa
+              </Button>
+            </div>
           </div>
 
           <Tabs defaultValue="bookings" className="w-[100%]">
