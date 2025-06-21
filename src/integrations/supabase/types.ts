@@ -232,6 +232,7 @@ export type Database = {
         Row: {
           country: string | null
           id: string
+          is_admin: boolean | null
           page_url: string
           referrer: string | null
           user_agent: string | null
@@ -241,6 +242,7 @@ export type Database = {
         Insert: {
           country?: string | null
           id?: string
+          is_admin?: boolean | null
           page_url: string
           referrer?: string | null
           user_agent?: string | null
@@ -250,6 +252,7 @@ export type Database = {
         Update: {
           country?: string | null
           id?: string
+          is_admin?: boolean | null
           page_url?: string
           referrer?: string | null
           user_agent?: string | null
