@@ -19,13 +19,17 @@ export const useVisitTracker = (pageUrl: string) => {
           console.log('Could not detect country:', ipError);
         }
 
-        // Zaznamenanie návštevy s krajinou
+        // Kontrola, či je používateľ admin
+        const isAdmin = localStorage.getItem("adminToken") ? true : false;
+
+        // Zaznamenanie návštevy s krajinou a admin informáciou
         await supabase.from('page_visits').insert({
           page_url: pageUrl,
           visitor_ip: null, // Môžeme nechať null, keďže IP sa ťažko získava na frontende
           user_agent: navigator.userAgent,
           referrer: document.referrer || null,
-          country: country
+          country: country,
+          is_admin: isAdmin
         });
 
         // Inkrementácia celkového počítadla

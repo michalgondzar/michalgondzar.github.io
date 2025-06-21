@@ -5,11 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Calendar, Globe, Users, Bot } from 'lucide-react';
+import { Eye, Calendar, Globe, Users, Bot, Shield } from 'lucide-react';
 import { format } from 'date-fns';
 import { sk } from 'date-fns/locale';
 import { CountryStatistics } from './CountryStatistics';
-import { isBot, getBotType } from '@/utils/botDetection';
+import { isBot, getBotType, getVisitorType } from '@/utils/botDetection';
 
 type PageVisit = Tables<'page_visits'>;
 type VisitCounter = Tables<'visit_counters'>;
@@ -21,6 +21,7 @@ interface VisitStats {
   thisMonthVisits: number;
   botVisits: number;
   humanVisits: number;
+  adminVisits: number;
 }
 
 export const VisitStatistics = () => {
@@ -30,7 +31,8 @@ export const VisitStatistics = () => {
     thisWeekVisits: 0,
     thisMonthVisits: 0,
     botVisits: 0,
-    humanVisits: 0
+    humanVisits: 0,
+    adminVisits: 0
   });
   const [recentVisits, setRecentVisits] = useState<PageVisit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,10 +79,11 @@ export const VisitStatistics = () => {
           .order('visited_at', { ascending: false })
           .limit(50);
 
-        // Spočítanie bot vs human návštev
+        // Spočítanie admin, bot vs human návštev
         const allVisits = recentData || [];
-        const botVisitsCount = allVisits.filter(visit => isBot(visit.user_agent)).length;
-        const humanVisitsCount = allVisits.length - botVisitsCount;
+        const adminVisitsCount = allVisits.filter(visit => visit.is_admin === true).length;
+        const botVisitsCount = allVisits.filter(visit => !visit.is_admin && isBot(visit.user_agent)).length;
+        const humanVisitsCount = allVisits.length - adminVisitsCount - botVisitsCount;
 
         setVisitStats({
           totalVisits: counterData?.total_visits || 0,
@@ -88,7 +91,8 @@ export const VisitStatistics = () => {
           thisWeekVisits: weekData?.length || 0,
           thisMonthVisits: monthData?.length || 0,
           botVisits: botVisitsCount,
-          humanVisits: humanVisitsCount
+          humanVisits: humanVisitsCount,
+          adminVisits: adminVisitsCount
         });
 
         setRecentVisits(recentData || []);
@@ -129,7 +133,7 @@ export const VisitStatistics = () => {
       </div>
 
       {/* Karty so štatistikami */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -194,6 +198,18 @@ export const VisitStatistics = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-gray-600">Admin návštevy</p>
+                <p className="text-2xl font-bold text-blue-600">{visitStats.adminVisits}</p>
+              </div>
+              <Shield className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm font-medium text-gray-600">Bot návštevy</p>
                 <p className="text-2xl font-bold text-red-600">{visitStats.botVisits}</p>
               </div>
@@ -220,6 +236,10 @@ export const VisitStatistics = () => {
                   <span>Ľudské návštevy</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
+                  <span>Admin návštevy</span>
+                </div>
+                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
                   <span>Bot návštevy</span>
                 </div>
@@ -239,13 +259,21 @@ export const VisitStatistics = () => {
                 </TableHeader>
                 <TableBody>
                   {recentVisits.map((visit) => {
-                    const isBotVisit = isBot(visit.user_agent);
+                    const visitorType = getVisitorType(visit.user_agent, visit.is_admin || false);
                     const botType = getBotType(visit.user_agent);
+                    
+                    const getRowClassName = () => {
+                      switch (visitorType) {
+                        case 'admin': return 'bg-blue-50 hover:bg-blue-100';
+                        case 'bot': return 'bg-red-50 hover:bg-red-100';
+                        default: return 'bg-green-50 hover:bg-green-100';
+                      }
+                    };
                     
                     return (
                       <TableRow 
                         key={visit.id}
-                        className={isBotVisit ? 'bg-red-50 hover:bg-red-100' : 'bg-green-50 hover:bg-green-100'}
+                        className={getRowClassName()}
                       >
                         <TableCell>
                           {format(new Date(visit.visited_at), 'dd.MM.yyyy HH:mm', { locale: sk })}
@@ -256,7 +284,12 @@ export const VisitStatistics = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            {isBotVisit ? (
+                            {visitorType === 'admin' ? (
+                              <>
+                                <Shield className="h-4 w-4 text-blue-600" />
+                                <span className="text-blue-700 font-medium">Admin</span>
+                              </>
+                            ) : visitorType === 'bot' ? (
                               <>
                                 <Bot className="h-4 w-4 text-red-600" />
                                 <span className="text-red-700 font-medium">

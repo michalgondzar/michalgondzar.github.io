@@ -1,4 +1,3 @@
-
 // Zoznam známych bot User Agent stringov
 const BOT_PATTERNS = [
   /bot/i,
@@ -32,6 +31,12 @@ export const isBot = (userAgent: string | null): boolean => {
   if (!userAgent) return false;
   
   return BOT_PATTERNS.some(pattern => pattern.test(userAgent));
+};
+
+export const getVisitorType = (userAgent: string | null, isAdmin: boolean): 'admin' | 'bot' | 'human' => {
+  if (isAdmin) return 'admin';
+  if (isBot(userAgent)) return 'bot';
+  return 'human';
 };
 
 export const getBotType = (userAgent: string | null): string | null => {
