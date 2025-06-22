@@ -7,6 +7,7 @@ import { CalendarIcon, Trash2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CalendarSyncDialog } from "./CalendarSyncDialog";
+import AutoSyncStatus from "./AutoSyncStatus";
 
 interface AvailabilityData {
   date: string;
@@ -145,6 +146,8 @@ const AvailabilityManager = () => {
 
   return (
     <>
+      <AutoSyncStatus />
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -163,7 +166,7 @@ const AvailabilityManager = () => {
               variant="outline"
             >
               <Download className="h-4 w-4" />
-              Synchronizovať s externým kalendárom
+              Manuálna synchronizácia
             </Button>
           </div>
 
