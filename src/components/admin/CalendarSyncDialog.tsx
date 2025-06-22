@@ -28,15 +28,25 @@ export const CalendarSyncDialog = ({ isOpen, onClose, onSync }: CalendarSyncDial
     setIsLoading(true);
     
     try {
-      // Fetch iCal data from URL
-      const response = await fetch(icalUrl);
+      console.log('Starting calendar sync with URL:', icalUrl);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Použiť Supabase Edge Function ako proxy
+      const { data, error } = await supabase.functions.invoke('fetch-ical', {
+        body: { url: icalUrl }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Chyba pri volaní Edge Function');
       }
-      
-      const icalData = await response.text();
-      console.log('iCal data fetched:', icalData.substring(0, 200) + '...');
+
+      if (data.error) {
+        console.error('iCal fetch error:', data.error);
+        throw new Error(data.details || data.error);
+      }
+
+      const icalData = data.data;
+      console.log('iCal data fetched successfully, length:', icalData.length);
       
       // Parse iCal data
       const events = parseICalData(icalData);
@@ -69,14 +79,14 @@ export const CalendarSyncDialog = ({ isOpen, onClose, onSync }: CalendarSyncDial
 
       // Update database
       if (availabilityUpdates.length > 0) {
-        const { error } = await supabase
+        const { error: dbError } = await supabase
           .from('availability_calendar')
           .upsert(availabilityUpdates, {
             onConflict: 'date'
           });
 
-        if (error) {
-          console.error('Error updating availability:', error);
+        if (dbError) {
+          console.error('Error updating availability:', dbError);
           toast.error('Chyba pri aktualizácii dostupnosti');
           return;
         }
@@ -94,7 +104,7 @@ export const CalendarSyncDialog = ({ isOpen, onClose, onSync }: CalendarSyncDial
     } catch (error) {
       console.error('Error syncing calendar:', error);
       toast.error("Chyba pri synchronizácii kalendára", {
-        description: "Skontrolujte prosím URL kalendára a internetové pripojenie"
+        description: error.message || "Skontrolujte prosím URL kalendára a internetové pripojenie"
       });
     } finally {
       setIsLoading(false);
