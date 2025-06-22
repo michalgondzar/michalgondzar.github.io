@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3, Euro, Home } from "lucide-react";
+import { Shield, Users, Calendar, Image, MessageSquare, Settings, Heart, BarChart3, Euro, Home, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthForm } from "@/components/admin/AuthForm";
 import { BookingsManager } from "@/components/admin/BookingsManager";
@@ -14,6 +14,7 @@ import { ContentEditor } from "@/components/admin/ContentEditor";
 import ThematicStaysManager from "@/components/admin/ThematicStaysManager";
 import { VisitStatistics } from "@/components/admin/VisitStatistics";
 import { PricingEditor } from "@/components/admin/PricingEditor";
+import { SeoManager } from "@/components/admin/SeoManager";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -81,6 +82,10 @@ const Admin = () => {
                 <Heart className="mr-2 h-4 w-4" />
                 Tematické pobyty
               </TabsTrigger>
+              <TabsTrigger value="seo">
+                <Search className="mr-2 h-4 w-4" />
+                SEO
+              </TabsTrigger>
               <TabsTrigger value="statistics">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Štatistiky
@@ -106,6 +111,9 @@ const Admin = () => {
             </TabsContent>
             <TabsContent value="thematic" className="mt-6">
               <ThematicStaysManager />
+            </TabsContent>
+            <TabsContent value="seo" className="mt-6">
+              <SeoManager />
             </TabsContent>
              <TabsContent value="statistics" className="mt-6">
               <VisitStatistics />
