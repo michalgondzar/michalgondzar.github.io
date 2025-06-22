@@ -297,6 +297,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_settings: {
+        Row: {
+          canonical_url: string
+          created_at: string | null
+          id: number
+          meta_description: string
+          meta_keywords: string
+          og_description: string
+          og_image: string
+          og_title: string
+          page_title: string
+          structured_data: string
+          twitter_description: string
+          twitter_title: string
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_url?: string
+          created_at?: string | null
+          id?: number
+          meta_description?: string
+          meta_keywords?: string
+          og_description?: string
+          og_image?: string
+          og_title?: string
+          page_title?: string
+          structured_data?: string
+          twitter_description?: string
+          twitter_title?: string
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_url?: string
+          created_at?: string | null
+          id?: number
+          meta_description?: string
+          meta_keywords?: string
+          og_description?: string
+          og_image?: string
+          og_title?: string
+          page_title?: string
+          structured_data?: string
+          twitter_description?: string
+          twitter_title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       thematic_stays: {
         Row: {
           created_at: string
