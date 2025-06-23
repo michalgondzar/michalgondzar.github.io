@@ -64,11 +64,7 @@ export const useBookingSubmission = () => {
 
       console.log('Booking saved successfully:', savedBooking);
 
-      // Check if we can access email settings
-      console.log('Checking email settings...');
-      const emailSettings = localStorage.getItem('emailSettings');
-      console.log('Email settings found:', !!emailSettings);
-
+      // Nastavenie default email nastavení s admin emailom
       let emailTemplate = {
         subject: "Potvrdenie rezervácie - Apartmán Tília",
         content: `Dobrý deň {name},
@@ -86,34 +82,46 @@ V prípade akýchkoľvek otázok nás neváhajte kontaktovať.
 Tešíme sa na Vašu návštevu!`
       };
       let senderEmail = "onboarding@resend.dev";
-      let adminNotificationSettings = null;
+      
+      // Nastavenie admin notifikácií - vždy povolené
+      const adminNotificationSettings = {
+        adminEmail: "apartmantilia2@gmail.com",
+        adminTemplate: {
+          subject: "🔔 Nová rezervácia - Apartmán Tília",
+          content: `Nová rezervácia bola vytvorená:
 
+- Meno hosťa: {name}
+- Email hosťa: {email}
+- Dátum príchodu: {dateFrom}
+- Dátum odchodu: {dateTo}
+- Počet hostí: {guests}
+- Typ pobytu: {stayType}{coupon}
+
+Prosím skontrolujte a potvrďte túto rezerváciu v admin paneli.`
+        }
+      };
+
+      // Načítanie custom nastavení ak existujú
+      const emailSettings = localStorage.getItem('emailSettings');
       if (emailSettings) {
         try {
           const settings = JSON.parse(emailSettings);
-          emailTemplate = settings.confirmationTemplate;
+          emailTemplate = settings.confirmationTemplate || emailTemplate;
           senderEmail = settings.senderEmail || senderEmail;
           
-          // Prepare admin notification settings
+          // Aktualizovať admin nastavenia ak sú definované
           if (settings.adminNotificationsEnabled && settings.adminEmail) {
-            adminNotificationSettings = {
-              adminEmail: settings.adminEmail,
-              adminTemplate: settings.adminNotificationTemplate
-            };
+            adminNotificationSettings.adminEmail = settings.adminEmail;
+            adminNotificationSettings.adminTemplate = settings.adminNotificationTemplate || adminNotificationSettings.adminTemplate;
           }
-          console.log('Email settings parsed successfully');
+          console.log('Email settings loaded from localStorage');
         } catch (parseError) {
           console.error('Error parsing email settings:', parseError);
         }
       }
 
-      console.log('Attempting to send confirmation email...');
-      console.log('Email payload:', { 
-        bookingData, 
-        emailTemplate, 
-        senderEmail, 
-        adminNotificationSettings 
-      });
+      console.log('Attempting to send emails...');
+      console.log('Admin notification settings:', adminNotificationSettings);
 
       // Send email confirmation
       const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
