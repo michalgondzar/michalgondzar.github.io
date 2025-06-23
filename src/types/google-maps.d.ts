@@ -1,30 +1,40 @@
 
 declare global {
   interface Window {
-    google: typeof google;
+    google: {
+      maps: {
+        Map: new (mapDiv: HTMLElement, opts?: google.maps.MapOptions) => google.maps.Map;
+        Marker: new (opts?: google.maps.MarkerOptions) => google.maps.Marker;
+        InfoWindow: new (opts?: google.maps.InfoWindowOptions) => google.maps.InfoWindow;
+        MapTypeId: {
+          ROADMAP: string;
+          SATELLITE: string;
+          HYBRID: string;
+          TERRAIN: string;
+        };
+      };
+    };
   }
 }
 
 declare namespace google {
   namespace maps {
-    class Map {
-      constructor(mapDiv: HTMLElement, opts?: MapOptions);
-    }
-    
-    class Marker {
-      constructor(opts?: MarkerOptions);
+    interface Map {
       addListener(eventName: string, handler: () => void): void;
     }
     
-    class InfoWindow {
-      constructor(opts?: InfoWindowOptions);
+    interface Marker {
+      addListener(eventName: string, handler: () => void): void;
+    }
+    
+    interface InfoWindow {
       open(map: Map, anchor?: Marker): void;
     }
     
     interface MapOptions {
       zoom?: number;
       center?: LatLngLiteral;
-      mapTypeId?: MapTypeId;
+      mapTypeId?: string;
       styles?: MapTypeStyle[];
     }
     
@@ -48,17 +58,7 @@ declare namespace google {
       elementType?: string;
       stylers?: Array<{ [key: string]: string }>;
     }
-    
-    enum MapTypeId {
-      ROADMAP = 'roadmap',
-      SATELLITE = 'satellite',
-      HYBRID = 'hybrid',
-      TERRAIN = 'terrain'
-    }
   }
 }
-
-// Globálne rozšírenie pre window objekt
-declare const google: typeof google;
 
 export {};
