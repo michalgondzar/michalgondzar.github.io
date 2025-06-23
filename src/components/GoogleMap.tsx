@@ -14,7 +14,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
       if (!mapRef.current || mapInstanceRef.current || !window.google?.maps) return;
 
       // Správne súradnice pre Bešeňová 155
-      const besenova = { lat: 49.0988, lng: 19.4195 };
+      const besenova = { lat: 49.0963, lng: 19.4169 };
 
       // Vytvorenie mapy
       mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
