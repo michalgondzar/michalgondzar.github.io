@@ -15,7 +15,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   className = "w-full h-full"
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || !apiKey) return;
@@ -42,13 +42,13 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       try {
         await loadGoogleMaps();
         
-        if (!mapRef.current || !window.google || !window.google.maps) return;
+        if (!mapRef.current) return;
 
         // Initialize the map
-        mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+        mapInstanceRef.current = new google.maps.Map(mapRef.current, {
           center,
           zoom,
-          mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
           styles: [
             {
               featureType: "all",
@@ -69,18 +69,18 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         });
 
         // Add marker for Bešeňová
-        const marker = new window.google.maps.Marker({
+        new google.maps.Marker({
           position: center,
           map: mapInstanceRef.current,
           title: "Apartmán Tília - Bešeňová",
           icon: {
             url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            scaledSize: new window.google.maps.Size(32, 32)
+            scaledSize: new google.maps.Size(32, 32)
           }
         });
 
         // Add info window
-        const infoWindow = new window.google.maps.InfoWindow({
+        const infoWindow = new google.maps.InfoWindow({
           content: `
             <div style="padding: 10px;">
               <h3 style="margin: 0 0 5px 0; color: #333;">Apartmán Tília</h3>
@@ -91,6 +91,12 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         });
 
         // Add click listener to marker
+        const marker = new google.maps.Marker({
+          position: center,
+          map: mapInstanceRef.current,
+          title: "Apartmán Tília - Bešeňová"
+        });
+
         marker.addListener('click', () => {
           infoWindow.open(mapInstanceRef.current, marker);
         });
