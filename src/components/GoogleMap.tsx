@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 interface GoogleMapProps {
@@ -56,8 +57,16 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
     if (window.google?.maps) {
       initMap();
     } else {
+      // Get API key from environment variable
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey) {
+        console.error('Google Maps API key not found. Please set VITE_GOOGLE_MAPS_API_KEY in your environment variables.');
+        return;
+      }
+
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCaOISTnJMn5htSCekRXIUf7_-mRj7Q8hk&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = initMap;
