@@ -58,4 +58,7 @@ declare namespace google {
   }
 }
 
+// Globálne rozšírenie pre window objekt
+declare const google: typeof google;
+
 export {};

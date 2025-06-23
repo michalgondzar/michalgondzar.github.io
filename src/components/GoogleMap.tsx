@@ -13,12 +13,12 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
     const initMap = () => {
       if (!mapRef.current || mapInstanceRef.current || !window.google?.maps) return;
 
-      // Koordináty pre Bešeňová
-      const besenova = { lat: 49.1029, lng: 19.4136 };
+      // Správne súradnice pre Bešeňová 155
+      const besenova = { lat: 49.0988, lng: 19.4195 };
 
       // Vytvorenie mapy
       mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-        zoom: 15,
+        zoom: 16,
         center: besenova,
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
         styles: [
@@ -34,7 +34,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
       const marker = new window.google.maps.Marker({
         position: besenova,
         map: mapInstanceRef.current,
-        title: "Apartmán Tília - Bešeňová"
+        title: "Apartmán Tília - Bešeňová 155"
       });
 
       // Pridanie info okna
@@ -42,7 +42,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
         content: `
           <div style="padding: 10px;">
             <h3 style="margin: 0 0 8px 0; color: #333;">Apartmán Tília</h3>
-            <p style="margin: 0; color: #666;">Bešeňová, Slovensko</p>
+            <p style="margin: 0; color: #666;">Bešeňová 155, Slovensko</p>
             <p style="margin: 4px 0 0 0; color: #666;">10 minút pešo od aquaparku</p>
           </div>
         `
