@@ -11,16 +11,16 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
 
   useEffect(() => {
     const initMap = () => {
-      if (!mapRef.current || mapInstanceRef.current) return;
+      if (!mapRef.current || mapInstanceRef.current || !window.google?.maps) return;
 
       // Koordináty pre Bešeňová
       const besenova = { lat: 49.1029, lng: 19.4136 };
 
       // Vytvorenie mapy
-      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
         zoom: 15,
         center: besenova,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeId: window.google.maps.MapTypeId.ROADMAP,
         styles: [
           {
             featureType: "poi",
@@ -31,14 +31,14 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
       });
 
       // Pridanie markera
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: besenova,
         map: mapInstanceRef.current,
         title: "Apartmán Tília - Bešeňová"
       });
 
       // Pridanie info okna
-      const infoWindow = new google.maps.InfoWindow({
+      const infoWindow = new window.google.maps.InfoWindow({
         content: `
           <div style="padding: 10px;">
             <h3 style="margin: 0 0 8px 0; color: #333;">Apartmán Tília</h3>
@@ -54,7 +54,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className = "" }) => {
     };
 
     // Načítanie Google Maps API ak ešte nie je načítané
-    if (typeof google !== 'undefined' && google.maps) {
+    if (window.google?.maps) {
       initMap();
     } else {
       const script = document.createElement('script');
