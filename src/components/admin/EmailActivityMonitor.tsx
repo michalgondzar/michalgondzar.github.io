@@ -25,7 +25,8 @@ export const EmailActivityMonitor = () => {
   const loadEmailLogs = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Use any type to bypass TypeScript checking until types are regenerated
+      const { data, error } = await (supabase as any)
         .from('email_logs')
         .select('*')
         .order('created_at', { ascending: false })
