@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useBookingSubmission } from "./hooks/useBookingSubmission";
+import { useAvailabilityCheck } from "./hooks/useAvailabilityCheck";
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
@@ -20,12 +22,25 @@ const BookingForm = () => {
   });
 
   const { submitBooking, isSubmitting } = useBookingSubmission();
+  const { validateAndShowMessage, loading: availabilityLoading } = useAvailabilityCheck();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Kontrola dostupnosti pri zmene dátumov
+    if (field === 'checkIn' || field === 'checkOut') {
+      const newFormData = { ...formData, [field]: value };
+      
+      // Malé oneskorenie aby sa zabránilo príliš častým kontrolám
+      setTimeout(() => {
+        if (newFormData.checkIn && newFormData.checkOut) {
+          validateAndShowMessage(newFormData.checkIn, newFormData.checkOut);
+        }
+      }, 500);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,6 +52,12 @@ const BookingForm = () => {
     if (!formData.name || !formData.email || !formData.checkIn || !formData.checkOut) {
       toast.error("Prosím vyplňte všetky povinné polia");
       return;
+    }
+
+    // Kontrola dostupnosti pred odoslaním
+    const isAvailable = validateAndShowMessage(formData.checkIn, formData.checkOut);
+    if (!isAvailable) {
+      return; // Zabránenie odoslaniu ak termín nie je dostupný
     }
 
     // Use the booking submission hook which handles both database saving and email sending
@@ -111,6 +132,7 @@ const BookingForm = () => {
                 value={formData.checkIn}
                 onChange={(e) => handleInputChange('checkIn', e.target.value)}
                 required
+                disabled={availabilityLoading}
               />
             </div>
             <div className="space-y-2">
@@ -121,6 +143,7 @@ const BookingForm = () => {
                 value={formData.checkOut}
                 onChange={(e) => handleInputChange('checkOut', e.target.value)}
                 required
+                disabled={availabilityLoading}
               />
             </div>
           </div>
@@ -171,7 +194,7 @@ const BookingForm = () => {
           <Button 
             type="submit" 
             className="w-full bg-blue-600 hover:bg-blue-700" 
-            disabled={isSubmitting}
+            disabled={isSubmitting || availabilityLoading}
           >
             {isSubmitting ? "Odosielam..." : "Odoslať nezáväznú rezerváciu"}
           </Button>
