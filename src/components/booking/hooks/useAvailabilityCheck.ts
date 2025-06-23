@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export const useAvailabilityCheck = () => {
   const [availabilityData, setAvailabilityData] = useState<{[key: string]: boolean}>({});
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Načítanie dostupnosti zo servera
   const loadAvailability = async () => {
@@ -65,15 +65,16 @@ export const useAvailabilityCheck = () => {
   // Validácia a zobrazenie chybových hlášok
   const validateAndShowMessage = (startDate: string, endDate: string): boolean => {
     if (!startDate || !endDate) {
+      setErrorMessage(null);
       return true; // Nekontrolujeme ak nie sú vyplnené oba dátumov
     }
 
     const isAvailable = checkDateRangeAvailability(startDate, endDate);
     
     if (!isAvailable) {
-      toast.error("Vybraný termín je obsadený", {
-        description: "Prosím vyberte iný termín pre vašu rezerváciu."
-      });
+      setErrorMessage("Vybraný termín je obsadený! Prosím vyberte iný termín pre vašu rezerváciu.");
+    } else {
+      setErrorMessage(null);
     }
     
     return isAvailable;
@@ -84,6 +85,7 @@ export const useAvailabilityCheck = () => {
     checkDateRangeAvailability,
     validateAndShowMessage,
     loading,
+    errorMessage,
     refreshAvailability: loadAvailability
   };
 };

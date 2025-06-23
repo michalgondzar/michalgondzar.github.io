@@ -1,11 +1,11 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Calendar, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useBookingSubmission } from "./hooks/useBookingSubmission";
 import { useAvailabilityCheck } from "./hooks/useAvailabilityCheck";
@@ -22,7 +22,7 @@ const BookingForm = () => {
   });
 
   const { submitBooking, isSubmitting } = useBookingSubmission();
-  const { validateAndShowMessage, loading: availabilityLoading } = useAvailabilityCheck();
+  const { validateAndShowMessage, loading: availabilityLoading, errorMessage } = useAvailabilityCheck();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -97,6 +97,15 @@ const BookingForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-4 border-red-500 bg-red-50">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="font-semibold text-red-700">
+              {errorMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
