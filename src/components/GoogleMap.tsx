@@ -1,5 +1,3 @@
-
-/// <reference path="../types/google-maps.d.ts" />
 import React, { useEffect, useRef } from 'react';
 
 interface GoogleMapProps {
