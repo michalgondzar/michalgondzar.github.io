@@ -141,6 +141,20 @@ export const SeoManager = () => {
     if (metaKeywords) {
       metaKeywords.setAttribute('content', seoSettings.meta_keywords);
     }
+
+    // Update JSON-LD structured data
+    if (seoSettings.structured_data) {
+      const structuredDataScript = document.getElementById('structured-data');
+      if (structuredDataScript) {
+        try {
+          // Validate JSON before inserting
+          JSON.parse(seoSettings.structured_data);
+          structuredDataScript.textContent = seoSettings.structured_data;
+        } catch (error) {
+          console.error('Invalid JSON-LD data:', error);
+        }
+      }
+    }
   };
 
   const generateStructuredData = () => {
