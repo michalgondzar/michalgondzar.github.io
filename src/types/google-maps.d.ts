@@ -1,22 +1,4 @@
 
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        Map: new (mapDiv: HTMLElement, opts?: google.maps.MapOptions) => google.maps.Map;
-        Marker: new (opts?: google.maps.MarkerOptions) => google.maps.Marker;
-        InfoWindow: new (opts?: google.maps.InfoWindowOptions) => google.maps.InfoWindow;
-        MapTypeId: {
-          ROADMAP: string;
-          SATELLITE: string;
-          HYBRID: string;
-          TERRAIN: string;
-        };
-      };
-    };
-  }
-}
-
 declare namespace google {
   namespace maps {
     interface Map {
@@ -58,6 +40,38 @@ declare namespace google {
       elementType?: string;
       stylers?: Array<{ [key: string]: string }>;
     }
+
+    interface MapConstructor {
+      new (mapDiv: HTMLElement, opts?: MapOptions): Map;
+    }
+
+    interface MarkerConstructor {
+      new (opts?: MarkerOptions): Marker;
+    }
+
+    interface InfoWindowConstructor {
+      new (opts?: InfoWindowOptions): InfoWindow;
+    }
+
+    interface MapTypeId {
+      ROADMAP: string;
+      SATELLITE: string;
+      HYBRID: string;
+      TERRAIN: string;
+    }
+  }
+}
+
+declare global {
+  interface Window {
+    google: {
+      maps: {
+        Map: google.maps.MapConstructor;
+        Marker: google.maps.MarkerConstructor;
+        InfoWindow: google.maps.InfoWindowConstructor;
+        MapTypeId: google.maps.MapTypeId;
+      };
+    };
   }
 }
 
