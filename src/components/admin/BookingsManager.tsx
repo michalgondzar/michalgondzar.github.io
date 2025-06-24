@@ -1,12 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CalendarIcon, Edit, Trash, Plus, Heart, Tag, Euro } from "lucide-react";
+import { CalendarIcon, Edit, Trash, Plus, Heart, Tag, Euro, Filter, X } from "lucide-react";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,11 +30,13 @@ interface Booking {
 
 export const BookingsManager = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoogleCalendarDialogOpen, setIsGoogleCalendarDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const { calculatePrice } = usePriceCalculator();
 
   const form = useForm({
@@ -74,6 +78,15 @@ export const BookingsManager = () => {
   useEffect(() => {
     loadBookings();
   }, []);
+
+  // Filter bookings based on status
+  useEffect(() => {
+    if (statusFilter === "all") {
+      setFilteredBookings(bookings);
+    } else {
+      setFilteredBookings(bookings.filter(booking => booking.status === statusFilter));
+    }
+  }, [bookings, statusFilter]);
 
   // Function to update availability calendar when booking status changes
   const updateAvailabilityCalendar = async (booking: Booking, isConfirmed: boolean) => {
@@ -120,6 +133,17 @@ export const BookingsManager = () => {
   const calculateBookingPrice = (booking: Booking) => {
     const calculation = calculatePrice(booking.date_from, booking.date_to, booking.guests);
     return calculation ? calculation.totalPrice.toFixed(2) : "-";
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Potvrdené":
+        return "bg-green-100 text-green-800";
+      case "Zrušené":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-yellow-100 text-yellow-800";
+    }
   };
 
   const openAddDialog = () => {
@@ -225,9 +249,14 @@ export const BookingsManager = () => {
       // Update availability calendar based on status change
       const wasConfirmed = currentBooking.status === "Potvrdené";
       const isNowConfirmed = data.status === "Potvrdené";
+      const isNowCancelled = data.status === "Zrušené";
       
-      if (wasConfirmed !== isNowConfirmed) {
-        await updateAvailabilityCalendar(currentBooking, isNowConfirmed);
+      if (wasConfirmed && (isNowCancelled || data.status === "Čaká na potvrdenie")) {
+        // If was confirmed but now cancelled or pending, free up the dates
+        await updateAvailabilityCalendar(currentBooking, false);
+      } else if (!wasConfirmed && isNowConfirmed) {
+        // If was not confirmed but now confirmed, block the dates
+        await updateAvailabilityCalendar(currentBooking, true);
       }
 
       toast.success("Rezervácia bola upravená");
@@ -236,6 +265,36 @@ export const BookingsManager = () => {
     } catch (error) {
       console.error('Error updating booking:', error);
       toast.error('Chyba pri úprave rezervácie');
+    }
+  };
+
+  const handleCancelBooking = async (booking: Booking) => {
+    if (!confirm("Naozaj chcete zrušiť túto rezerváciu?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: "Zrušené" })
+        .eq('id', booking.id);
+
+      if (error) {
+        console.error('Error cancelling booking:', error);
+        toast.error('Chyba pri rušení rezervácie');
+        return;
+      }
+
+      // If booking was confirmed, free up the dates
+      if (booking.status === "Potvrdené") {
+        await updateAvailabilityCalendar(booking, false);
+      }
+
+      toast.success("Rezervácia bola zrušená");
+      loadBookings(); // Reload bookings
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Chyba pri rušení rezervácie');
     }
   };
 
@@ -304,6 +363,36 @@ export const BookingsManager = () => {
             </Button>
           </div>
         </div>
+
+        {/* Status Filter */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-600" />
+            <span className="text-sm font-medium">Filter podľa stavu:</span>
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Všetky rezervácie</SelectItem>
+              <SelectItem value="Čaká na potvrdenie">Čaká na potvrdenie</SelectItem>
+              <SelectItem value="Potvrdené">Potvrdené</SelectItem>
+              <SelectItem value="Zrušené">Zrušené</SelectItem>
+            </SelectContent>
+          </Select>
+          {statusFilter !== "all" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setStatusFilter("all")}
+              className="flex items-center gap-1"
+            >
+              <X className="h-3 w-3" />
+              Zrušiť filter
+            </Button>
+          )}
+        </div>
         
         <div className="overflow-x-auto">
           <Table>
@@ -322,7 +411,7 @@ export const BookingsManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.name}</TableCell>
                   <TableCell>{booking.email}</TableCell>
@@ -354,11 +443,7 @@ export const BookingsManager = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      booking.status === "Potvrdené" 
-                        ? "bg-green-100 text-green-800" 
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(booking.status)}`}>
                       {booking.status}
                     </span>
                   </TableCell>
@@ -367,6 +452,17 @@ export const BookingsManager = () => {
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(booking)}>
                         <Edit size={16} />
                       </Button>
+                      {booking.status !== "Zrušené" && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleCancelBooking(booking)}
+                          className="text-orange-600 hover:text-orange-700"
+                          title="Zrušiť rezerváciu"
+                        >
+                          <X size={16} />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => handleDeleteBooking(booking.id)}>
                         <Trash size={16} />
                       </Button>
@@ -374,10 +470,10 @@ export const BookingsManager = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {bookings.length === 0 && (
+              {filteredBookings.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={10} className="text-center text-gray-500 py-8">
-                    Žiadne rezervácie
+                    {statusFilter === "all" ? "Žiadne rezervácie" : `Žiadne rezervácie so stavom "${statusFilter}"`}
                   </TableCell>
                 </TableRow>
               )}

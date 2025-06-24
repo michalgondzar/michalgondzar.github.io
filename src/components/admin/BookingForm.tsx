@@ -1,26 +1,19 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormField, FormItem, FormLabel, FormControl, Form } from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { UseFormReturn } from "react-hook-form";
 
 interface BookingFormProps {
-  form: any;
+  form: UseFormReturn<any>;
   onSubmit: (data: any) => void;
   onCancel: () => void;
   submitLabel: string;
 }
 
 export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFormProps) => {
-  const stayOptions = [
-    { id: "manzelsky", label: "Manželský pobyt" },
-    { id: "rodinny", label: "Rodinný pobyt" },
-    { id: "komôrka", label: "Pobyt v komôrke" }
-  ];
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -29,13 +22,14 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Meno a priezvisko</FormLabel>
+              <FormLabel>Meno</FormLabel>
               <FormControl>
-                <Input {...field} required />
+                <Input {...field} placeholder="Meno hosťa" />
               </FormControl>
             </FormItem>
           )}
         />
+        
         <FormField
           control={form.control}
           name="email"
@@ -43,64 +37,34 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" {...field} required />
+                <Input {...field} type="email" placeholder="email@example.com" />
               </FormControl>
             </FormItem>
           )}
         />
+        
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="dateFrom"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dátum príchodu</FormLabel>
+                <FormLabel>Dátum od</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} required />
+                  <Input {...field} type="date" />
                 </FormControl>
               </FormItem>
             )}
           />
+          
           <FormField
             control={form.control}
             name="dateTo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dátum odchodu</FormLabel>
+                <FormLabel>Dátum do</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} required />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="guests"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Počet hostí</FormLabel>
-                <FormControl>
-                  <Input type="number" min="1" {...field} required />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Stav</FormLabel>
-                <FormControl>
-                  <select 
-                    {...field} 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="Čaká na potvrdenie">Čaká na potvrdenie</option>
-                    <option value="Potvrdené">Potvrdené</option>
-                  </select>
+                  <Input {...field} type="date" />
                 </FormControl>
               </FormItem>
             )}
@@ -109,15 +73,12 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
         
         <FormField
           control={form.control}
-          name="coupon"
+          name="guests"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-green-500" />
-                Zľavový kupón
-              </FormLabel>
+              <FormLabel>Počet hostí</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Zadajte kód kupónu" />
+                <Input {...field} type="number" min="1" max="10" />
               </FormControl>
             </FormItem>
           )}
@@ -129,30 +90,64 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
           render={({ field }) => (
             <FormItem>
               <FormLabel>Typ pobytu</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Vyberte typ pobytu" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="">Žiadny</SelectItem>
+                  <SelectItem value="manzelsky">Manželský pobyt</SelectItem>
+                  <SelectItem value="rodinny">Rodinný pobyt</SelectItem>
+                  <SelectItem value="komorka">Pobyt v komôrke</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="coupon"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Zľavový kupón</FormLabel>
               <FormControl>
-                <RadioGroup value={field.value} onValueChange={field.onChange}>
-                  {stayOptions.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option.id} id={option.id} />
-                      <Label htmlFor={option.id} className="cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <Input {...field} placeholder="Kód kupónu (voliteľné)" />
               </FormControl>
             </FormItem>
           )}
         />
         
-        <DialogFooter className="sm:justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Stav</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Čaká na potvrdenie">Čaká na potvrdenie</SelectItem>
+                  <SelectItem value="Potvrdené">Potvrdené</SelectItem>
+                  <SelectItem value="Zrušené">Zrušené</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        
+        <div className="flex gap-2 pt-4">
+          <Button type="submit" className="flex-1">{submitLabel}</Button>
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
             Zrušiť
           </Button>
-          <Button type="submit" className="bg-booking-primary hover:bg-booking-secondary">
-            {submitLabel}
-          </Button>
-        </DialogFooter>
+        </div>
       </form>
     </Form>
   );
