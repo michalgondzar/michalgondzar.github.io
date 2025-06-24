@@ -62,7 +62,7 @@ const AvailabilitySection = () => {
 
   if (loading) {
     return (
-      <section className="section-container bg-white">
+      <section id="availability-section" className="section-container bg-white">
         <div className="text-center mb-12">
           <h2 className="section-title">Kalendár obsadenosti</h2>
           <p className="section-subtitle">
@@ -74,7 +74,7 @@ const AvailabilitySection = () => {
   }
 
   return (
-    <section className="section-container bg-white">
+    <section id="availability-section" className="section-container bg-white">
       <div className="text-center mb-12">
         <h2 className="section-title">Kalendár obsadenosti</h2>
         <p className="section-subtitle">

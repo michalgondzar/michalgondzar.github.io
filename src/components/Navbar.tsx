@@ -56,11 +56,18 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
-          <Button className="bg-booking-primary hover:bg-booking-secondary">
-            <Link to="rezervacia" spy={true} smooth={true} offset={-100} duration={500}>
-              Rezervovať
-            </Link>
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" className="border-booking-primary text-booking-primary hover:bg-booking-primary hover:text-white">
+              <Link to="availability-section" spy={true} smooth={true} offset={-100} duration={500}>
+                Overiť Dostupnosť
+              </Link>
+            </Button>
+            <Button className="bg-booking-primary hover:bg-booking-secondary">
+              <Link to="rezervacia" spy={true} smooth={true} offset={-100} duration={500}>
+                Rezervovať
+              </Link>
+            </Button>
+          </div>
         </nav>
         
         {/* Mobile Navigation */}
@@ -85,7 +92,12 @@ const Navbar = () => {
                   {item.name}
                 </Link>
               ))}
-              <Button className="w-full bg-booking-primary hover:bg-booking-secondary mt-4">
+              <Button variant="outline" className="w-full border-booking-primary text-booking-primary hover:bg-booking-primary hover:text-white mt-4">
+                <Link to="availability-section" spy={true} smooth={true} offset={-100} duration={500} className="w-full">
+                  Overiť Dostupnosť
+                </Link>
+              </Button>
+              <Button className="w-full bg-booking-primary hover:bg-booking-secondary mt-2">
                 <Link to="rezervacia" spy={true} smooth={true} offset={-100} duration={500} className="w-full">
                   Rezervovať
                 </Link>
