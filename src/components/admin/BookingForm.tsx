@@ -97,7 +97,6 @@ export const BookingForm = ({ form, onSubmit, onCancel, submitLabel }: BookingFo
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Žiadny</SelectItem>
                   <SelectItem value="manzelsky">Manželský pobyt</SelectItem>
                   <SelectItem value="rodinny">Rodinný pobyt</SelectItem>
                   <SelectItem value="komorka">Pobyt v komôrke</SelectItem>
