@@ -10,7 +10,7 @@ interface PriceEstimateProps {
 }
 
 export const PriceEstimate = ({ checkIn, checkOut, guests }: PriceEstimateProps) => {
-  const { calculatePrice } = usePriceCalculator();
+  const { calculatePrice, pricing } = usePriceCalculator();
   
   const calculation = calculatePrice(checkIn, checkOut, guests);
 
@@ -62,7 +62,7 @@ export const PriceEstimate = ({ checkIn, checkOut, guests }: PriceEstimateProps)
             <span className="font-medium">{calculation.breakdown.accommodationCost.toFixed(2)}€</span>
           </div>
           <div className="flex justify-between">
-            <span>Pobytová daň ({guests} x {calculation.numberOfNights} x 1.50€):</span>
+            <span>Pobytová daň ({guests} x {calculation.numberOfNights} x {pricing.touristTax}€):</span>
             <span className="font-medium">{calculation.breakdown.touristTaxCost.toFixed(2)}€</span>
           </div>
           <div className="border-t pt-2 flex justify-between font-bold">
