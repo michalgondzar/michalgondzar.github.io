@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,10 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CalendarIcon, Edit, Trash, Plus, Heart, Tag } from "lucide-react";
+import { CalendarIcon, Edit, Trash, Plus, Heart, Tag, Euro } from "lucide-react";
 import { BookingForm } from "./BookingForm";
 import { GoogleCalendarDialog } from "./GoogleCalendarDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { usePriceCalculator } from "@/components/booking/hooks/usePriceCalculator";
 
 interface Booking {
   id: string;
@@ -33,6 +33,7 @@ export const BookingsManager = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoogleCalendarDialogOpen, setIsGoogleCalendarDialogOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const { calculatePrice } = usePriceCalculator();
 
   const form = useForm({
     defaultValues: {
@@ -114,6 +115,11 @@ export const BookingsManager = () => {
       "komôrka": "Pobyt v komôrke"
     };
     return stayType ? stayTypes[stayType as keyof typeof stayTypes] || stayType : "Neuvedené";
+  };
+
+  const calculateBookingPrice = (booking: Booking) => {
+    const calculation = calculatePrice(booking.date_from, booking.date_to, booking.guests);
+    return calculation ? calculation.totalPrice.toFixed(2) : "-";
   };
 
   const openAddDialog = () => {
@@ -310,6 +316,7 @@ export const BookingsManager = () => {
                 <TableHead>Hostia</TableHead>
                 <TableHead>Typ pobytu</TableHead>
                 <TableHead>Kupón</TableHead>
+                <TableHead>Predbežná cena</TableHead>
                 <TableHead>Stav</TableHead>
                 <TableHead className="text-right">Akcie</TableHead>
               </TableRow>
@@ -339,6 +346,14 @@ export const BookingsManager = () => {
                     )}
                   </TableCell>
                   <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Euro size={14} className="text-green-600" />
+                      <span className="text-sm font-semibold text-green-700">
+                        {calculateBookingPrice(booking)}€
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       booking.status === "Potvrdené" 
                         ? "bg-green-100 text-green-800" 
@@ -361,7 +376,7 @@ export const BookingsManager = () => {
               ))}
               {bookings.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                  <TableCell colSpan={10} className="text-center text-gray-500 py-8">
                     Žiadne rezervácie
                   </TableCell>
                 </TableRow>
