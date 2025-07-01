@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AvailabilityData {
   date: string;
@@ -14,6 +15,7 @@ interface AvailabilityData {
 const AvailabilitySection = () => {
   const [availabilityData, setAvailabilityData] = useState<AvailabilityData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   // Load availability data from database
   const loadAvailabilityData = async () => {
@@ -64,9 +66,9 @@ const AvailabilitySection = () => {
     return (
       <section id="availability-section" className="section-container bg-white">
         <div className="text-center mb-12">
-          <h2 className="section-title">Kalendár obsadenosti</h2>
+          <h2 className="section-title">{t('availability.title')}</h2>
           <p className="section-subtitle">
-            Načítavam kalendár...
+            {t('common.loading')}
           </p>
         </div>
       </section>
@@ -76,9 +78,9 @@ const AvailabilitySection = () => {
   return (
     <section id="availability-section" className="section-container bg-white">
       <div className="text-center mb-12">
-        <h2 className="section-title">Kalendár obsadenosti</h2>
+        <h2 className="section-title">{t('availability.title')}</h2>
         <p className="section-subtitle">
-          Pozrite si dostupné termíny pre váš pobyt
+          {t('availability.subtitle')}
         </p>
       </div>
       
@@ -87,10 +89,10 @@ const AvailabilitySection = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-center">
               <CalendarIcon className="h-5 w-5 text-blue-600" />
-              Dostupné termíny
+              {t('availability.available')}
             </CardTitle>
             <CardDescription className="text-center">
-              Červenou farbou sú označené obsadené termíny. Ostatné termíny sú voľné.
+              {t('availability.legend')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -107,11 +109,11 @@ const AvailabilitySection = () => {
               <div className="flex flex-col sm:flex-row gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-                  <span>Obsadené termíny</span>
+                  <span>{t('availability.unavailable')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
-                  <span>Voľné termíny</span>
+                  <span>{t('availability.available')}</span>
                 </div>
               </div>
             </div>

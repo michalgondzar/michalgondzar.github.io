@@ -24,6 +24,8 @@ const translations = {
     'hero.subtitle': 'Bešeňová',
     'hero.description': 'Luxusné ubytovanie v srdci Liptova s výhľadom na Tatry',
     'hero.book': 'Rezervovať pobyt',
+    'hero.gallery': 'Prezrieť galériu',
+    'hero.stay': 'Príjemné ubytovanie v blízkosti aquaparku Bešeňová',
     
     // Promo banner
     'promo.summer': 'LETNÁ AKCIA',
@@ -73,6 +75,9 @@ const translations = {
     // Availability
     'availability.title': 'Dostupnosť',
     'availability.subtitle': 'Skontrolujte dostupné termíny',
+    'availability.available': 'Voľné termíny',
+    'availability.unavailable': 'Obsadené termíny',
+    'availability.legend': 'Červenou farbou sú označené obsadené termíny. Ostatné termíny sú voľné.',
     
     // Contact
     'contact.title': 'Kontakt',
@@ -81,10 +86,32 @@ const translations = {
     'contact.form.email': 'Váš email',
     'contact.form.message': 'Správa',
     'contact.form.send': 'Odoslať správu',
+    'contact.info.address': 'Adresa',
+    'contact.info.phone': 'Telefón',
+    'contact.info.email': 'Email',
     
     // Footer
     'footer.address': 'Bešeňová, Slovensko',
     'footer.rights': 'Všetky práva vyhradené',
+    'footer.accommodation': 'Ubytovanie',
+    'footer.description': 'Komfortné ubytovanie v blízkosti aquaparku Bešeňová pre váš dokonalý oddych.',
+    'footer.navigation': 'Navigácia',
+    'footer.contact': 'Kontakt',
+    'footer.payment': 'Platobné možnosti',
+    'footer.cash': 'Hotovosť',
+    'footer.transfer': 'Bankový prevod',
+    'footer.admin': 'Vstup pre admina',
+    
+    // Common
+    'common.loading': 'Načítavam...',
+    'common.error': 'Chyba',
+    'common.success': 'Úspech',
+    'common.save': 'Uložiť',
+    'common.cancel': 'Zrušiť',
+    'common.delete': 'Vymazať',
+    'common.edit': 'Upraviť',
+    'common.add': 'Pridať',
+    'common.remove': 'Odstrániť',
   },
   pl: {
     // Navigation
@@ -98,6 +125,8 @@ const translations = {
     'hero.subtitle': 'Bešeňová',
     'hero.description': 'Luksusowe zakwaterowanie w sercu Liptova z widokiem na Tatry',
     'hero.book': 'Zarezerwuj pobyt',
+    'hero.gallery': 'Zobacz galerię',
+    'hero.stay': 'Przyjemne zakwaterowanie w pobliżu aquaparku Bešeňová',
     
     // Promo banner
     'promo.summer': 'AKCJA LETNIA',
@@ -147,6 +176,9 @@ const translations = {
     // Availability
     'availability.title': 'Dostępność',
     'availability.subtitle': 'Sprawdź dostępne terminy',
+    'availability.available': 'Dostępne terminy',
+    'availability.unavailable': 'Zajęte terminy',
+    'availability.legend': 'Czerwonym kolorem oznaczone są zajęte terminy. Pozostałe terminy są wolne.',
     
     // Contact
     'contact.title': 'Kontakt',
@@ -155,10 +187,32 @@ const translations = {
     'contact.form.email': 'Twój email',
     'contact.form.message': 'Wiadomość',
     'contact.form.send': 'Wyślij wiadomość',
+    'contact.info.address': 'Adres',
+    'contact.info.phone': 'Telefon',
+    'contact.info.email': 'Email',
     
     // Footer
     'footer.address': 'Bešeňová, Słowacja',
     'footer.rights': 'Wszystkie prawa zastrzeżone',
+    'footer.accommodation': 'Zakwaterowanie',
+    'footer.description': 'Komfortowe zakwaterowanie w pobliżu aquaparku Bešeňová dla idealnego wypoczynku.',
+    'footer.navigation': 'Nawigacja',
+    'footer.contact': 'Kontakt',
+    'footer.payment': 'Opcje płatności',
+    'footer.cash': 'Gotówka',
+    'footer.transfer': 'Przelew bankowy',
+    'footer.admin': 'Wejście dla admina',
+    
+    // Common
+    'common.loading': 'Ładowanie...',
+    'common.error': 'Błąd',
+    'common.success': 'Sukces',
+    'common.save': 'Zapisz',
+    'common.cancel': 'Anuluj',
+    'common.delete': 'Usuń',
+    'common.edit': 'Edytuj',
+    'common.add': 'Dodaj',
+    'common.remove': 'Usuń',
   }
 };
 
