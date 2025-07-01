@@ -1,14 +1,17 @@
 
 import BookingForm from "./booking/BookingForm";
 import PricingCard from "./booking/PricingCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Booking = () => {
+  const { t } = useLanguage();
+  
   return (
     <section id="rezervacia" className="section-container bg-gray-50">
       <div className="text-center mb-12">
-        <h2 className="section-title">Rezervácia</h2>
+        <h2 className="section-title">{t('booking.title')}</h2>
         <p className="section-subtitle">
-          Rezervujte si váš pobyt v apartmáne Tília
+          {t('booking.subtitle')}
         </p>
       </div>
       

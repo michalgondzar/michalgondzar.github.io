@@ -1,112 +1,123 @@
 
-import { useState, useEffect } from 'react';
-import { Link } from 'react-scroll';
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
-const navItems = [
-  { name: "Opis", to: "opis" },
-  { name: "Galéria", to: "galeria" },
-  { name: "Rezervácia", to: "rezervacia" },
-  { name: "Kontakt", to: "kontakt" },
-];
+import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
+import { Logo } from "./Logo";
+import { LanguageSelector } from "./LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  
+  const { t } = useLanguage();
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 0);
     };
-    
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <header
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
-      }`}
-    >
-      <div className="container flex items-center justify-between">
-        <a href="/" className="text-2xl font-bold text-booking-primary">
-          Apartmán Tília
-        </a>
-        
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              spy={true}
-              smooth={true}
-              offset={-100}
-              duration={500}
-              className="text-booking-darkGray hover:text-booking-primary cursor-pointer font-medium transition-colors"
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? "bg-white shadow-md" : "bg-transparent"
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Logo white={!isScrolled} />
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <button 
+              onClick={() => scrollToSection("ubytovanie")}
+              className={`transition-colors hover:text-booking-primary ${
+                isScrolled ? "text-gray-700" : "text-white"
+              }`}
             >
-              {item.name}
-            </Link>
-          ))}
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" className="border-booking-primary text-booking-primary hover:bg-booking-primary hover:text-white">
-              <Link to="availability-section" spy={true} smooth={true} offset={-100} duration={500}>
-                Overiť Dostupnosť
-              </Link>
-            </Button>
-            <Button className="bg-booking-primary hover:bg-booking-secondary">
-              <Link to="rezervacia" spy={true} smooth={true} offset={-100} duration={500}>
-                Rezervovať
-              </Link>
-            </Button>
+              {t('nav.accommodation')}
+            </button>
+            <button 
+              onClick={() => scrollToSection("galeria")}
+              className={`transition-colors hover:text-booking-primary ${
+                isScrolled ? "text-gray-700" : "text-white"
+              }`}
+            >
+              {t('nav.gallery')}
+            </button>
+            <button 
+              onClick={() => scrollToSection("rezervacia")}
+              className={`transition-colors hover:text-booking-primary ${
+                isScrolled ? "text-gray-700" : "text-white"
+              }`}
+            >
+              {t('nav.booking')}
+            </button>
+            <button 
+              onClick={() => scrollToSection("kontakt")}
+              className={`transition-colors hover:text-booking-primary ${
+                isScrolled ? "text-gray-700" : "text-white"
+              }`}
+            >
+              {t('nav.contact')}
+            </button>
+            <LanguageSelector />
           </div>
-        </nav>
-        
-        {/* Mobile Navigation */}
-        <Sheet>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="outline" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent>
-            <nav className="flex flex-col space-y-4 mt-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  spy={true}
-                  smooth={true}
-                  offset={-100}
-                  duration={500}
-                  className="text-lg text-booking-darkGray hover:text-booking-primary cursor-pointer transition-colors py-2"
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <Button variant="outline" className="w-full border-booking-primary text-booking-primary hover:bg-booking-primary hover:text-white mt-4">
-                <Link to="availability-section" spy={true} smooth={true} offset={-100} duration={500} className="w-full">
-                  Overiť Dostupnosť
-                </Link>
-              </Button>
-              <Button className="w-full bg-booking-primary hover:bg-booking-secondary mt-2">
-                <Link to="rezervacia" spy={true} smooth={true} offset={-100} duration={500} className="w-full">
-                  Rezervovať
-                </Link>
-              </Button>
-            </nav>
-          </SheetContent>
-        </Sheet>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center gap-2">
+            <LanguageSelector />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className={`p-2 rounded-md ${
+                isScrolled ? "text-gray-700" : "text-white"
+              }`}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isOpen && (
+          <div className="md:hidden bg-white border-t shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <button
+                onClick={() => scrollToSection("ubytovanie")}
+                className="block px-3 py-2 text-gray-700 hover:text-booking-primary w-full text-left"
+              >
+                {t('nav.accommodation')}
+              </button>
+              <button
+                onClick={() => scrollToSection("galeria")}
+                className="block px-3 py-2 text-gray-700 hover:text-booking-primary w-full text-left"
+              >
+                {t('nav.gallery')}
+              </button>
+              <button
+                onClick={() => scrollToSection("rezervacia")}
+                className="block px-3 py-2 text-gray-700 hover:text-booking-primary w-full text-left"
+              >
+                {t('nav.booking')}
+              </button>
+              <button
+                onClick={() => scrollToSection("kontakt")}
+                className="block px-3 py-2 text-gray-700 hover:text-booking-primary w-full text-left"
+              >
+                {t('nav.contact')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </header>
+    </nav>
   );
 };
 
