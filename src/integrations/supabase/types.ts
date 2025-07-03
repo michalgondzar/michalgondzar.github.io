@@ -13,34 +13,64 @@ export type Database = {
         Row: {
           created_at: string | null
           features: Json
+          features_pl: Json | null
+          features_sk: Json | null
           id: number
           images: Json
           paragraph1: string
+          paragraph1_pl: string | null
+          paragraph1_sk: string | null
           paragraph2: string
+          paragraph2_pl: string | null
+          paragraph2_sk: string | null
           subtitle: string
+          subtitle_pl: string | null
+          subtitle_sk: string | null
           title: string
+          title_pl: string | null
+          title_sk: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           features?: Json
+          features_pl?: Json | null
+          features_sk?: Json | null
           id?: number
           images?: Json
           paragraph1: string
+          paragraph1_pl?: string | null
+          paragraph1_sk?: string | null
           paragraph2: string
+          paragraph2_pl?: string | null
+          paragraph2_sk?: string | null
           subtitle: string
+          subtitle_pl?: string | null
+          subtitle_sk?: string | null
           title: string
+          title_pl?: string | null
+          title_sk?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           features?: Json
+          features_pl?: Json | null
+          features_sk?: Json | null
           id?: number
           images?: Json
           paragraph1?: string
+          paragraph1_pl?: string | null
+          paragraph1_sk?: string | null
           paragraph2?: string
+          paragraph2_pl?: string | null
+          paragraph2_sk?: string | null
           subtitle?: string
+          subtitle_pl?: string | null
+          subtitle_sk?: string | null
           title?: string
+          title_pl?: string | null
+          title_sk?: string | null
           updated_at?: string | null
         }
         Relationships: []
