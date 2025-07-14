@@ -159,9 +159,10 @@ export const ContactMessagesManager = () => {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => setSelectedMessage(message)}
+                            className="bg-booking-primary hover:bg-booking-secondary text-white"
                           >
                             Zobraziť
                           </Button>
