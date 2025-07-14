@@ -161,8 +161,11 @@ export const ContactMessagesManager = () => {
                           <Button
                             variant="default"
                             size="sm"
-                            onClick={() => setSelectedMessage(message)}
-                            className="bg-booking-primary hover:bg-booking-secondary text-white"
+                            onClick={() => {
+                              console.log('Button clicked, message:', message);
+                              setSelectedMessage(message);
+                            }}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium cursor-pointer"
                           >
                             Zobraziť
                           </Button>
