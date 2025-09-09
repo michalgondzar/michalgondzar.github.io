@@ -407,6 +407,7 @@ export const BookingsManager = () => {
                 <TableHead>Kupón</TableHead>
                 <TableHead>Predbežná cena</TableHead>
                 <TableHead>Stav</TableHead>
+                <TableHead>Vytvorené</TableHead>
                 <TableHead className="text-right">Akcie</TableHead>
               </TableRow>
             </TableHeader>
@@ -447,6 +448,11 @@ export const BookingsManager = () => {
                       {booking.status}
                     </span>
                   </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600">
+                      {new Date(booking.created_at).toLocaleDateString('sk-SK')}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(booking)}>
@@ -472,7 +478,7 @@ export const BookingsManager = () => {
               ))}
               {filteredBookings.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-gray-500 py-8">
+                  <TableCell colSpan={11} className="text-center text-gray-500 py-8">
                     {statusFilter === "all" ? "Žiadne rezervácie" : `Žiadne rezervácie so stavom "${statusFilter}"`}
                   </TableCell>
                 </TableRow>
