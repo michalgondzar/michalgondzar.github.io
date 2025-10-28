@@ -218,6 +218,7 @@ const BookingForm = () => {
         checkIn={formData.checkIn}
         checkOut={formData.checkOut}
         guests={parseInt(formData.guests)}
+        couponCode={formData.couponCode}
       />
     </div>
   );

@@ -20,8 +20,13 @@ interface PriceCalculation {
   breakdown: {
     accommodationCost: number;
     touristTaxCost: number;
+    discountAmount: number;
   };
   isHighSeason: boolean;
+  appliedDiscount?: {
+    type: 'percentage' | 'fixed';
+    value: number;
+  };
 }
 
 export const usePriceCalculator = () => {
@@ -62,7 +67,12 @@ export const usePriceCalculator = () => {
     loadPricing();
   }, []);
 
-  const calculatePrice = (checkIn: string, checkOut: string, guests: number): PriceCalculation | null => {
+  const calculatePrice = (
+    checkIn: string, 
+    checkOut: string, 
+    guests: number,
+    couponDiscount?: { type: 'percentage' | 'fixed', value: number }
+  ): PriceCalculation | null => {
     if (!checkIn || !checkOut) return null;
 
     const startDate = new Date(checkIn);
@@ -96,8 +106,18 @@ export const usePriceCalculator = () => {
       accommodationCost += nightPrice;
     }
 
+    // Apply coupon discount to accommodation cost only
+    let discountAmount = 0;
+    if (couponDiscount) {
+      if (couponDiscount.type === 'percentage') {
+        discountAmount = accommodationCost * (couponDiscount.value / 100);
+      } else if (couponDiscount.type === 'fixed') {
+        discountAmount = Math.min(couponDiscount.value, accommodationCost);
+      }
+    }
+
     const touristTaxCost = guests * numberOfNights * parseFloat(pricing.touristTax);
-    const totalPrice = accommodationCost + touristTaxCost;
+    const totalPrice = accommodationCost - discountAmount + touristTaxCost;
 
     // Determine if any night falls in high season
     const isHighSeason = Array.from({ length: numberOfNights }, (_, i) => {
@@ -112,9 +132,11 @@ export const usePriceCalculator = () => {
       numberOfNights,
       breakdown: {
         accommodationCost,
-        touristTaxCost
+        touristTaxCost,
+        discountAmount
       },
-      isHighSeason
+      isHighSeason,
+      appliedDiscount: couponDiscount
     };
   };
 
