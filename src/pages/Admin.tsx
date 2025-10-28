@@ -15,6 +15,7 @@ import { VisitStatistics } from "@/components/admin/VisitStatistics";
 import { PricingEditor } from "@/components/admin/PricingEditor";
 import { SeoManager } from "@/components/admin/SeoManager";
 import { EmailActivityMonitor } from "@/components/admin/EmailActivityMonitor";
+import { CouponManager } from "@/components/admin/CouponManager";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -102,7 +103,10 @@ const Admin = () => {
               <AvailabilityManager />
             </TabsContent>
             <TabsContent value="pricing" className="mt-6">
-              <PricingEditor />
+              <div className="space-y-8">
+                <PricingEditor />
+                <CouponManager />
+              </div>
             </TabsContent>
             <TabsContent value="gallery" className="mt-6">
               <GalleryManager />
